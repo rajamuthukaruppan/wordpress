@@ -48,10 +48,11 @@ public class AlertFrame extends JFrame {
 	private void initCommon() {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 	}
+	
+	//	TODO: modify to handle enumerations.
 	public <T> AlertFrame(List<T> list) {
         initCommon();
 		final JTextArea jTextArea = new JTextArea();
-		jTextArea.setPreferredSize(new Dimension(300, 300));
 		final DefaultListModel listModel = new DefaultListModel();
 		int i = 0;
 		for (Object value : list) {
@@ -61,6 +62,7 @@ public class AlertFrame extends JFrame {
 		getContentPane().add(new JScrollPane(jList),
 				BorderLayout.CENTER);
 		final JScrollPane scrollPane = new JScrollPane(jTextArea);
+		scrollPane.setPreferredSize(new Dimension(300, 300));
 		getContentPane().add(scrollPane,BorderLayout.SOUTH);
 		setSize(gd.getDisplayMode().getWidth() / 2, gd.getDisplayMode()
 				.getWidth() / 2);
@@ -160,7 +162,6 @@ public class AlertFrame extends JFrame {
 	public AlertFrame(String[] values) {
         initCommon();
 		final JTextArea jTextArea = new JTextArea();
-		jTextArea.setPreferredSize(new Dimension(300, 300));
 		final DefaultListModel listModel = new DefaultListModel();
 		int i = 0;
 		for (Object value : values) {
@@ -170,19 +171,16 @@ public class AlertFrame extends JFrame {
 		getContentPane().add(new JScrollPane(jList),
 				BorderLayout.SOUTH);
 		final JScrollPane scrollPane = new JScrollPane(jTextArea);
+		scrollPane.setPreferredSize(new Dimension(300, 300));
 		getContentPane().add(scrollPane,BorderLayout.CENTER);
 		setSize(gd.getDisplayMode().getWidth() / 2, gd.getDisplayMode()
 				.getWidth() / 2);
 
 		jList.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {
-//				if (e.getValueIsAdjusting() == false || e.getFirstIndex() == -1) {
-//					return;
-//				}
 				for (int i = e.getFirstIndex(); i <= e.getLastIndex(); i++) {
 					if (((JList) e.getSource()).isSelectedIndex(i)) {
 						jTextArea.setText(String.valueOf(listModel.get(i)));
-						scrollPane.invalidate(); // TODO: fix this.
 					}
 				}
 			}
@@ -206,9 +204,6 @@ public class AlertFrame extends JFrame {
 		jList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		jList.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {
-//				if (e.getValueIsAdjusting() == false || e.getFirstIndex() == -1) {
-//					return;
-//				}
 				for (int i = e.getFirstIndex(); i <= e.getLastIndex(); i++) {
 					if (((JList) e.getSource()).isSelectedIndex(i)) {
 						textArea.setText(String.valueOf(map.get(listModel.get(i))));
