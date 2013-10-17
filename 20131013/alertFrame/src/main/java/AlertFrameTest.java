@@ -9,10 +9,10 @@ import java.util.Set;
 
 public class AlertFrameTest {
 	public static void main(String args[]) throws Exception {
-//		testValue();
-//		testValueSet();
-//		testValueList();
-//		testValueMap();
+		testValue();
+		testValueSet();
+		testValueList();
+		testValueMap();
 		testValueListMap();		
 	}
 
@@ -22,17 +22,17 @@ public class AlertFrameTest {
 	 * @throws Exception
 	 */
 	private static void testValue() throws Exception {
-//		new AlertFrame(123);
-//		new AlertFrame(123.5);
-//		new AlertFrame(new Integer(123));
+		new AlertFrame(123);
+		new AlertFrame(123.5);
+		new AlertFrame(new Integer(123));
 		// Strings
-//		new AlertFrame("Testing Single String");
+		new AlertFrame("Testing Single String");
 		// beans 
 		// uses reflection to get a map of all the getters.
 		// displays a jListbox with the getters.
 		// clicking displays toString on bottom jTextArea.
 		// double clicking opens new AlertFrame (value).
-//		new AlertFrame(new UserBean(1, "Bob", new UserBean(0, "Manager", null)));
+		new AlertFrame(new UserBean(1, "Bob", new UserBean(0, "Manager", null)));
 	}
 
 	/**
@@ -144,6 +144,3 @@ public class AlertFrameTest {
 		}
 	}
 }
-
-
-
