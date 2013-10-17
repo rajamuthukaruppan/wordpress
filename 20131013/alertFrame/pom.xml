@@ -38,7 +38,7 @@
                 <artifactId>blog-plugin</artifactId>
                 <version>1.0-SNAPSHOT</version>
                 <configuration>
-                <gitUrl>https://github.com/numberformat/wordpress/tree/master/20131013</gitUrl>
+                <gitUrl>https://github.com/numberformat/wordpress/tree/master/20131013/${artifactId}</gitUrl>
                 </configuration>
             <executions>
               <execution>
