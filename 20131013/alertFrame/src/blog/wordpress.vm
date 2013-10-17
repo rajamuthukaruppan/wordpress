@@ -1,4 +1,6 @@
-This page describes how to create a simple Alert Frame to display java variable during application runtime.It is similar to the alert window commonly displayed in javaScript. The AlertFrame can be used during development as well as in your final application. 
+This page describes how to create a simple Alert Frame to display java variable during application runtime. It is similar to the alert window commonly displayed in javaScript. The AlertFrame can be used during development as well as in your final application. 
+
+An example would be to display the results of a database query you have run, or to display results of a web service call that was made. The AlertFrame has capability to display not only simple wrapper types but also complex beans. It inspects and finds getter methods using reflection and displays the results in the appropriate format. It also allows the user to click further into the bean to explore deeper.
 
 $blog_header
 
