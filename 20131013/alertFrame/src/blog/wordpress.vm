@@ -1,0 +1,33 @@
+This page describes how to create a simple Alert Frame to display java variable during application runtime.It is similar to the alert window commonly displayed in javaScript. The AlertFrame can be used during development as well as in your final application. 
+
+$blog_header
+
+<h3>Code</h3>
+
+The following is the code for the the AlertFrame.
+
+vi src/main/java/AlertFrame.java
+[sourcecode language="java" gutter="false"]
+#include("src/main/java/AlertFrame.java")
+[/sourcecode]
+
+<h3>Sample Swing Test Application</h3>
+
+vi src/main/java/AlertFrameTest.java
+[sourcecode language="java" gutter="false"]
+#include("src/main/java/AlertFrameTest.java")
+[/sourcecode]
+
+To run the app just type the following:
+[sourcecode language='shell' gutter='false']
+mvn exec:java -Dexec.mainClass=AlertFrame
+[/sourcecode]
+
+Finally the pom.xml
+
+vi pom.xml
+[sourcecode language="xml" gutter="false"]
+#include("pom.xml")
+[/sourcecode]
+
+$blog_footer
