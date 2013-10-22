@@ -2,51 +2,104 @@ Use the following for html sites that are strictly XHTML.
 
 $blog_header
 
-vi src/main/webapp/strict.html
-[sourcecode language="html" gutter="false"]
-#include("src/main/webapp/strict.html")
+<strong>Inline style</strong>
+
+[sourcecode language='html' gutter='false']
+<style type="text/css">
+/* <!CDATA[ */
+h1 { font-size: 16pt; font-weight: bold; }
+/* ]]> */
+</style>
 [/sourcecode]
 
-Use the following for sites that are mix html and xhtml.
+<strong>Including CSS from a file</strong>
+The included file does not need any tags to surround the css code.
 
-[sourcecode language="html" gutter="false"]
-#include("src/main/webapp/transitional.html")
+[sourcecode language='html' gutter='false']
+<head>
+<link href="demo_styles.css" rel="stylesheet" type="text/css"/>
+</head>
 [/sourcecode]
 
-In order to  use JSTL in your pages just include the following line up top.
-
-[sourcecode language="html" gutter="false"]
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<strong>Adjacent Sibling Selector</strong>
+[sourcecode language='html' gutter='false']
+h1 + p {font-variant: small-caps]
+[/sourcecode]
+<strong>Universal selector</strong>
+[sourcecode language='html' gutter='false']
+* { color: green;}
+[/sourcecode]
+<strong>Pseudo-Classes</strong>
+[sourcecode language='html' gutter='false']
+a:link {color:black;}
+a:visited {color:gray;}
+a:hover {text-decoration:none;}
+a:active {color:navy;}
 [/sourcecode]
 
-And include this in your pom.xml file
+<strong>First child</strong>
+[sourcecode language='html' gutter='false']
+div.weather strong:first-child {color: red;}
+[/sourcecode]
+<strong>Focus</strong>
 
-[sourcecode language="xml" gutter="false"]
-#include("pom.xml")
+An element such as a text field of a form is said to have focus when the user clicks it; that's where the character appear when the user types. For instance, the code
+
+[sourcecode language='html' gutter='false']
+input:focus {border: 1px solid blue;}
 [/sourcecode]
 
-<h3>HTML Redirect Page</h3>
-Use the following code to redirect to another page. you can set content="0; to the number of seconds you want the browser to wait before redirecting.
+puts a blue border around such a field when the user clicks it.
 
-[sourcecode language="html" gutter="false"]
-#include("src/main/webapp/redirect.html")
+<strong>First Letter</strong>
+[sourcecode language='html' gutter='false']
+p:firstletter {font-size:300%; float:left;}
+[/sourcecode]
+<strong>First Line</strong>
+[sourcecode language='html' gutter='false']
+p:first-line{font-varient:small-caps;}
+[/sourcecode]
+<strong>Before / After</strong>
+[sourcecode language='html' gutter='false']
+h1.age:before {content:"Age: "}
+h1.age:after {content:" years old."}
+<h1 class="age">25</h1>
 [/sourcecode]
 
-<h3>Redirect using JSTL</h3>
-Sometimes you need to redirect the user to the main page in your application but you don't want to hard-code the context root.
-
-[sourcecode language="html" gutter="false"]
-#include("src/main/webapp/redirect.jsp")
+<strong>Font Style and Size</strong>
+[sourcecode language='html' gutter='false']
+* {font-family: cursive, monospace, sans-serif, serif}
+* {font-size: 12pt;}
+* {font-size: .8em;}
 [/sourcecode]
 
+<p style="font-family:cursive, monospace, sans-serif, serif;">Testing 123</p>
+<p style="font-size:12pt;">font-size: 12pt</p>
+<p style="font-size:.8em;">font-size: .8em</p>
 
-How to add hovering effect to table rows:
-
-[sourcecode language="javascript" gutter="false"]
-tr:hover{
-  background-color: #FFFAF0; color: #000;
-}
+<strong>Text Properties</strong>
+[sourcecode language='html' gutter='false']
+text-indent - sets the start position of the text box in relation to the containing element.
+letter-spacing - also known as tracking
+word-spacing
+text-decoration
+text-align - left, center, right, justify
+line-height - 
+text-transform - uppercase, lowercase, capitalize, none
+vertical-align - value, sub, sup, top, middle, bottom
 [/sourcecode]
 
-Related:
-<a href="http://numberformat.wordpress.com/2010/05/22/blank-jquery-templates/" target="_blank">http://numberformat.wordpress.com/2010/05/22/blank-jquery-templates/</a>
+<strong>Positioning Elements</strong>
+Border
+p { border: 1px solid #333; background-color: #EEE}
+<strong>Width </strong>- thin, medium, thick, any unit
+<strong>Style</strong>- none, hidden, dotted, dashed, solid, double, groove, ridge, inset, and outset 
+<strong>color</strong>- 
+
+<strong>Margin and Padding</strong>
+* {margin:0; padding:0}
+
+p { border-style: solid}
+
+
+$blog_footer
