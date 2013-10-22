@@ -1,0 +1,49 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.test</groupId>
+  <artifactId>blank-html-template</artifactId>
+  <version>20090718</version>
+  
+    <pluginRepositories>
+      <pluginRepository>
+        <id>numberformat-releases</id>
+        <url>https://raw.github.com/numberformat/20130213/master/repo</url>
+      </pluginRepository>
+    </pluginRepositories>
+      
+  <dependencies>
+  <dependency>
+    <groupId>javax.servlet</groupId>
+    <artifactId>jstl</artifactId>
+    <version>1.1.2</version>
+        </dependency>
+        <dependency>
+         <groupId>taglibs</groupId>
+         <artifactId>standard</artifactId>
+         <version>1.1.2</version>
+        </dependency>
+  </dependencies>
+  
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>github.numberformat</groupId>
+                <artifactId>blog-plugin</artifactId>
+                <version>1.0-SNAPSHOT</version>
+                <configuration>
+                <gitUrl>https://github.com/numberformat/wordpress/tree/master/${project.version}/${project.artifactId}</gitUrl>
+                </configuration>
+            <executions>
+              <execution>
+                <id>1</id>
+                <phase>site</phase>
+                <goals>
+                  <goal>generate</goal>
+                </goals>
+              </execution>
+            </executions>
+            </plugin>
+        </plugins>
+    </build>
+      
+</project>

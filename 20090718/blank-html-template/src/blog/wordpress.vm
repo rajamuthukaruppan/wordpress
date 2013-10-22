@@ -1,0 +1,53 @@
+Use the following for html sites that are strictly XHTML.
+
+$blog_header
+
+vi src/main/webapp/strict.html
+[sourcecode language="html" gutter="false"]
+#include("src/main/webapp/strict.html")
+[/sourcecode]
+
+Use the following for sites that are mix html and xhtml.
+
+[sourcecode language="html" gutter="false"]
+#include("src/main/webapp/transitional.html")
+[/sourcecode]
+
+In order to use JSTL in your pages just include the following line up top.
+
+[sourcecode language="html" gutter="false"]
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+[/sourcecode]
+
+And include this in your pom.xml file
+
+[sourcecode language="xml" gutter="false"]
+#include("pom.xml")
+[/sourcecode]
+
+<h3>HTML Redirect Page</h3>
+Use the following code to redirect to another page. you can set content="0; to the number of seconds you want the browser to wait before redirecting.
+
+[sourcecode language="html" gutter="false"]
+#include("src/main/webapp/redirect.html")
+[/sourcecode]
+
+<h3>Redirect using JSTL</h3>
+Sometimes you need to redirect the user to the main page in your application but you don't want to hard-code the context root.
+
+[sourcecode language="html" gutter="false"]
+#include("src/main/webapp/redirect.jsp")
+[/sourcecode]
+
+
+How to add hovering effect to table rows:
+
+[sourcecode language="javascript" gutter="false"]
+tr:hover{
+  background-color: #FFFAF0; color: #000;
+}
+[/sourcecode]
+
+Related:
+<a href="http://numberformat.wordpress.com/2010/05/22/blank-jquery-templates/" target="_blank">http://numberformat.wordpress.com/2010/05/22/blank-jquery-templates/</a>
+
