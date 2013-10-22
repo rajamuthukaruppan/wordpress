@@ -1,0 +1,44 @@
+The following draws a form with 2 columns.
+
+[sourcecode language='css' gutter='false']
+  <style type="text/css">
+* {margin:0px; padding:0px;}
+
+body {font-size: 1em; font-family: sans-serif;}  
+div#nav {position:absolute; width:150px; left:0px; top:0px; border-right:2px solid red; top: 60px;}  
+div#content {margin-left:150px; border-left:2px solid red;top: 60px;} 
+div#header {height:60px; background-color: #CCC; border-bottom:2px solid red;}  
+div#header h1 {margin-top: 0px;}  
+
+div#formcontainer {width:425px; margin-left:40px; margin-top:20px;}
+div#formcontainer form {border: 1px solid #CCC; }
+div#formcontainer form label {width:100px; float:left; font-size:.75em; margin:0 10px;}
+div#formcontainer div.clearfix {border-top:1px solid #CCC; padding:10px 0px; vertical-align:top;}
+
+  </style>
+[/sourcecode]
+<strong>Sample form using CSS</strong>
+[sourcecode language='html' gutter='false']
+  <div id="formcontainer">
+  	<p>Please enter your information here: </p>
+  	<form method="post" action="">
+  		<div class="clearfix">
+	  		<label>Enter your first Name</label>
+	  		<input name="firstName" type="text" size="30"/>
+	  		<input name="address" type="text" size="20"/>
+  		</div>
+  		<div class="clearfix">
+	  		<label>Enter your address</label>
+	  		<input name="address" type="text" size="35"/>
+  		</div>  		
+  		<div class="clearfix">
+	  		<label>Enter your address</label>
+	  		<input name="address" type="text" size="35"/>
+  		</div>
+		<div class="clearfix" align="right">
+			<input type="submit"/>
+		</div>
+		
+  	</form>
+  </div> 
+[/sourcecode]
