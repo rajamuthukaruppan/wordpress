@@ -1,0 +1,88 @@
+This page describes how to get a Spring Batch application to print hello world to the console. This page provides a stepping stone to help you get up and running quickly. Since this is a quick and dirty method of getting up and running with spring batch, it does not cover the fundamental concepts.  For further information please visit the Spring Batch project documentation site.
+
+This page shows the latest techniques of configuring spring batch using pure java annotations. This results in a significant reduction in work necessary to get a spring batch job running.
+
+An older version of the page is available here. <a href="http://numberformat.wordpress.com/2010/02/05/hello-world-with-spring-batch/">http://numberformat.wordpress.com/2010/02/05/hello-world-with-spring-batch/</a>
+
+$blog_header
+
+This page takes about 10 minutes to complete and have a working spring batch application.
+
+<h3>Background</h3>
+The following spring batch example program is the simplest way you could setup a job to run in Spring batch. As such there are some limitations with the following approach.
+<h4>Use of an In Memory Database</h4>
+The following program uses an uses in memory database to store information about batch execution runs. This means that there is no protection against duplicate job runs and it does not store when a job was started or completed. Since spring is a pluggable architecture you can always change to use a persistent database like mysql or oracle to store job information. I will describe this process in a future blog entry.
+
+If you use scheduling tools like Autosys you should already have a system that maintains information about job executions. These tools would maintain the history of past runs and if the job succeeded or not etc...so using an in-memory database should not big deal.
+
+<h3>Library Versions</h3>
+<ul>
+	<li>Spring Batch 3.0.0-M3 or above</li>
+</ul>
+
+<h3>Modify the pom.xml</h3>
+vi pom.xml
+[sourcecode language="xml" gutter="false"]
+#include("pom.xml")
+[/sourcecode]
+
+Setup the log4j configuration files. We will be using a very basic file that outputs to the console.
+vi src/main/resources/log4j.xml
+[sourcecode language="xml" gutter="false"]
+#include("src/main/resources/log4j.xml")
+[/sourcecode]
+
+
+The job configuration is stored in the com.test.config package. The configuration for the infrastructure and the job is present in this package.
+
+<h3>Config Interface</h3>
+vi src/main/java/com/test/config/InfrastructureConfiguration.java
+[sourcecode language="java" gutter="false"]
+#include("src/main/java/com/test/config/InfrastructureConfiguration.java")
+[/sourcecode]
+
+<h3>The implementation</h3>
+
+vi src/main/java/com/test/config/StandaloneInfrastructureConfiguration.java
+[sourcecode language="java" gutter="false"]
+#include("src/main/java/com/test/config/StandaloneInfrastructureConfiguration.java")
+[/sourcecode]
+
+<h3>Job Configuration</h3>
+
+vi src/main/java/com/test/config/HelloWorldJobConfig.java
+[sourcecode language="java" gutter="false"]
+#include("src/main/java/com/test/config/HelloWorldJobConfig.java")
+[/sourcecode]
+
+
+<h3>The Tasklet</h3>
+This class does the actual printing of the message to the console.
+
+vi src/main/java/com/test/HelloWorldTasklet.java
+[sourcecode language="java" gutter="false"]
+#include("src/main/java/com/test/HelloWorldTasklet.java")
+[/sourcecode]
+
+
+<h3>Execute the Job</h3>
+To run the job from the command line type the following.
+[sourcecode language="shell" gutter="false"]
+mvn compile exec:java -Dexec.mainClass=org.springframework.batch.core.launch.support.CommandLineJobRunner -Dexec.args="com.test.config.HelloWorldJobConfig helloWorldJob"
+[/sourcecode]
+
+<h3>Deploying the application</h3>
+
+The following tutorial describes how to <a href="http://numberformat.wordpress.com/2011/04/07/spring-batch-executable-jar-with-dependencies/">Package and deploy the application as a self contained jar</a>. (just be mindful to change the commandline args to the one you see here.)
+
+<h3>What's Next?</h3>
+
+In the next few articles I plan on describing how to:
+<ol>
+	<li>Read and write flat files.</li>
+	<li>Write header and footer records in the output file.</li>
+	<li>Replace the in-memory database with a HyperSQL Java database so we can have job information persist between job invocations.</li>
+	<li>Throw an exception in the middle of a large batch job and restart the job execution from the point where it left off.</li>
+	<li>Use validation framework like "commons-validator" to perform input file validation and create reject records for manual correction and later processing.</li>
+</ol>
+
