@@ -1,0 +1,95 @@
+This page describes how you can <strong>R</strong>ead, w<strong>R</strong>rite and perform a<strong>R</strong>ithmetic on flat files using The Spring Batch Framework. We will take a comma separated file (csv) that contain employee information, add some information to it, and write it back to the file system.
+
+$blog_header
+
+The basic building blocks of any batch process is 
+
+<ol>
+	<li>Reading a Item</li>
+	<li>Performing an operation on it</li>
+	<li>Writing the Item back</li>
+</ol>
+
+Please take some time to review <a href="http://static.springsource.org/spring-batch/reference/html/domain.html">The Domain Language of Batch</a> before proceeding. It covers much of the fundamental concepts we will be covering here.
+
+<h3>Batch Steps</h3>
+
+This page is focused on an individual step of the batch process. 
+
+The following is from the spring batch documentation
+
+<blockquote>A Step is a domain object that encapsulates an independent, sequential phase of a batch job. Therefore, every Job is composed entirely of one or more steps. A Step contains all of the information necessary to define and control the actual batch processing. This is a necessarily vague description because the contents of any given Step are at the discretion of the developer writing a Job. A Step can be as simple or complex as the developer desires. A simple Step might load data from a file into the database, requiring little or no code. (depending upon the implementations used) A more complex Step may have complicated business rules that are applied as part of the processing. </blockquote>
+
+<h3>Step Processing types</h3>
+There are 2 ways a step can process data, 
+
+<h4>Tasklet</h4>
+If the step requires only to execute a single task then you can use a tasklet. Typical use case for this is when you need to run a stored procedure, or copy a file from one location to the other. In the "Hello World" example we used a Tasklet to print the message to the console.
+
+<h4>Chunk oriented</h4>
+Chunk oriented processing involves specifying a reader, processor and writer. The input is read one item at a time in sequence and passed to the processor and eventually to the writer in chunks within a transaction boundary. Once the commit interval is reached the items are committed to the writer. Chunk oriented processing is what we will cover on this page.
+
+
+<h3>Library Versions</h3>
+<ul>
+	<li>Spring Batch 3.0.0-M3 or above</li>
+</ul>
+
+<h3>Input Data</h3>
+The following is the input csv file that will be read. Please create the following file in the projects resource directory.
+
+vi src/main/resources/input_data.txt
+[sourcecode gutter="false"]
+#include("src/main/resources/input_data.txt")
+[/sourcecode]
+
+
+<h3>Employee Bean</h3>
+
+This is a simple bean that represents a single Employee.
+
+vi src/main/java/com/test/Employee.java
+[sourcecode language="java" gutter="false"]
+#include("src/main/java/com/test/Employee.java")
+[/sourcecode]
+
+
+<h3>Reading</h3>
+
+The reader is configured in the ThreeRJobConfig.java ( see reader() method )
+
+
+<h3>Arithmetic</h3>
+Not really! All we are doing is assigning a Rank based on the salary amount. The item processor takes an input Bean and converts it to an output bean. In this case the beans are the same but they don't have to be.
+
+vi src/main/java/com/test/EmployeeProcessor.java
+[sourcecode language="java" gutter="false"]
+#include("src/main/java/com/test/EmployeeProcessor.java")
+[/sourcecode]
+
+
+<h3>Writing</h3>
+
+The reader is configured in the ThreeRJobConfig.java ( See writer() method )
+
+
+<h3>Job Configuration</h3>
+vi src/main/java/com/test/config/ThreeRJobConfig.java
+[sourcecode language='java' gutter='false']
+#include("src/main/java/com/test/config/ThreeRJobConfig.java")
+[/sourcecode]
+
+<h3>Execute the job</h3>
+Go to the command line and type the following:
+
+[sourcecode language="shell" gutter="false"]
+mvn compile exec:java -Dexec.mainClass=org.springframework.batch.core.launch.support.CommandLineJobRunner -Dexec.args="com.test.config.ThreeRJobConfig threeRJob"
+[/sourcecode]
+
+<h3>View the Results</h3>
+
+The output file will appear in the target/ folder of the project.
+
+<h3>Further Reading</h3>
+To keep things simple we were reading and writing files located in the project own folders. There are many enterprise design patterns that describe the best practices for feeding data into the batch programs. For further reading on this topic please see the <a href="http://www.springsource.org/spring-integration">Spring Integrations Framework Homepage</a>. 
+
