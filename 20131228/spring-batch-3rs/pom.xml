@@ -93,7 +93,7 @@
 	</build>
 
 <!-- Run the application using: 
-mvn compile exec:java -Dexec.mainClass=org.springframework.batch.core.launch.support.CommandLineJobRunner -Dexec.args="com.test.config.HelloWorldJobConfig helloWorldJob"
+mvn compile exec:java -Dexec.mainClass=org.springframework.batch.core.launch.support.CommandLineJobRunner -Dexec.args="com.test.config.ThreeRJobConfig threeRJob"
 -->	  
   
 </project>
