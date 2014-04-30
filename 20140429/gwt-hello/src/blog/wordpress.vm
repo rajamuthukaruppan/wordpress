@@ -1,0 +1,93 @@
+This page describes the complete end-to-end process of creating and testing a blank "Hello World" type Google Web Tool kit (GWT) starter application using Maven. The page takes about 10-15 minutes to complete and have a working GWT application.
+
+$blog_header
+
+The application described on this page displays a Send Button on the page. It displays a JavaScript alert() message when the button is clicked.
+
+<h3>Background</h3>
+The GWT SDK allows you to generate an application using their generation tool. However I never liked using this tool because the application it generated is useless to me unless I understand how the application is working. The following page breaks down a simple Hello World GWT application step by step and allows the reader to follow along. Once the application is complete the user can import it into eclipse and use the GWT tool to modify the application using the Screen Design Tools.
+
+<h3>Requirements</h3>
+<ul>
+	<li>Maven</li>
+	<li>M2 Eclipse plugin</li>
+	<li>Eclipse GWT plugin</li>
+</ul>
+
+This page covers GWT version 2.4.0.
+
+First step is to create a simple maven project in eclipse.
+
+Modify the pom.xml to look like this...
+
+vi pom.xml
+[sourcecode language="xml" gutter="false"]
+#include("pom.xml")
+[/sourcecode]
+
+<h3>Host HTML Page</h3>
+The following is the Host HTML Page. The page imports the generated Javascript and starts the Javascript application. Similar to the "Entry Point" main() method of many other programming languages.
+
+vi src/main/webapp/Matrix.html
+
+[sourcecode language="html" gutter="false"]
+#include("src/main/webapp/Matrix.html")
+[/sourcecode]
+
+<h3>CSS Styles</h3>
+GWT components are highly customizable. It makes sense to define sizes, colors, alighment, images, and other visual aspects of the component in CSS.
+
+vi src/main/webapp/Matrix.css
+
+[sourcecode language="css" gutter="false"]
+#include("src/main/webapp/Matrix.css")
+[/sourcecode]
+
+<h3>Web Application Descriptor</h3>
+The following is a basic web.xml file for the application.
+
+vi src/main/webapp/WEB-INF/web.xml
+[sourcecode language="xml" gutter="false"]
+#include("src/main/webapp/WEB-INF/web.xml")
+[/sourcecode]
+
+vi src/main/java/com/test/Matrix.gwt.xml
+
+[sourcecode language="xml" gutter="false"]
+#include("src/main/java/test/Matrix.gwt.xml")
+[/sourcecode]
+
+vi src/main/java/test/client/Matrix.java
+[sourcecode language="java" gutter="false"]
+#include("src/main/java/test/client/Matrix.java")
+[/sourcecode]
+
+<h3>Run the project</h3>
+[sourcecode language="shell" gutter="false"]
+mvn clean compile gwt:run
+[/sourcecode]
+
+Click on Launch Default Browser button. You should see a page with a button on the top left.
+
+
+<h3>Import into Eclipse and Edit in Design View</h3>
+The following procedure allows you to open the screen above in the "GWT Design View".
+<ol>
+	<li>Right click -&gt; Properties -&gt; Google -&gt; Web Toolkit.</li>
+	<li>Add the Entry point Module Matrix to the list if not already there by clicking on the "Add" button.</li>
+	<li>Right click on the Matrix.java File and choose Open With -&gt; WindowBuilder Editor.</li>
+	<li>The source file will open and allow you to click on the Design Tab.</li>
+	<li>Change the button name to Send2.</li>
+</ol>
+Test the change by typing:
+
+[sourcecode language="shell" gutter="false"]
+mvn clean compile gwt:run
+[/sourcecode]
+
+Might need to click on Launch Default Browser button twice. You should see a page with a button titled "Send2" on the top left.
+<h3>What's Next?</h3>
+<ul>
+	<li><a href="http://numberformat.wordpress.com/2012/01/16/internationalizing-a-gwt-application/">Internationalize your application</a></li>
+	<li><a href="http://numberformat.wordpress.com/2012/01/16/invoke-server-side-code-using-gwt/">Invoke Server Side Code Using GWT</a></li>
+</ul>
