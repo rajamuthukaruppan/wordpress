@@ -8,7 +8,7 @@
 	<pluginRepositories>
 	  <pluginRepository>
 	    <id>numberformat-releases</id>
-	    <url>https://raw.github.com/numberformat/20130213/master/repo</url>
+	    <url>https://raw.github.com/numberformat/wordpress/20130213/master/repo</url>
 	  </pluginRepository>
 	</pluginRepositories>
 	  
