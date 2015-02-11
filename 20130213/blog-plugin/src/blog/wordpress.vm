@@ -1,0 +1,121 @@
+This page describes how to create a custom maven plugin. 
+
+$blog_header
+
+<h3>Problem Statement</h3>
+This site contains hundreds pages with small demo java projects embedded in its pages.
+
+While working on this site I came across a few problems.
+<ol>
+	<li>How to reduce typo errors on the pages source code.</li>
+	<li>How to keep the blog page up to date after code fixes.</li>
+</ol>
+
+<strong>The solution</strong>: Have a custom maven plugin generate the blog page with source code automatically.  The plugin uses velocity template that contain the text of the blog page along with "\#include" velocity directives that bring in the source code from the project.
+
+<h3>Implementation</h3>
+Follow these steps to create a custom plugin to generate HTML content from velocity templates.
+
+Start by editing the pom.xml file to look like this.
+
+vi pom.xml
+[sourcecode language="xml" gutter="false"]
+#include("pom.xml")
+[/sourcecode]
+
+The following file is the plugin implementation class.
+
+BlogMojo.java
+[sourcecode language="java" gutter="false"]
+#include("src/main/java/github/numberformat/plugin/BlogMojo.java")
+[/sourcecode]
+
+
+<h3>Publish to Nexus or Website</h3>
+You may <a href="http://numberformat.wordpress.com/2011/05/18/nexus-repository/">deploy the plugin into a nexus repository a simple website</a>.
+
+<h3>Example Usage</h3>
+
+For demonstration purposes I have published the plugin to the following URL, you may use it in your project by including it in your pom.xml.
+
+vi pom.xml
+[sourcecode language="xml" gutter="false"]
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.test</groupId>
+  <artifactId>testProject</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  
+  <pluginRepositories>
+    <pluginRepository>
+      <id>numberformat-releases</id>
+      <url>https://raw.github.com/numberformat/20130213/master/repo</url>
+    </pluginRepository>
+  </pluginRepositories>
+  
+  <build>
+  	<plugins>
+  		<plugin> 			
+  			<groupId>github.numberformat</groupId>
+  			<artifactId>blog-plugin</artifactId>
+  			<version>1.0-SNAPSHOT</version>
+	        <executions>
+	          <execution>
+	            <id>1</id>
+	            <phase>site</phase>
+	            <goals>
+	              <goal>generate</goal>
+	            </goals>	            
+	          </execution>
+	        </executions>
+  		</plugin>
+  	</plugins>
+  </build>
+</project>
+[/sourcecode]
+
+As you can see from the above the plugin to generate the wordpress page is hooked into the "site" phase of the build lifecycle.
+
+<h3>Velocity Template</h3>
+
+Save the file into: 
+
+src/blog/wordpress.vm 
+
+[sourcecode gutter="false"]
+\#set( $foo = "Velocity" )
+Hello $foo World!
+
+(include sourcecode tag in square brackets around the include line below)
+\#include("src/main/java/App.java")
+(include /sourcecode tag in square brackets around the include line above)
+[/sourcecode]
+
+<h3>Run the Plugin</h3>
+
+To run the plugin and you have specified the executions tag above just type 
+[sourcecode gutter="false"]
+mvn site
+[/sourcecode]
+
+As an alternative if you don't want to hook it into the maven lifecycle then just delete the "executions" tag above and run the plugin by typing:
+
+To run the plugin just type 
+[sourcecode gutter="false"]
+mvn blog:generate
+[/sourcecode]
+
+If you get a WARNING about plexus ignore it.
+
+Upon successful build you can view the generated wordpress page in the target/blog folder of the project.
+
+<h3>Next Steps</h3>
+
+blog-plugin improvements:
+<ol>
+	<li>Enhance the plugin to generate pages in formats other than wordpress.</li>
+	<li>Have plugin insert headers or footers on the generated pages. (done)</li>
+	<li>Enhance the plugin to have blog pages contain a link to GitHub where visitors can simply checkout the project instead of copying and pasting source from the page. (done)</li>
+</ol>
+
+$blog_footer
