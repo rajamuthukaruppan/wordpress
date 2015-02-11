@@ -1,0 +1,99 @@
+This page describes how to create a simple RESTlet based web application to print hello world in your browser. We will test the application using jetty servlet engine. Will finish off by creating a WAR file that we can use to deploy to any Java Servlet Platform.
+
+This page can take about 10 minutes to complete.
+
+$blog_header
+
+<h3>Background</h3>
+The following <a href="http://www.youtube.com/watch?v=YCcAE2SCQ6k">google video</a> describes the basics of REST architecture style.
+
+
+<h3>Requirements</h3>
+<ul>
+<li>Java 5</li>
+<li>Maven 2 - if you haven't done so already, please install maven2.</li>
+</ul>
+
+<h3>Project Setup</h3>
+We will start by creating a new project using maven2. Maven allows you to document, build and run your project with minimal work. In most cases an IDE is not required to have a fully functional Java application.
+
+
+Open up the command prompt and navigate to an empty directory.
+
+mvn archetype:generate -DarchetypeArtifactId=maven-archetype-quickstart
+groupId: com.test
+artifactId: RESTletTest
+
+Answer the rest of the questions with defaults “Just hit the enter key”
+
+<h3>Project Configuration</h3>
+
+Navigate to the project folder.
+
+cd RESTletTest
+
+Your pom.xml file should look like this. Please be sure to change the packaging to "war".
+
+vi pom.xml
+[sourcecode language="xml" gutter="false"]
+#include("pom.xml")
+[/sourcecode]
+
+<h3>Web Application configuration</h3>
+
+The web.xml will be used to define the "ServerServlet". This class act's like a ControllerServlet for the RESTful Application.
+
+Create a web.xml file and make sure it looks like the following...
+
+mkdir -p src/main/webapp/WEB-INF
+
+vi src/main/webapp/WEB-INF/web.xml
+[sourcecode language="xml" gutter="false"]
+#include("src/main/webapp/WEB-INF/web.xml")
+[/sourcecode]
+
+<h3>RESTful Application</h3>
+
+The Application manages a collection of resources. Programmers typically configure the resources in the createRoot() method of this class. The createRoot() method is expected to return an instance of a router. The router maps the URL to the implementation of the resource. In the case below the "/hello" maps to the HelloResource class (see highlight below).
+
+vi src/main/java/com/test/HelloApplication.java
+[sourcecode language="java" gutter="false" highlight="25"]
+#include("src/main/java/com/test/HelloApplication.java")
+[/sourcecode]
+
+<h3>Resource Implementation</h3>
+
+This resource prints the message to the browser window. The media type is "test/plain" however we can change this to be text/html or any other content type.
+
+vi src/main/java/com/test/HelloResource.java
+[sourcecode language="java" gutter="false"]
+#include("src/main/java/com/test/HelloResource.java")
+[/sourcecode]
+
+<h3>Run the application</h3>
+
+Jetty is a small lightweight servlet engine. You can test the application by simply typing the following command.
+
+[sourcecode language="shell" gutter="false"]
+mvn clean compile jetty:run
+[/sourcecode]
+
+Test the application by navigating to the following url: 
+
+http://localhost:8080/app
+http://localhost:8080/app/hello
+
+Stop the server by typing CTRL-C
+
+<h3>Creating a WAR file</h3>
+
+If you want to run the application in another environment you can create a war file and drop it into a server of your choice.
+
+[sourcecode language="shell" gutter="false"]
+mvn clean compile package
+[/sourcecode]
+The war file should appear in the following location...
+
+RESTletTest/target/RESTletTest-1.0-SNAPSHOT.war
+
+$blog_footer
