@@ -1,1 +1,22 @@
 This page contains a list of directories that contain source code for blogs created on that day.
+
+These blog pages were generated using the following method:
+see example pom.xml for any project listed here.
+
+mvn blog:generate
+src/blog/wordpress.vm
+copy and paste the wordpress.html file into the wordpress page.
+
+First-Time Git Setup
+====================
+$ git config --global user.name "John Doe"
+$ git config --global user.email johndoe@example.com
+
+git clone <URL>
+git add
+git rm
+git commit
+git push
+
+.gitignore
+
