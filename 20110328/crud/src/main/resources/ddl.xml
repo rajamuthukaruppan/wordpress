@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!DOCTYPE database SYSTEM "http://db.apache.org/torque/dtd/database.dtd">
+ 
+<database name="testdb">
+ 
+    <table name="item">
+        <column name="item_id" type="INTEGER" required="true"
+            primaryKey="true" autoIncrement="true" />
+        <column name="category_id" type="INTEGER" />
+        <column name="oem_id" type="VARCHAR" size="50"/>
+        <column name="item_x" type="VARCHAR" size="100" />
+        <column name="special_f" type="CHAR" size="1" />
+        <column name="description" type="VARCHAR" size="1000" />
+        <column name="color" type="VARCHAR" size="20" />
+        <column name="image_url" type="VARCHAR" size="100" />
+        <column name="price" type="DECIMAL" size="15" />
+        <column name="length" type="DECIMAL" size="10" />
+        <column name="width" type="DECIMAL" size="10" />
+        <column name="height" type="DECIMAL" size="10" />
+        <column name="weight" type="DECIMAL" size="10" />
+        <column name="stock_qty" type="DECIMAL" size="10" />
+        <index name="item_item_x">
+            <index-column name="item_x" />
+        </index>
+    </table>
+ 
+</database>
