@@ -1,0 +1,114 @@
+This page describes how to use the new Log4j 2 Framework within multiple web application deployed to a single web container using a shared log4j jar file.
+
+$blog_header
+
+<h3>Background</h3>
+
+Historically Java Web Application WAR files have included their own copy of the log4j jar files. This allowed multiple applications to co exist and use their own log4j configuration. However as web applications get smaller and focused smaller tasks (possibly RESTful applications) you will find yourself deploying multiple WAR files to the same web container. It doesn't make too much sense to have each WAR contain its own copy of log4j.jar.
+
+Ideally it would be nice to have one log4j.jar file at the container level that each application can share. However, its not as simple as moving it out of the WAR file because of the way log4j configures itself.
+
+This page covers a method described in the log4j 2 homepage.
+
+<blockquote>
+Place the logging jars in the container's classpath and use the default ClassLoaderContextSelector. Include the Log4jContextListener in each web application. Each ContextListener can be configured to share the same configuration used at the container or they can be individually configured. If status logging is set to debug in the configuration there will be output from when logging is initialized in the container and then again in each web application. 
+</blockquote>
+
+<h3>Requirements</h3>
+<ul>
+<li>Java 5 or later</li>
+<li>Maven 2 or later</li>
+<li>Log4j 2</li>
+<li>Apache Tomcat 6</li>
+</ul>
+
+<h3>Procedure</h3>
+
+We will create 2 apps and deploy them on Tomcat and verify that they are both logging to the console as well as individual files specified in their configs.
+
+Any one who worked with log4j 1.x knows that this was a pain to setup with multiple web applications. Log4j 2 makes it a lot easier.
+
+<ul>
+<li>web-log-test - outputs to SYSOUT and ${user.home}/APPBASE/logs/web-log-test.log</li>
+<li>web-log-test2 - outputs to SYSOUT and ${user.home}/APPBASE/logs/web-log-test2.log</li>
+</ul>
+
+<h3>Project Configuration</h3>
+
+pom.xml
+[sourcecode language='xml' gutter='false']
+#include("pom.xml")
+[/sourcecode]
+
+<h3>Web Configuration</h3>
+
+The following sets up the log4jContextListener by specifying the log4jConfiguration parameter pointing it to the location of your config.
+
+You may specify a file in the classpath or an absolute location on your system. If you want to keep this file in your WEB-INF folder then you can extend the class and customize it to suit your requirement.
+
+vi src/main/webapp/WEB-INF/web.xml
+[sourcecode language='xml' gutter='false']
+#include("src/main/webapp/WEB-INF/web.xml")
+[/sourcecode]
+
+<h3>Log4j Configuration</h3>
+
+In log4j 2 the name of the config file should be log4j2.xml. For this page our configuration file is very simple. See the log4j 2 site for further details about other configuration options.
+
+vi src/main/resources/log4j2.xml
+[sourcecode language='xml' gutter='false']
+#include("src/main/resources/log4j2.xml")
+[/sourcecode]
+
+<h3>Test Page</h3>
+
+We can test the application by using a simple jsp.
+
+vi src/main/webapp/snoop.jsp
+[sourcecode language='xml' gutter='false']
+#include("src/main/webapp/snoop.jsp")
+[/sourcecode]
+
+
+Finally copy the following files to the "tomcat6/lib" folder. You may obtain these files from the .m2 folder after the project is built. Or you can get them from the apache download site. (at the time of this writing only beta4 was the latest available)
+
+<ul>
+<li>log4j-core-2.0.jar - core libarary.</li>
+<li>log4j-api-2.0.jar - API Shell Classes to be used by your code</li>
+<li>log4j-web-2.0.jar - Servlet Listener to initialize Logging</li>
+<li>log4j-1.2-api-2.0.jar - log4j 1.x support for legacy code that still uses it.</li>
+</ul>
+
+
+<h3>Build and Run the Application</h3>
+
+perform the build by typing:
+
+[sourcecode language='xml' gutter='false']
+mvn clean compile package
+[/sourcecode]
+
+You will notice that the WAR file does not contain any log4j jars. 
+
+Copy the war file into your tomcat6/webapps folder.
+
+navigate to: <a href="http://localhost:8080/web-log-test/snoop.jsp">http://localhost:8080/web-log-test/snoop.jsp</a>
+
+<h3>Modify and Deploy the Second Application</h3>
+
+For the second application we want to modify the log4j2.xml to write the log to ${user.home}/APPBASE/logs/web-log-test2.log
+
+Rename the WAR file to web-log-test2.war deploy to the same server.
+
+Restart and test.
+
+Using a new TAB, navigate to: <a href="http://localhost:8080/web-log-test2/snoop.jsp">http://localhost:8080/web-log-test2/snoop.jsp</a>
+
+Verify that the logs are being written the console and to each file independently.
+
+<h3>Appendix</h3>
+<a href="http://numberformat.wordpress.com/2012/01/14/log4j-property-file-default/">log4j 1.x configuration available here</a>
+
+
+$blog_footer
+
