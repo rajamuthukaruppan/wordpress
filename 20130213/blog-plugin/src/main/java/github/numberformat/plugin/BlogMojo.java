@@ -72,17 +72,13 @@ public class BlogMojo extends AbstractMojo {
 
 
 	private Object getFooter() {
-		return "<div style=\"font-size:13px;border:1px solid gray; " +
-				"padding:5px;line-height:120%\">Full downloadable source for " +
-				"this page is <a href=\""+gitUrl+"\">available here</a>. " +
-				"</div>";
+		return getHeader();
 	}
 
 	private Object getHeader() {
 		return "<div style=\"font-size:13px;border:1px solid gray; " +
-				"padding:5px;line-height:120%\">Full downloadable source for " +
-				"this page is <a href=\""+gitUrl+"\">available here</a>. " +
-				"Corrections and enhancements are welcome, fork, change and push " +
-				"back to GitHub.</div>";
+				"padding:5px;line-height:120%\"><strong>This site is a collaborative effort!</strong> The complete text and sourcecode for " +
+				"this is <a href=\""+gitUrl+"\">available on GitHub</a>. " +
+				"Corrections and enhancements are welcome, please make the change and submit a pull request in the comment area below.</div>";
 	}
 }
