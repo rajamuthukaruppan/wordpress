@@ -1,0 +1,305 @@
+$blog_header
+This page will cover the details of how Spring supports transactions when working with a <strong>single resource using non-XA transactions</strong>.
+
+This is page is part of a multi-step tutorial that demonstrate spring's transaction capabilities using XA and non-XA resources. To visit step 2 please<a href="http://wp.me/pvUBW-84"> follow this link</a>.
+
+Each step of the way I will try to demonstrate how spring is handling the transaction and where the rollbacks / commits are being issued. JDBCTemplate is normally used to execute SQL statements against the database. If applications don't need transactional capabilities than JDBCTemplate operates non-transactionally.
+
+Transactions can be declare programmatically or declaratively. Programmatic transactions are too cumbersome, therefore we will only cover declarative transactions.
+
+Requirements
+<ol>
+	<li>Maven</li>
+	<li>Mysql</li>
+	<li>Spring 2.5.5</li>
+	<li>Active MQ</li>
+	<li>Basic understanding of transactions.</li>
+</ol>
+<h2>Spring Transaction Example 1</h2>
+In the first example we have a car rental website that stores the user's address then the users phone number into a database.
+
+System will do the following from within a transaction
+<ul>
+	<li>insert into the address table</li>
+	<li>insert into the party (customer) table</li>
+	<li>insert into the party_address(associative table)</li>
+</ul>
+These will be to separate JDBC statements. We will introduce an error in the second SQL statement. We should see the first statement rollback.
+
+To describe the this happening we will have the system print to the logs when the following events happen:
+<ul>
+	<li>Begin transaction</li>
+	<li>commit</li>
+	<li>rollback</li>
+</ul>
+Before we begin we need to create some beans in the applicationContext.xml
+<ul>
+	<li>The "dataSource" bean represents our connection to the database. For now we will use the DriverManagerDataSource. It is a quick and dirty way for connecting to the database without using a connection pool.</li>
+	<li>The "mySQLjdbcTemplate" bean represents the jdbcTemplate that we will be using to execute our sql statements. This is a universal helper class that is used for database access.</li>
+	<li>The "customerDataManager" is a bean that will incapsulate the database interaction. This will shield the rest of the application from the datastore. This is a typical class that is used in many 3 tier applications.</li>
+	<li>The "customerModelTarget" bean respresents where the business logic is stored.</li>
+	<li>The "customerModel" bean is a TransactionProxyFactoryBean. This is where all the magic happens. This bean will incapuslate the transactional behavour of our application. It will wrap around the customerModelTarget and instruct rollbacks or commits transparently to the application. This way you dont have to write code that is transaction aware. You are free to write code that specifically deals with your business logic and leave the transactional aspect to configuration files.</li>
+	<li>The "transactionManager" bean represents the implementing class for our transaction manager. This is where the transactional logic takes place. Later in this article we will add logging support for the transaction manager. This way when the system issues a rollback it will be logged into a file.</li>
+</ul>
+[sourcecode language="html"]
+	
+
+
+
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+			
+		
+
+			
+		
+
+
+PROPAGATION_REQUIRED
+			
+		
+	
+
+	
+
+			
+		
+	
+[/sourcecode]
+
+The following was the log output of the application. The log4j.properties had to be modified and the following line added.
+
+[sourcecode language="shell"]
+#[[#]]# Set root logger level to DEBUG and its only appender to A1.
+log4j.rootLogger=ERROR, A1
+log4j.logger.com.vermatech=DEBUG
+log4j.logger.org.springframework.jdbc.datasource=DEBUG
+#[[#]]# A1 is set to be a ConsoleAppender.
+
+#[[#]]# A1 uses PatternLayout.
+log4j.appender.A1=org.apache.log4j.ConsoleAppender
+log4j.appender.A1.layout=org.apache.log4j.PatternLayout
+log4j.appender.A1.layout.ConversionPattern=%d %-5p %c - %m%n
+
+[/sourcecode]
+
+When the code is run normally the following is displayed to the log.
+
+[sourcecode language="shell"]
+2009-08-13 00:41:18,091 DEBUG org.springframework.jdbc.datasource.DataSourceTransactionManager - Creating new transaction with name [test.CustomerModel.reserveCar]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2009-08-13 00:41:18,092 DEBUG org.springframework.jdbc.datasource.DriverManagerDataSource - Creating new JDBC DriverManager Connection to [jdbc:mysql://192.168.0.17/it]
+2009-08-13 00:41:18,304 DEBUG org.springframework.jdbc.datasource.DataSourceTransactionManager - Acquired Connection [com.mysql.jdbc.JDBC4Connection@6e3e5a91] for JDBC transaction
+2009-08-13 00:41:18,312 DEBUG org.springframework.jdbc.datasource.DataSourceTransactionManager - Switching JDBC Connection [com.mysql.jdbc.JDBC4Connection@6e3e5a91] to manual commit
+address stored
+2009-08-13 00:41:18,340 DEBUG org.springframework.jdbc.datasource.DataSourceTransactionManager - Initiating transaction commit
+2009-08-13 00:41:18,340 DEBUG org.springframework.jdbc.datasource.DataSourceTransactionManager - Committing JDBC transaction on Connection [com.mysql.jdbc.JDBC4Connection@6e3e5a91]
+2009-08-13 00:41:18,392 DEBUG org.springframework.jdbc.datasource.DataSourceTransactionManager - Releasing JDBC Connection [com.mysql.jdbc.JDBC4Connection@6e3e5a91] after transaction
+2009-08-13 00:41:18,393 DEBUG org.springframework.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+[/sourcecode]
+
+When the code is run to issue a rollback after the first statement the following is displayed to the log.
+
+[sourcecode language="shell"]
+2009-08-13 00:58:33,368 DEBUG org.springframework.jdbc.datasource.DataSourceTransactionManager - Creating new transaction with name [test.CustomerModel.reserveCar]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2009-08-13 00:58:33,368 DEBUG org.springframework.jdbc.datasource.DriverManagerDataSource - Creating new JDBC DriverManager Connection to [jdbc:mysql://192.168.0.17/it]
+2009-08-13 00:58:33,602 DEBUG org.springframework.jdbc.datasource.DataSourceTransactionManager - Acquired Connection [com.mysql.jdbc.JDBC4Connection@3ebfbbe3] for JDBC transaction
+2009-08-13 00:58:33,607 DEBUG org.springframework.jdbc.datasource.DataSourceTransactionManager - Switching JDBC Connection [com.mysql.jdbc.JDBC4Connection@3ebfbbe3] to manual commit
+address stored
+rolling back...
+2009-08-13 00:58:33,624 DEBUG org.springframework.jdbc.datasource.DataSourceTransactionManager - Initiating transaction rollback
+2009-08-13 00:58:33,624 DEBUG org.springframework.jdbc.datasource.DataSourceTransactionManager - Rolling back JDBC transaction on Connection [com.mysql.jdbc.JDBC4Connection@3ebfbbe3]
+2009-08-13 00:58:33,672 DEBUG org.springframework.jdbc.datasource.DataSourceTransactionManager - Releasing JDBC Connection [com.mysql.jdbc.JDBC4Connection@3ebfbbe3] after transaction
+2009-08-13 00:58:33,672 DEBUG org.springframework.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+[/sourcecode]
+
+To get the application to rollback when there was an error I did the following:
+
+[sourcecode language="java"]
+		if(true) {
+			System.out.println("rolling back...");
+			throw new RuntimeException("rolling back.");
+		}
+[/sourcecode]
+
+The following data manager will store the address and party records to the database.
+CustomerDataManagerImpl.java
+
+[sourcecode language="java"]
+package test;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+
+public class CustomerDataManagerImpl implements CustomerDataManager {
+	private JdbcTemplate jdbcTemplate;
+
+	/* (non-Javadoc)
+	 * @see test.CustomerDataManager#[[#]]#getJdbcTemplate()
+	 */
+	public JdbcTemplate getJdbcTemplate() {
+		return jdbcTemplate;
+	}
+
+	/* (non-Javadoc)
+	 * @see test.CustomerDataManager#[[#]]#setJdbcTemplate(org.springframework.jdbc.core.JdbcTemplate)
+	 */
+	public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
+		this.jdbcTemplate = jdbcTemplate;
+	}
+
+	/* (non-Javadoc)
+	 * @see test.CustomerDataManager#[[#]]#storeAddress(test.Address)
+	 */
+	public void storeAddress(Address address) {
+		String sql = "INSERT INTO address (postal_code, address1, address2) " +
+				"values (?,?,?)";
+
+		jdbcTemplate.update(sql, new Object[] { address.getZip(), address.getName(), address.getStreet() });
+
+	}
+
+	@Override
+	public void storeParty(Party party) {
+		String sql = "INSERT INTO party (last_name, first_name) " +
+		"values (?,?)";
+
+		jdbcTemplate.update(sql, new Object[] { party.getLastName(), party.getFirstName() });
+
+	}
+
+}
+[/sourcecode]
+
+In the Model the following code will store the data in 2 jdbc operations.
+
+[sourcecode language="java"]
+package test;
+
+public class CustomerModelImpl implements CustomerModel {
+	private CustomerDataManager customerDataManager;
+
+	/* (non-Javadoc)
+	 * @see test.CustomerModel#[[#]]#reserveCar(test.Address)
+	 */
+	public void reserveCar(CarReservation reservation) {
+		Address address = reservation.getAddress();
+		Party party = reservation.getParty();
+		if(party == null) {
+			throw new NullPointerException("party should not be null");
+		}
+		if(address==null) {
+			throw new NullPointerException("address should not be null");
+		}
+
+		// responsible for storing the Address information
+		customerDataManager.storeAddress(address);
+		System.out.println("address stored");
+
+		customerDataManager.storeParty(party);
+
+		if(true) {
+			System.out.println("rolling back...");
+			throw new RuntimeException("rolling back.");
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see test.CustomerModel#[[#]]#getCustomerDataManager()
+	 */
+	public CustomerDataManager getCustomerDataManager() {
+		return customerDataManager;
+	}
+
+	/* (non-Javadoc)
+	 * @see test.CustomerModel#[[#]]#setCustomerDataManager(test.CustomerDataManager)
+	 */
+	public void setCustomerDataManager(CustomerDataManager customerDataManager) {
+		this.customerDataManager = customerDataManager;
+	}
+}
+
+[/sourcecode]
+
+The above example demonstrates the roll-back after the first SQL statement. We will now introduce the error after the second statement. The second statement as well as the first one should roll-back.
+
+As you can see below that is what exactly happend. The first and second insert succeded but it did not commit. The runtime exception resulted in both SQL statements being rolled back.
+
+[sourcecode language="shell"]
+2009-08-13 23:00:18,781 DEBUG org.springframework.jdbc.datasource.DataSourceTransactionManager - Creating new transaction with name [test.CustomerModel.reserveCar]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT
+2009-08-13 23:00:18,782 DEBUG org.springframework.jdbc.datasource.DriverManagerDataSource - Creating new JDBC DriverManager Connection to [jdbc:mysql://192.168.0.17/it]
+2009-08-13 23:00:18,847 DEBUG org.springframework.jdbc.datasource.DataSourceTransactionManager - Acquired Connection [com.mysql.jdbc.JDBC4Connection@46d0d843] for JDBC transaction
+2009-08-13 23:00:18,854 DEBUG org.springframework.jdbc.datasource.DataSourceTransactionManager - Switching JDBC Connection [com.mysql.jdbc.JDBC4Connection@46d0d843] to manual commit
+2009-08-13 23:00:18,858 DEBUG org.springframework.jdbc.core.JdbcTemplate - Executing prepared SQL update
+2009-08-13 23:00:18,859 DEBUG org.springframework.jdbc.core.JdbcTemplate - Executing prepared SQL statement [INSERT INTO address (postal_code, address1, address2) values (?,?,?)]
+2009-08-13 23:00:18,863 DEBUG org.springframework.jdbc.core.JdbcTemplate - SQL update affected 1 rows
+address stored
+2009-08-13 23:00:18,867 DEBUG org.springframework.jdbc.core.JdbcTemplate - Executing prepared SQL update
+2009-08-13 23:00:18,867 DEBUG org.springframework.jdbc.core.JdbcTemplate - Executing prepared SQL statement [INSERT INTO party (last_name, first_name) values (?,?)]
+2009-08-13 23:00:18,868 DEBUG org.springframework.jdbc.core.JdbcTemplate - SQL update affected 1 rows
+rolling back...
+2009-08-13 23:00:18,869 DEBUG org.springframework.jdbc.datasource.DataSourceTransactionManager - Initiating transaction rollback
+2009-08-13 23:00:18,869 DEBUG org.springframework.jdbc.datasource.DataSourceTransactionManager - Rolling back JDBC transaction on Connection [com.mysql.jdbc.JDBC4Connection@46d0d843]
+2009-08-13 23:00:18,931 DEBUG org.springframework.jdbc.datasource.DataSourceTransactionManager - Releasing JDBC Connection [com.mysql.jdbc.JDBC4Connection@46d0d843] after transaction
+2009-08-13 23:00:18,932 DEBUG org.springframework.jdbc.datasource.DataSourceUtils - Returning JDBC Connection to DataSource
+[/sourcecode]
+
+The following are the DDL's for the address and the party tables. Its important to define these tables as ENGINE=InnoDB. This is the engine that supports transactions. Tables of other types will not be transactional.
+
+[sourcecode language="sql"]
+--
+-- Table structure for table `address`
+--
+
+CREATE TABLE IF NOT EXISTS `address` (
+  `address_id` smallint(6) NOT NULL AUTO_INCREMENT,
+  `geo_code` smallint(6) DEFAULT NULL,
+  `postal_code` char(5) DEFAULT NULL,
+  `address1` varchar(60) DEFAULT NULL,
+  `address2` varchar(60) DEFAULT NULL,
+  `address3` varchar(60) DEFAULT NULL,
+  PRIMARY KEY (`address_id`),
+  KEY `geo_code` (`geo_code`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=51 ;
+
+--
+-- Table structure for table `party`
+--
+
+CREATE TABLE IF NOT EXISTS `party` (
+  `party_id` int(11) NOT NULL AUTO_INCREMENT,
+  `last_name` varchar(50) NOT NULL,
+  `party_type_code` smallint(6) DEFAULT NULL,
+  `first_name` varchar(50) DEFAULT NULL,
+  `name` varchar(120) DEFAULT NULL,
+  `middle_name` varchar(50) DEFAULT NULL,
+  `personal_title` varchar(50) DEFAULT NULL,
+  `suffix` varchar(20) DEFAULT NULL,
+  `nickname` varchar(50) DEFAULT NULL,
+  `sex` bit(1) DEFAULT NULL,
+  `birth_date` datetime DEFAULT NULL,
+  `height` smallint(6) DEFAULT NULL,
+  `mother_s_maiden_name` varchar(50) DEFAULT NULL,
+  `marital_status` bit(1) DEFAULT NULL,
+  `ssn` char(9) DEFAULT NULL,
+  `passport_number` varchar(50) DEFAULT NULL,
+  `passport_expire_date` datetime DEFAULT NULL,
+  `total_years_work_experience` smallint(6) DEFAULT NULL,
+  `comment` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`party_id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=17 ;
+[/sourcecode]
+$blog_footer

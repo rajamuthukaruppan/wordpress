@@ -1,0 +1,43 @@
+$blog_header
+Creating a certificate is a 2 step process
+<ul>
+	<li>Generate a certificate Request</li>
+	<li>Sign a request with a CA's signature</li>
+</ul>
+Requirements
+<ul>
+	<li><a href="http://numberformat.wordpress.com/?p=461">Demo Certificate Authority</a></li> ( If self signing )
+</ul>
+<h2>Creating a private key and Certificate Request</h2>
+openssl req -new -keyout pw-protected-privkey.pem -out my-server.csr -days 365
+
+# provide the hostname of the server as the Common Name when creating the certificate.
+
+pw-protected-privkey.pem : private key
+newreq.pem : CSR
+
+Remove the password from the server's private key (unless you want the server to ask you each time)
+
+openssl rsa -in pw-protected-privkey.pem -out my-server-private-key.pem
+
+sign the csr using your own CA
+
+You now have to send this Certificate Signing Request (CSR) to a
+Certifying Authority (CA) for signing. The result is then a real
+Certificate which can be used for Apache.
+<h2>Or you can sign it using your own CA</h2>
+openssl ca -verbose -in my-server.csr -out my-server.cert -keyfile demoCA/private/cakey.pem -cert demoCA/cacert.pem
+
+# during signing you should see the following output
+
+[sourcecode language='shell']
+Certificate is to be certified until Apr 5 03:09:42 2010 GMT (365 days)
+Sign the certificate? [y/n]:y
+1 out of 1 certificate requests certified, commit? [y/n]y
+Write out database with 1 new entries
+writing new certificates
+writing ./demoCA/newcerts/01.pem
+Data Base Updated
+[/sourcecode]
+
+$blog_footer

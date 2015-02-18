@@ -1,0 +1,189 @@
+$blog_header
+Jakarta Commons Validation uses XML to declaratively specify constraints. The configuration is not intuitive and the configuration is too verbose for my tastes.
+
+Valang is specifically designed for validating target objects and the syntax is short and to the point.
+
+<a href="http://numberformat.wordpress.com/2009/08/08/car-rental-web-application/">If you have not done so already please read the following link to get started.</a>
+
+In order to use valang you need to add the following into your Maven pom.xml
+
+[sourcecode language="xml" gutter="false"]
+ 		 <dependency>
+			<groupId>org.springmodules</groupId>
+			<artifactId>spring-modules-validation</artifactId>
+			<version>0.8</version>
+ 		</dependency>
+[/sourcecode]
+
+In spring-servlet.xml put the following:
+[sourcecode language="xml" gutter="false"]
+<bean id="addressValidator" class="org.springmodules.validation.valang.ValangValidator">
+  <property name="valang">
+    <value>
+    <![CDATA[
+      { name : name HAS TEXT : 'Name is required'}
+      { street : street HAS TEXT : 'Street is required' }
+      { city : city HAS TEXT : 'City is required'}
+      { state : state HAS TEXT : 'State is required' }
+      { zip : zip HAS TEXT : 'Zip is required' }
+    ]]>
+    </value>
+  </property>
+</bean>
+[/sourcecode]
+
+In the same file as above modify /newRequest bean and add the vaidator defined above.
+[sourcecode language="xml" gutter="false"]
+	<bean name="/newRequest" class="test.NewRequestFormController">
+		<property name="commandName" value="address"/>
+	    <property name="commandClass" value="test.Address"/>
+        <property name="formView" value="carNew"/>
+		<property name="successView" value="selectDate"/>
+		<property name="validator" ref="addressValidator"/>
+	</bean>
+[/sourcecode]
+
+<strong>Thats all!</strong>
+
+Just restart the server and navigate to the page
+[contextroot]//app/newRequest
+
+Click submit without entering anything and you should start getting a whole mess of error messages.
+
+The great thing about this is that if you are switching from commons-validator you dont need to modfy your jsp's. The same "form:errors" tags that were used to define the form stay as is.
+
+<strong>Client Side Validation</strong>
+
+In order to get client side validation working you need to follow these simple steps.
+
+First you need to make sure you defined the following handler mapping in your spring-servlet.xml file
+[sourcecode language="xml" gutter="false"]
+<bean id="handlerMapping" class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping">
+    <property name="interceptors">
+        <list>
+            <bean class="org.springmodules.validation.valang.javascript.taglib.ValangRulesExportInterceptor" />
+        </list>
+    </property>
+</bean>
+[/sourcecode]
+
+Then you need to make sure you have the following defined up top of your JSP
+[sourcecode language="html" gutter="false"]
+<%@taglib uri="http://www.springmodules.org/tags/valang" prefix="valang" %>
+[/sourcecode]
+
+In the head tag of your JSP make sure you have the following defined:
+[sourcecode language="html" gutter="false"]
+<valang:codebase includeScriptTags="true" fieldErrorsIdSuffix="_error" globalErrorsId="global_error"/>
+[/sourcecode]
+
+Lastly.. you need to define the following from within the form tag:
+[sourcecode language="html" gutter="false"]
+<valang:validate commandName="address" />
+[/sourcecode]
+
+At the time of this writing the 0.8a version of spring-modules-validation had an open bug with the client side validation using valang validation. It is described by the following url:
+<a href="http://jira.springframework.org/browse/MOD-267">http://jira.springframework.org/browse/MOD-267</a>
+
+In order to fix this issue you need to apply the following patch that was submitted by Andrew May. 
+
+[sourcecode language="javascript" gutter="false"]
+Index: projects/validation/src/java/org/springmodules/validation/valang/javascript/valang_codebase.js
+===================================================================
+RCS file: /cvs/springmodules/projects/validation/src/java/org/springmodules/validation/valang/javascript/valang_codebase.js,v
+retrieving revision 1.7
+diff -u -r1.7 valang_codebase.js
+--- projects/validation/src/java/org/springmodules/validation/valang/javascript/valang_codebase.js	27 Oct 2006 02:00:11 -0000	1.7
++++ projects/validation/src/java/org/springmodules/validation/valang/javascript/valang_codebase.js	26 Oct 2007 15:03:36 -0000
+@@ -119,21 +119,27 @@
+         }
+     },
+     _findForm: function(name) {
++    	var formElement
+         var element = document.getElementById(name)
+-        if (!element || element.tagName.toLowerCase() != 'form') {
++		if (element && element.tagName.toLowerCase() == 'form') {
++			formElement = element;
++		}
++		if (!formElement) {
+             element = document.getElementById(name + 'ValangValidator')
+-        }
+-        if (!element || element.tagName.toLowerCase() != 'script') {
++			if (element && element.tagName.toLowerCase() == 'script') {
++		        while (element && element.tagName.toLowerCase() != 'form') {
++		            element = element.parentNode
++		        }
++		        if (!element) {
++		            throw 'unable to find FORM element enclosing element with ID \'' + name+ 'ValangValidator\''
++		        }
++				formElement = element;
++			}
++		}
++		if (!formElement) { 
+             throw 'unable to find form with ID \'' + name + '\' or script element with ID \'' + name + 'ValangValidator\''
+         }
+-        var foundElement = element
+-        while (element && element.tagName.toLowerCase() != 'form') {
+-            element = element.parentNode
+-        }
+-        if (!element) {
+-            throw 'unable to find FORM element enclosing element with ID \'' + foundElement.id + '\''
+-        }
+-        return new ValangValidator.Form(element)
++        return new ValangValidator.Form(formElement)
+     },
+     _installSelfWithForm: function() {
+         var oldOnload = window.onload
+@@ -471,33 +477,29 @@
+ // converting to a string or a number; number is always
+ // favoured.
+     _makeCompatible: function(lhs, rhs) {
+-        try {
+-            this._forceNumber(rhs)
+-            return this._forceNumber(lhs)
+-        } catch(ex) {
+-        }
++    	var lhsNum = new Number(lhs)
++    	var rhsNum = new Number(rhs)
++    	if (lhsNum != Number.NaN && rhsNum != Number.NaN) {
++    		// Both are numbers - return primitive value of lhs
++    		return lhsNum.valueOf();
++    	}
++    	// at least one is NaN    	
+         var lhsType = typeof lhs
+         var rhsType = typeof rhs
+         if (lhsType == rhsType) {
++        	// they're both the same (non-number) type, return lhs
+             return lhs
+-        } else if (lhsType == 'number' || rhsType == 'number') {
+-            return this._forceNumber(lhs)
+         } else {
+             throw 'unable to convert [' + lhs + '] and [' + rhs + '] to compatible types'
+         }
+     },
+     _forceNumber: function(value) {
+-        if (typeof value != 'number') {
+-            try {
+-                var newValue = eval(value.toString())
+-            } catch(ex) {
+-            }
+-            if (newValue && typeof newValue == 'number') {
+-                return newValue
+-            }
++    	var num = new Number(value);
++    	if (num == Number.NaN) {
+             throw 'unable to convert value [' + value + '] to number'
+-        }
+-        return value
++    	} else {
++    		return num.valueOf();
++    	}
+     },
+ 
+ // Unary Operators
+
+
+[/sourcecode]
+
+ 
+$blog_footer

@@ -1,0 +1,198 @@
+$blog_header
+
+In order to have effecient database access from your web application using connection pools makes sense.
+
+Along with the performance boost you get added complexity. Database connection pools hold active connections. In some cases when the held connections don't get used, the database will close those connections automatically without letting the connection pool manager know. The pool manager still think that the connections are still open. When the pool is asked to give a connection there is a possibility a stale connection will be returned to the caller.
+
+The caller will try to use the connection and will get a StaleConnectionException. If the client program does not catch this then there is a possibility of your application crashing.
+
+Luckely there are things you can do to prevent this.
+
+<strong>Have your pool manager do some Cleaning</strong>
+This is done by the pool maintenance thread. Different pool managers call it differently but in essence they all do the same thing...
+
+Their goal is to monitor the pools and look out for connections that went bad. Now the question becomes
+<ul>
+	<li>how often to run this thread</li>
+	<li>what is considered bad</li>
+	<li>what to do when a bad connection is found</li>
+</ul>
+In the Websphere Application server the DataSource connection settings can be configured using the parameters seen below.
+
+<strong>Reap Time</strong>
+Specifies the interval, in seconds, between runs of the pool maintenance thread.
+
+<strong>Unused Timeout </strong>
+Specifies the interval in seconds after which an unused or idle connection is discarded.
+
+<strong>Aged Timeout </strong>
+Specifies the interval in seconds before a physical connection is discarded.
+
+<strong>Purge Policy </strong>
+Specifies how to purge connections when a stale connection or fatal connection error is detected. The two choices for this is FailingConnectionOnly or EntirePool. The default is EntirePool and it is the recommended method as well.
+
+<strong>Testing the database settings manually</strong>
+
+This program will run in the background and open connections for long duration of time. This will simulate active connections in the pool. It will print out how long a connection was active for before it got cleaned up by the database.
+
+Often in very controlled environments you will not have access to the current database settings. To see what your database is doing with stale connections you can run the following.
+
+[sourcecode language="java" gutter='false']
+package test;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
+public class StaleConnectionReportApp {
+
+	public static final long ONE_MINUTE = 1000 * 60;
+
+	public static void calculateMaxTimeBeforeStale() throws SQLException {
+		long time = 0;
+		String driver = "com.mysql.jdbc.Driver";
+		String url = "jdbc:mysql://localhost/dbname";
+		String username = "xxx";
+		String password = "xxx";
+
+		try {
+			Class.forName(driver);
+		} catch (ClassNotFoundException e1) {
+			e1.printStackTrace();
+			throw new RuntimeException();
+		}
+		while(true) {
+
+			Connection conn = DriverManager.getConnection(url, username, password);
+
+			try {
+				System.out.println("Sleeping for: " + time/60/1000 + " minutes.");
+				Thread.sleep(time);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+
+			try {
+				testConnection(conn);
+			} finally  {
+				try {
+					conn.close();
+				} catch(Exception ex) {} // ohh well...
+			}
+
+			System.out.println("Test connection complete after waiting for: " + time/60/1000 + " minutes.");
+			time += ONE_MINUTE;
+		}
+	}
+
+	public static void testConnection(Connection conn) throws SQLException {
+		String sql = "select current_TIME;";
+
+		PreparedStatement ps = conn.prepareStatement(sql);
+		ps.executeQuery();
+		ps.close();
+	}
+
+	public static void main(String args[]) throws SQLException {
+		calculateMaxTimeBeforeStale();
+	}
+}
+[/sourcecode]
+
+To make this code to return the data faster consider using Threads. The following program sets up threads to run in parallel.
+
+[sourcecode language="java" gutter='false']
+package test;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
+public class StaleConnectionReportApp implements Runnable {
+
+	public static final long ONE_MINUTE = 1000 * 60;
+	private long time = 0;
+
+	public StaleConnectionReportApp(long time) {
+		this.time = time;
+	}
+
+	public long getTime() {
+		return time;
+	}
+
+	public void setTime(long time) {
+		this.time = time;
+	}
+
+	public void calculateMaxTimeBeforeStale() throws SQLException {
+
+		String driver = "com.mysql.jdbc.Driver";
+		String url = "jdbc:mysql://prod.silverflix.com/artistic";
+		String username = "xxx";
+		String password = "xxx";
+
+		try {
+			Class.forName(driver);
+		} catch (ClassNotFoundException e1) {
+			e1.printStackTrace();
+			throw new RuntimeException();
+		}
+		while(true) {
+
+			Connection conn = DriverManager.getConnection(url, username, password);
+
+			try {
+				System.out.println("Sleeping for: " + time/60/1000 + " minutes.");
+				Thread.sleep(time);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+
+			try {
+				testConnection(conn);
+			} finally  {
+				try {
+					conn.close();
+				} catch(Exception ex) {} // ohh well...
+			}
+
+			System.out.println("Test connection complete after waiting for: " + time/60/1000 + " minutes.");
+			time += ONE_MINUTE;
+		}
+	}
+
+	public static void testConnection(Connection conn) throws SQLException {
+		String sql = "select current_TIME;";
+
+		PreparedStatement ps = conn.prepareStatement(sql);
+		ps.executeQuery();
+		ps.close();
+	}
+
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		try {
+			calculateMaxTimeBeforeStale();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public static void main(String args[]) throws SQLException {
+
+		for(int i=30; i<120; i=i+10) {
+			StaleConnectionReportApp app = new StaleConnectionReportApp(ONE_MINUTE*i);
+			Thread thread = new Thread(app);
+			thread.start();
+		}
+	}
+}
+
+[/sourcecode]
+
+$blog_footer
