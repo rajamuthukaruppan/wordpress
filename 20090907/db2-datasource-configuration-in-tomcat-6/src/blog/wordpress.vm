@@ -1,0 +1,57 @@
+$blog_header
+This page describes the process to get Tomcat 6 configured with a IBM DB2 Data source using a type 4 JDBC driver.
+<h3>Requirements</h3>
+<ul>
+	<li> Tomcat 6.0 standalone or <a href="http://wp.me/pvUBW-bz">integrated with eclipse</a></li>
+	<li><a href="http://numberformat.wordpress.com/2009/07/24/db2-jdbc-drivers/" target="_blank">DB2 JDBC Drivers</a></li>
+</ul>
+<h3>Step 1</h3>
+Ensure you have the <a href="http://numberformat.wordpress.com/2009/07/24/db2-jdbc-drivers/" target="_blank">IBM JDBC Drivers</a> installed in your tomcat lib directory. See my other post. Next you need to create a basic hello World servlet. Do that now and return to continue step 2
+<h3>Step 2</h3>
+At the very end of web.xml
+
+[sourcecode language="html" gutter="false"]
+	<resource-ref>
+		<res-ref-name>/jdbc/TESTShared</res-ref-name>
+		<res-type>javax.sql.DataSource</res-type>
+		<res-auth>Container</res-auth>
+        </resource-ref>
+[/sourcecode]
+<h3>Step 3</h3>
+In your tomcat "conf" folder modify the <strong>context.xml</strong> and insert the following
+
+[sourcecode language="html" gutter="false"]
+	<ResourceLink name="jdbc/TESTShared" global="jdbc/TEST" type="javax.sql.DataSource"/>
+[/sourcecode]
+<h3>Step 4</h3>
+In your tomcat "conf" folder modify the server.xml and add the following in the GlobalNamingResources section.
+
+[sourcecode language="html" gutter="false"]
+		<Resource auth="Container"
+		driverClassName="com.ibm.db2.jcc.DB2Driver"
+		name="jdbc/TEST"
+		password="xxxx"
+		username="xxxx"
+		type="javax.sql.DataSource"
+		url="jdbc:db2://hostname:port/TEST"/>
+[/sourcecode]
+
+The hostname and port are custom to your database installation. For this example we used the TEST database. But you can change this to your specific database name. Just be sure to replace it everywhere you see TEST in this page.
+<h3>Step 5</h3>
+Add the following to the helloWorld servet.
+
+[sourcecode language="java" gutter="false"]
+		System.out.println("trying to get connection...");
+
+		Context initCtx = new InitialContext();
+		Context envCtx = (Context) initCtx.lookup("java:comp/env");
+		  DataSource ds = (DataSource) envCtx.lookup("jdbc/TESTShared");
+		  Connection c = ds.getConnection();
+
+		System.out.println(c);
+		c.close();
+[/sourcecode]
+<h3>Thats all</h3>
+At this point you can save the source code for the test servlet and verify that you have database connectivity. By opening up a browser and navigating to the servlet. It should print out a the connection object to the standard out.
+
+$blog_footer

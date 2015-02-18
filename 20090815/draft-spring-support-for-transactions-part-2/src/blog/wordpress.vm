@@ -1,0 +1,23 @@
+$blog_header
+In this document we will introduce transactions with different resources using a non-XA compliant drivers. Maintaining transactions across multiple resources is challenging. The reason for this is that unless they participate in a 2-phase commit protocol you are not guaranteed an atomic transaction.
+
+Keeping this in mind lets start setting up the 2 resources we will use to complete a unit of work. We will test the system by inserting data into both database resources and watch them commit. We will then try to break the system by simulating a failure after the first resource has committed.
+
+<img class="alignnone size-full wp-image-518" title="two_resource_transaction" src="http://numberformat.wordpress.com/files/2009/08/two_resource_transaction.gif" alt="two_resource_transaction" width="645" height="261" />
+<h2>Spring Transaction Example 2</h2>
+In this example we will save the data to the database and save something else to database 2. We will use a non-XA resource.
+
+We will simulate a failure:
+<ul>
+	<li>After the database insert</li>
+	<li>After the database 2 insert</li>
+</ul>
+Resources in this example participate in what is called a "Local Transaction Context". This means that there is no "voting process" at the end of the transaction.
+<h2>Spring Transaction Example 3</h2>
+In this example we will use a fully compliant XA Resource for all participants. We will demonstrate how the voting process works. We will introduce failures at multiple points and observe its affects.
+<h2>Spring Transaction Example 4</h2>
+In this example we will introduce Web Services into the mix.
+<div id="_mcePaste" style="overflow:hidden;position:absolute;left:-10000px;top:1482px;width:1px;height:1px;">
+<pre>When the code is run to issue a rollback the following is displayed to the log.</pre>
+</div>
+$blog_footer

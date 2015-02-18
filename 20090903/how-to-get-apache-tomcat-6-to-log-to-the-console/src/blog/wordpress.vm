@@ -1,0 +1,62 @@
+$blog_header
+s article explains how to get apache tomcat to log to the console (system.out).
+
+The process is quite simple. $CATALINA_HOME represents where you have tomcat version 6 installed.
+
+<h3>Step 1</h3>
+Download Apache log4j and put it into $CATALINA_HOME/lib folder.
+
+<h3>Step 2</h3>
+Download the jar files listed below
+<ul>
+	<li> tomcat-juli-adapters.jar</li>
+	<li> tomcat-juli.jar</li>
+</ul>
+You may download them from here (fool proof method):
+
+<a href="http://tomcat.apache.org/">http://tomcat.apache.org/</a>
+Click on version 6 then click on Quick Navigation -&gt; browse -&gt; extras
+
+Not sure if the following link will work years from now: <a href="http://www.poolsaboveground.com/apache/tomcat/tomcat-6/v6.0.20/bin/extras/">http://www.poolsaboveground.com/apache/tomcat/tomcat-6/v6.0.20/bin/extras/</a> but it shows you were the files were at the time this blog was being written.
+
+<h3>Step 3</h3>
+Put tomcat-juli.jar into your $CATALINA_HOME/bin folder and the other jar file goes into the $CATALINA_HOME/lib folder.
+
+<h3>Step 4</h3>
+Put the following log4j.properties file into the $CATALINA_HOME/lib folder.
+
+[sourcecode gutter="false" language="shell"]
+#[[#]]# Set root logger level to DEBUG and its only appender to A1.
+log4j.rootLogger=INFO, A1
+
+#[[#]]# A1 is set to be a ConsoleAppender.
+
+#[[#]]# A1 uses PatternLayout.
+log4j.appender.A1=org.apache.log4j.ConsoleAppender
+log4j.appender.A1.layout=org.apache.log4j.PatternLayout
+log4j.appender.A1.layout.ConversionPattern=%d %-5p %c - %m%n
+[/sourcecode]
+
+<h3>Finally</h3>
+Restart the tomcat server and you should now start seeing the output to the console.
+
+[sourcecode gutter="false" language="shell"]
+2009-09-07 10:03:45,208 WARN  org.apache.commons.digester.Digester - [SetPropertiesRule]{Server/Service/Engine/Host/Context} Setting property 'source' to 'org.eclipse.jst.j2ee.server:helloWorld' did not find a matching property.
+2009-09-07 10:03:45,211 INFO  org.apache.catalina.core.AprLifecycleListener - The APR based Apache Tomcat Native library which allows optimal performance in production environments was not found on the java.library.path: /usr/lib/jvm/java-6-sun-1.6.0.14/jre/lib/amd64/server:/usr/lib/jvm/java-6-sun-1.6.0.14/jre/lib/amd64:/usr/lib/jvm/java-6-sun-1.6.0.14/jre/../lib/amd64:/usr/lib64/xulrunner-addons:/usr/java/packages/lib/amd64:/lib:/usr/lib
+2009-09-07 10:03:45,231 INFO  org.apache.coyote.http11.Http11Protocol - Initializing Coyote HTTP/1.1 on http-8080
+2009-09-07 10:03:45,232 INFO  org.apache.catalina.startup.Catalina - Initialization processed in 316 ms
+2009-09-07 10:03:45,254 INFO  org.apache.catalina.core.StandardService - Starting service Catalina
+2009-09-07 10:03:45,255 INFO  org.apache.catalina.core.StandardEngine - Starting Servlet Engine: Apache Tomcat/6.0.18
+2009-09-07 10:03:45,654 INFO  org.apache.catalina.core.ContainerBase.[Catalina].[localhost].[/helloWorld] - Initializing Spring root WebApplicationContext
+2009-09-07 10:03:45,768 INFO  org.apache.coyote.http11.Http11Protocol - Starting Coyote HTTP/1.1 on http-8080
+2009-09-07 10:03:45,799 INFO  org.apache.jk.common.ChannelSocket - JK: ajp13 listening on /0.0.0.0:8009
+2009-09-07 10:03:45,803 INFO  org.apache.jk.server.JkMain - Jk running ID=0 time=0/12  config=null
+2009-09-07 10:03:45,804 INFO  org.apache.catalina.startup.Catalina - Server startup in 572 ms
+[/sourcecode]
+
+The logging is totally customizable. You can change the where the log output goes to or the Severity of errors that get logged by modifying the log4j.properties file seen above. To learn more about Apache log4j please visit the following URL: <a href="http://logging.apache.org" target="_blank">http://logging.apache.org</a>
+
+Note that this does not replace the custom logging properties you have within your applications. You can still specify them by putting a log4j.properties inside your applications /WEB-INF/classes folder. This logger is only at the top level. It helps in debugging issues you may encounter with the tomcat server.
+
+
+$blog_footer
