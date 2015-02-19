@@ -1,0 +1,256 @@
+This page explains how to take the "core spring hello world application" and integrate it with struts framework.
+<h3>Requirements</h3>
+<ul>
+	<li>A functioning struts application. <a href="http://numberformat.wordpress.com/2009/09/07/struts-1-lesson-1-hello-world-with-maven-2/" target="_blank">Click here to create one.</a></li>
+	<li>A functioning core spring application. <a href="http://numberformat.wordpress.com/2009/09/07/core-spring-hello-world/" target="_blank">Click here to create one.</a></li>
+</ul>
+A typical Struts application is a collection of Action classes. The trick to integrating spring framework into one of these application is to convert the action classes to spring beans. Spring beans are managed by the spring container. The container is initialized via xml configuration file.
+
+In the Example application listed at the above URL you were introduced with an account transfer process. The customer wanted some amount of money transferred between 2 accounts. For this we used the AccountTransferService. The service used 2 data mangers configured as spring beans. Once the datamangers were configured they were "injected" into the AccountTransferService. All of this was done thru XML configuration and none of the components of the system knew how to construct each other. This leads to a loosely coupled system since we can swap out the implementation of the datamangers for testing or development purposes.
+
+In this page we will convert the Struts Actions into spring enabled beans. We will "inject" the objects that the action needs to do its job. In this case the AccountTransferService will be injected into the Action. The action will handle the request, delegate the processing of the request to the AccountTransferService, then forward to the success page.
+<h3>ContextLoaderPlugin</h3>
+This plugin loads a spring context file for the struts ActionServlet. This allows your struts actions to be managed by Spring. You can do this 2 ways.
+<ul>
+	<li>Override Struts' default RequestProcessor with Spring's DelegatingRequestProcessor</li>
+	<li>Use the DelegatingActionProxy class in the type attribute of your action-mapping element.</li>
+</ul>
+In the first method the type attribute of the struts action element will be ignored. In the second method you can use the DelegatingActionProxy as the type in your action-mapping. This is the approach we will cover here.
+<h3>DelegatingActionProxy</h3>
+The job of this class is to delegate the handling of a request to an Action Bean that is "spring enabled". Spring enabling a bean means that we have defined it in a spring configuration file and injected it with the dependencies it needs to do its job.
+
+It will chose the spring-enabled bean based on the URI of the incoming request. If we are asking for accountTransfer.do it will look for a spring bean named "/accountTransfer" in the spring application context.
+
+The bridge between the Action in struts-config.xml and the strutsConfiguration.xml is built with the action-mapping's "path" and the bean's "name". If you have the following in your struts-config.xml
+
+[sourcecode language="html" gutter="false"]
+
+<action path="/users" .../>
+
+[/sourcecode]
+
+You must define that Action's bean with the "/users" name in the strutsConfiguration.xml file.
+
+[sourcecode language="html" gutter="false"]
+
+<bean name="/users" .../>
+[/sourcecode]
+
+Before we can start making this we need to add a few things to the pom.xml file.
+
+Insert the pom file modifications here.
+
+[sourcecode language="html" gutter="false"]
+<dependency>
+	<groupId>org.springframework</groupId>
+	<artifactId>spring-webmvc-struts</artifactId>
+	<version>2.5.5</version>
+</dependency>
+<dependency>
+	<groupId>org.springframework</groupId>
+	<artifactId>spring-webmvc-struts</artifactId>
+	<version>2.5.5</version>
+</dependency>
+[/sourcecode]
+
+Modify the struts-config.xml and add the following towards the end of the file.
+
+[sourcecode language="html" gutter="false"]
+<plug-in className="org.springframework.web.struts.ContextLoaderPlugIn">
+ <set-property property="contextConfigLocation" value="/WEB-INF/spring-config.xml"/>
+</plug-in>
+[/sourcecode]
+
+We will create an Action called AccountTransferAction. We will have this action spring enabled by putting it into the spring configuration file.
+
+Modify application.xml and add the following section.
+
+[sourcecode language="xml" gutter="false"]
+<bean name="/accountTransfer" class="strutsexample.AccountTransferAction">
+<property name="accountTransferService" ref="accountTransferService"/>
+</bean>
+[/sourcecode]
+
+Update the struts-config.xml file and replace the strutsexample.AccountTransferAction with org.springframework.web.struts.DelegatingActionProxy. As you can see in the above bean definition the "accountTransferService" is injected into the "Spring Enabled" struts action.
+
+[sourcecode language="html" gutter="false"]
+<action path="/AccountTransfer" forward="/pages/accountInput.jsp" />
+<!--
+ <action path="/AccountTransferSubmit"  type="strutsexample.AccountTransferAction">
+ <forward name="success" path="/pages/accountTransferSuccess.jsp"></forward>
+ </action>
+
+ <action path="/AccountTransferSubmit"  type="org.springframework.web.struts.DelegatingActionProxy">
+ <forward name="success" path="/pages/accountTransferSuccess.jsp"></forward>
+ </action>
+ -->
+[/sourcecode]
+
+The code in comments represents 2 ways to define an action. The first one is how you would typically define a struts action. The second element represents a spring enabled struts action.  Go ahead and copy the second element outside the comments and save the file.
+
+The following is the
+
+src/main/webapp/WEB-INF/spring-config.xml
+
+[sourcecode language="xml" gutter="false"]
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC
+	"-//SPRING//DTD BEAN//EN"
+	"http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+	<bean name="/AccountTransferSubmit" class="strutsexample.AccountTransferAction">
+		<property name="accountTransferService" ref="accountTransferService"/>
+	</bean>
+</beans>
+[/sourcecode]
+
+The following is the
+
+src/main/webapp/WEB-INF/applicationContext.xml
+
+[sourcecode language="xml" gutter="false"]
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC
+	"-//SPRING//DTD BEAN//EN"
+	"http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+	<bean name="accountDataManager" class="accountTransfer.AccountDataManagerImpl"/>
+	<bean name="customerDataManager" class="accountTransfer.CustomerDataManagerImpl"/>
+	<bean name="accountTransferService" class="accountTransfer.AccountTransferServiceImpl">
+		<property name="accountDataManager" ref="accountDataManager"/>
+		<property name="customerDataManager" ref="customerDataManager"/>
+	</bean>
+</beans>
+[/sourcecode]
+
+Add the following Action class file to the project
+
+[sourcecode language="java" gutter="false"]
+package strutsexample;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts.action.Action;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+
+import accountTransfer.AccountTransferServiceIF;
+
+public class AccountTransferAction extends Action {
+	private static final Log logger = LogFactory.getLog(AccountTransferAction.class);
+
+	private AccountTransferServiceIF accountTransferService;
+
+	public AccountTransferServiceIF getAccountTransferService() {
+		return accountTransferService;
+	}
+
+	public void setAccountTransferService(
+			AccountTransferServiceIF accountTransferService) {
+		this.accountTransferService = accountTransferService;
+	}
+
+	@Override
+	public ActionForward execute(ActionMapping mapping, ActionForm form,
+			HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
+
+		logger.info("struts action ran with: " + accountTransferService);
+
+		return mapping.findForward("success");
+	}
+}
+[/sourcecode]
+
+Add the following JSP's to the project.
+
+src/main/webapp/pages/accountTransferSuccess.jsp
+
+[sourcecode language="html" gutter="false"]
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+ <head>
+ <title>XHTML 1.0 Strict Template</title>
+ <meta http-equiv="Content-type" content="text/html; charset=iso-8859-1" />
+ <meta http-equiv="Content-Language" content="en-us" />
+ </head>
+ <body>
+
+Account Transfer Success!
+
+</body>
+</html>
+
+[/sourcecode]
+
+src/main/webapp/pages/accountInput.jsp
+
+[sourcecode language="html" gutter="false"]
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+	<title>XHTML 1.0 Strict Template</title>
+	<meta http-equiv="Content-type" content="text/html; charset=iso-8859-1" />
+	<meta http-equiv="Content-Language" content="en-us" />
+</head>
+<body>
+	<form action="AccountTransferSubmit.do">
+	<input type="text" value="test" />
+	<input type="submit"/>
+	</form>
+</body>
+</html>
+[/sourcecode]
+<h3>That's all! you just spring enabled your struts application!</h3>
+<div id="_mcePaste" style="overflow:hidden;position:absolute;left:-10000px;top:1622px;width:1px;height:1px;">
+
+package strutsexample;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts.action.Action;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+
+import accountTransfer.AccountTransferServiceIF;
+
+public class AccountTransferAction extends Action {
+private static final Log logger = LogFactory.getLog(AccountTransferAction.class);
+
+private AccountTransferServiceIF accountTransferService;
+
+public AccountTransferServiceIF getAccountTransferService() {
+return accountTransferService;
+}
+
+public void setAccountTransferService(
+AccountTransferServiceIF accountTransferService) {
+this.accountTransferService = accountTransferService;
+}
+
+@Override
+public ActionForward execute(ActionMapping mapping, ActionForm form,
+HttpServletRequest request, HttpServletResponse response)
+throws Exception {
+
+logger.info("struts action ran with: " + accountTransferService);
+
+return mapping.findForward("success");
+}
+}
+
+</div>
+
+$blog_footer

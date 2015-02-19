@@ -1,0 +1,511 @@
+$blog_header
+This page shows you how to create a basic hello world standalone application in spring.
+
+start with the pom file
+
+[sourcecode language="xml" gutter="false"]
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>accountTransfer</groupId>
+	<artifactId>SpringCoreDemo</artifactId>
+	<packaging>jar</packaging>
+	<version>1.0.1-SNAPSHOT</version>
+	<name>SpringCoreDemo</name>
+
+	<build>
+		<sourceDirectory>src</sourceDirectory>
+		<resources>
+			<resource>
+				<directory>src</directory>
+			</resource>	
+		</resources>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.0.2</version>
+				<configuration>
+					<source>1.5</source>
+					<target>1.5</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<configuration>
+					<downloadSources>true</downloadSources>
+					<downloadJavadocs>true</downloadJavadocs>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<repositories>
+	</repositories>
+	<dependencies>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring</artifactId>
+			<version>2.5.5</version>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.14</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+
+	</dependencies>
+</project>
+[/sourcecode]
+
+
+The following block of code contains all the source for this project. All the classes are within the same package. (accountTransfer).
+
+Just copy and paste each one into the directory and save.
+
+This class is a simple bean that represents the account. 
+[sourcecode language="java" gutter="false"]
+package accountTransfer;
+
+import java.math.BigDecimal;
+
+public class Account {
+	public String accountNumber;
+	public BigDecimal accountBalance;
+	public Customer owner = new Customer(); 
+	
+	
+	public Customer getOwner() {
+		return owner;
+	}
+	public void setOwner(Customer owner) {
+		this.owner = owner;
+	}
+	public String getAccountNumber() {
+		return accountNumber;
+	}
+	public void setAccountNumber(String accountNumber) {
+		this.accountNumber = accountNumber;
+	}
+	public BigDecimal getAccountBalance() {
+		return accountBalance;
+	}
+	public void setAccountBalance(BigDecimal accountBalance) {
+		this.accountBalance = accountBalance;
+	}
+	
+	
+}
+[/sourcecode]
+
+This bean represents a customer.
+[sourcecode language="java" gutter="false"]
+package accountTransfer;
+
+public class Customer {
+
+	private String id;
+	private String name;
+	
+	public String getId() {
+		return id;
+	}
+	public void setId(String id) {
+		this.id = id;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		return result;
+	}
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Customer other = (Customer) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		return true;
+	}
+}
+
+[/sourcecode]
+
+This is the AccountDataManager interface. We will use it as a handle to pass references of the actual data manager implementation classes around.
+
+[sourcecode language="java" gutter="false"]
+package accountTransfer;
+
+public interface CustomerDataManagerIF {
+
+	/**
+	 * This method is responsible for getting customer information from the
+	 * database. 
+	 */
+	public abstract Customer getCustomer(String customerID);
+
+}
+[/sourcecode]
+
+This is the actual class that implements the customer data manager. 
+[sourcecode language="java" gutter="false"]
+package accountTransfer;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+public class CustomerDataManagerImpl implements CustomerDataManagerIF {
+	private static final Log logger = LogFactory.getLog(CustomerDataManagerImpl.class);
+	
+	/* (non-Javadoc)
+	 * @see accountTransfer.CustomerDataManagerIF#[[#]]#getCustomer(java.lang.String)
+	 */
+	public Customer getCustomer(String customerID) {
+		logger.info("getting customer information from the database.");
+		
+		Customer customer = new Customer();
+		
+		customer.setId("1");
+		customer.setName("John");
+		
+		// custom logic to get customer from the database.
+		
+		return customer;
+	}
+}
+
+[/sourcecode]
+
+This is the interface we will  use to pass references of the Account Data Manager implementation classes around.
+[sourcecode language="java" gutter="false"]
+package accountTransfer;
+
+public interface AccountDataManagerIF {
+
+	/**
+	 * This method is responsible for getting account information from the
+	 * database.
+	 * 
+	 * @param accountNumber
+	 * @return
+	 */
+	public abstract Account getAccountInformation(final String accountNumber);
+
+	public abstract void saveAccountInformation(final Account account);
+
+}
+[/sourcecode]
+
+This is the actual implementation class for the Account Data Manager.
+[sourcecode language="java" gutter="false"]
+package accountTransfer;
+
+import java.math.BigDecimal;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+public class AccountDataManagerImpl implements AccountDataManagerIF {
+	private static final Log logger = LogFactory.getLog(AccountDataManagerImpl.class);
+
+	/* (non-Javadoc)
+	 * @see accountTransfer.AccountDataManagerIF#[[#]]#getAccountInformation(java.lang.String)
+	 */
+	public Account getAccountInformation(final String accountNumber) {
+		logger.info("getting account information from the database for account:" + accountNumber);
+		Account account = new Account();
+		
+		account.setAccountNumber(accountNumber);
+		
+		account.getOwner().setId("1");
+		account.getOwner().setName("John");
+		
+		account.setAccountBalance(new BigDecimal(1000));
+		// custom logic to get account information from database.
+		
+		return account;
+	}
+	
+	/* (non-Javadoc)
+	 * @see accountTransfer.AccountDataManagerIF#[[#]]#saveAccountInformation(accountTransfer.Account)
+	 */
+	public void saveAccountInformation(final Account account) {
+		logger.info("saving information to the database: " + account.getAccountNumber());
+		// custom logic to insert/update account in the database
+
+	}
+}
+[/sourcecode]
+
+The classes that implement this interface are considered "Model" classes. They contain business logic.
+[sourcecode language="java" gutter="false"]
+package accountTransfer;
+
+import java.math.BigDecimal;
+
+public interface AccountTransferServiceIF {
+
+	/**
+	 * This method is responsible for transferring the funds from one account
+	 * to another.
+	 * 
+	 * @param source
+	 * @param destination
+	 * @throws AccountBalanceException 
+	 * 
+	 */
+
+	public abstract void transfer(String customerId, String sourceAccountStr,
+			String destinationAccountStr, BigDecimal amount)
+			throws OwnershipException, AccountBalanceException;
+
+}
+[/sourcecode]
+
+This is the Service Class that will have the business logic to transfer money from one account to another. These classes are agnostic to the storage mechanism being used. They delegate that task to data managers.
+[sourcecode language="java" gutter="false"]
+package accountTransfer;
+
+import java.math.BigDecimal;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+public class AccountTransferServiceImpl implements AccountTransferServiceIF {
+	private static final Log logger = LogFactory.getLog(AccountTransferServiceImpl.class);
+	
+	private CustomerDataManagerIF customerDataManager;
+	private AccountDataManagerIF accountDataManager;
+	
+	public CustomerDataManagerIF getCustomerDataManager() {
+		return customerDataManager;
+	}
+
+	public void setCustomerDataManager(CustomerDataManagerIF customerDataManager) {
+		this.customerDataManager = customerDataManager;
+	}
+
+	public AccountDataManagerIF getAccountDataManager() {
+		return accountDataManager;
+	}
+
+	public void setAccountDataManager(AccountDataManagerIF accountDataManager) {
+		this.accountDataManager = accountDataManager;
+	}
+
+	/* (non-Javadoc)
+	 * @see accountTransfer.AccountTransferServiceIF#[[#]]#transfer(java.lang.String, java.lang.String, java.lang.String, java.math.BigDecimal)
+	 */
+	
+	public void transfer(String customerId, String sourceAccountStr, String destinationAccountStr, BigDecimal amount) throws OwnershipException, AccountBalanceException {
+		if (amount.compareTo(BigDecimal.ZERO) == 0)
+			return;
+		
+		Customer customer = customerDataManager.getCustomer(customerId);
+		
+		Account sourceAccount = accountDataManager.getAccountInformation(sourceAccountStr);
+		Account destAccount = accountDataManager.getAccountInformation(destinationAccountStr);
+		
+		// verify that both accounts are owned by the same customer.
+		Customer account1Owner = sourceAccount.getOwner();
+		Customer account2Owner = destAccount.getOwner();
+		
+		if(!account1Owner.equals(account2Owner)) {
+			throw new OwnershipException("account not owned by same person.");			
+		}
+		if(!customer.equals(account1Owner)) {
+			throw new OwnershipException("current customer does not own account1.");
+		}
+		
+		// verify that there is enough balance
+		if(sourceAccount.getAccountBalance().compareTo(amount) == -1 ) {
+			throw new AccountBalanceException("inadaquate source account balance.");
+		}
+		
+		// do the transfer
+		sourceAccount.setAccountBalance(sourceAccount.getAccountBalance().subtract(amount));
+		destAccount.setAccountBalance(destAccount.getAccountBalance().add(amount));		
+		
+		// save updated account information to the database		
+		accountDataManager.saveAccountInformation(sourceAccount);
+		accountDataManager.saveAccountInformation(destAccount);
+		
+		
+	}
+}
+[/sourcecode]
+
+This is a java main class that will be used to run our example from the command line or eclipse console. It simply instantiates a applicationContext and does a "lookup" for the service bean that contains the business logic. Once we get a reference to the service bean we execute a method to do the transfer.
+
+[sourcecode language="java" gutter="false"]
+package accountTransfer;
+
+import java.math.BigDecimal;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+public class AccountTransferApp {
+	private static final Log logger = LogFactory
+			.getLog(AccountTransferApp.class);
+
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) throws Exception {
+		logger.info("starting the application");
+
+		logger.info("initializing the application Context");
+		ApplicationContext context = new ClassPathXmlApplicationContext(
+				"application.xml");
+
+		AccountTransferServiceIF accountTransferService = (AccountTransferServiceIF) context
+				.getBean("accountTransferService");
+
+		// the following line initiates a call to the service to transfer money.
+		accountTransferService.transfer("1", "acct1", "acct2", BigDecimal.TEN);
+		
+	}
+
+}
+
+
+
+[/sourcecode]
+
+The following are the exception classes 
+
+[sourcecode language="java" gutter="false"]
+package accountTransfer;
+
+public class AccountBalanceException extends Exception {
+
+	public AccountBalanceException(String string) {
+		super(string);
+	}
+
+}
+[/sourcecode]
+[sourcecode language="java" gutter="false"]
+package accountTransfer;
+
+public class OwnershipException extends Exception {
+
+	public OwnershipException(String string) {
+		super(string);
+	}
+
+}
+
+[/sourcecode]
+
+
+The following class is the mock implementation that we will use to replace the actual data manager.
+[sourcecode language="java" gutter="false"]
+package accountTransfer;
+
+import java.math.BigDecimal;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+
+public class MockAccountDataManagerImpl implements AccountDataManagerIF {
+	private static final Log logger = LogFactory.getLog(MockAccountDataManagerImpl.class);
+	
+	public Account getAccountInformation(String accountNumber) {
+		logger.info("this is the MockAccountDataManagerImpl doing the same thing as the actual datamanager.");
+		Account account = new Account();
+		
+		account.setAccountNumber(accountNumber);
+		
+		account.getOwner().setId("1");
+		account.getOwner().setName("John");
+		
+		account.setAccountBalance(new BigDecimal(1000));
+		// custom logic to get account information from database.
+		
+		return account;		
+
+	}
+
+	public void saveAccountInformation(Account account) {
+		logger.info("This is the MockAccount DataManager saving information to the database: " + account.getAccountNumber());
+		// custom logic to insert/update account in the database
+	}
+
+}
+[/sourcecode]
+
+
+The following is the application.xml file. put this in the top package.
+
+[sourcecode language="xml" gutter="false"]
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC
+	"-//SPRING//DTD BEAN//EN"
+	"http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+	<bean name="accountDataManager" class="accountTransfer.AccountDataManagerImpl"/>
+	<bean name="customerDataManager" class="accountTransfer.CustomerDataManagerImpl"/>
+
+	<bean name="accountTransferService" class="accountTransfer.AccountTransferServiceImpl">
+		<property name="accountDataManager" ref="accountDataManager"/>
+		<property name="customerDataManager" ref="customerDataManager"/>
+	</bean>
+	
+</beans>
+
+[/sourcecode]
+
+The log4j.properties. put this in the top package.
+[sourcecode language="shell" gutter="false"]
+#[[#]]# Set root logger level to DEBUG and its only appender to A1.
+log4j.rootLogger=DEBUG, A1
+
+#[[#]]# A1 is set to be a ConsoleAppender.
+
+#[[#]]# A1 uses PatternLayout.
+log4j.appender.A1=org.apache.log4j.ConsoleAppender
+log4j.appender.A1.layout=org.apache.log4j.PatternLayout
+log4j.appender.A1.layout.ConversionPattern=%d %-5p %c - %m%n
+[/sourcecode]
+
+To replace the implementation class for the AccountDataManager, replace the following line with:
+
+[sourcecode language="shell" gutter="false"]
+	<bean name="accountDataManager" class="accountTransfer.MockAccountDataManagerImpl"/>
+[/sourcecode]
+
+$blog_footer
