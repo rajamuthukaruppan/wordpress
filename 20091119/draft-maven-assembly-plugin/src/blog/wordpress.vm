@@ -1,0 +1,42 @@
+Maven Assemblies are instructions that are used to build package distributions. Typically zip and tar files. These packages contain source, documentation, scripts, dependent libraries. This page describes how to create Maven assemblies.
+<h3>mvn assembly:assembly</h3>
+This task is used to execute the assembly instruction.
+
+<h3>Maven Assembly Defaults</h3>
+
+Maven has a couple of defaults but the ones worth mentioning are:
+
+<strong>mvn assembly:assembly -DdescriptorId=bin</strong>
+Smallest possible binary distribution. Only includes the bin files and LICENSE, README and NOTICE files.
+
+<strong>mvn assembly:assembly -DdescriptorId=jar-with-dependencies</strong>
+Packages all the code and all the dependencies up as one big jar file. The advantage of this is that you dont need to include individual jar files in the classpath when you run the program.
+
+<h3>Customizing Assembly via XML</h3>
+
+[sourcecode language="html"]
+<project>
+  ...
+  <build>
+    ...
+    <plugins>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.0-beta-1</version>
+        <configuration>
+          <descriptors>
+            <descriptor>path/to/descriptor.xml</descriptor>
+          </descriptors>
+          <finalName>final_name</finalName>
+          <outputDirectory>output/directory</outputDirectory>
+          <workDirectory>target/assembly/work</workDirectory>
+        </configuration>
+      </plugin>
+     </plugins>
+     ...
+   </build>
+   ...
+</project>
+[/sourcecode]
+
+$blog_footer

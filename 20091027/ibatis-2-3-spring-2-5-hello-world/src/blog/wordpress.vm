@@ -1,0 +1,145 @@
+This page describes a very simple HelloWorld type application being created so that it can be used as a base for more complex projects.
+
+We start out with adding this to an <a href="http://numberformat.wordpress.com/2009/07/19/spring-mvc-hello-world/">already created pom.xml file</a>.
+
+[sourcecode language="html" gutter="false"]
+		<dependency>
+			<groupId>org.apache.ibatis</groupId>
+			<artifactId>ibatis-sqlmap</artifactId>
+			<version>2.3.4.726</version>
+		</dependency>
+[/sourcecode]
+
+If you have not done so already add the jdbc drivers for your database. In my case I am using mySQL.
+
+[sourcecode language="html" gutter="false"]
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.9</version>
+		</dependency>
+[/sourcecode]
+
+regenerate the eclipse project:
+mvn eclipse:clean eclipse:eclipse
+
+REturn back to eclipse and refresh the project.
+<h3>IBatis Main Configuration File</h3>
+We first start with defining the main configuration file for the Ibatis framework. If you are working with a web application this is typically your WEB-INF folder. If you were using ibatis as a standalone framework you would have needed to put additional configuration entries in this file. However since we are using this with the state of-the-art dependency injection functionality provided by the spring framework.
+
+MappersConfig.xml currently contains the locations of all the xml configuration files of all the individual sqlMap files.
+
+MapperConfig.xml
+
+[sourcecode language="html" gutter="false"]
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMapConfig
+        PUBLIC "-//ibatis.apache.org//DTD SQL Map Config 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-config-2.dtd">
+<sqlMapConfig>
+    <sqlMap resource="com/vermatech/electronics/repository/ItemDataManager.xml"/>
+</sqlMapConfig>
+[/sourcecode]
+<h3>SQL Maps configuration files</h3>
+Each SQL MAp resource specifies a set of sql statements that may be run against an entity. Inserts, updates, deletes etc are specified within XML syntax. In addition to SQL Statements you may specify additional attributes like how long you want the statements to cache. Aliases may be defined for class names. REsults map for returned results and parameter map for parameters.
+<h3>Parameters Maps and Result Maps</h3>
+Here is an example that uses parameters map and results maps explicitly
+
+[sourcecode language="html" gutter="false"]
+<typeAlias alias=”product” type=”com.ibatis.example.Product” />
+<parameterMap id=”productParam” class=”product”>
+         <parameter property=”id”/>
+</parameterMap>
+<resultMap id=”productResult” class=”product”>
+         <result property=”id” column=”PRD_ID”/>
+         <result property=”description” column=”PRD_DESCRIPTION”/>
+</resultMap>
+<select id=”getProduct” parameterMap=”productParam”
+         resultMap=”productResult” cacheModel=”product-cache”>
+    select * from PRODUCT where PRD_ID = ?
+</select>
+[/sourcecode]
+
+If you want to keep the xml configuration simple you can have Ibatis make educated guesses on how to map a Bean to Parameter and from Results back to beans. There is a slight performance consequence in that this approach requires accessing the ResultSetMetaData. This limitation can be overcome by using an explicit resultMap. Result maps are described in more detail later in this document. This uses the auto mapping feature of the framework which could be slower than if you specified the mappings yourself.
+
+Here is an example that allows the sqlMap to make educated guesses about the mappings
+
+[sourcecode language="html" gutter="false"]
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap
+  PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+  "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace=”Product”>
+   <select id=”getProduct” parameterClass=” com.ibatis.example.Product”
+                              resultClass=”com.ibatis.example.Product”>
+         select
+            PRD_ID as id,
+            PRD_DESCRIPTION as description
+         from PRODUCT
+         where PRD_ID = #[[#]]#id#[[#]]#
+   </select>
+</sqlMap>
+[/sourcecode]
+
+Since the developer is specifying SQL witin XML you need the ability to escape characters that would appear in xml. An example is the &lt; and &gt; signs.
+
+[sourcecode language="html" gutter="false"]
+<select id="getPersonsByAge" parameterClass=”int” resultClass="examples.domain.Person">
+         SELECT *
+         FROM PERSON
+         WHERE AGE <![CDATA[ > ]]> #[[#]]#value#[[#]]#
+</select>
+[/sourcecode]
+<h3>SQL Fragments</h3>
+In order to reduce SQL Code duplication you can use things like Fragments but keep in mind that it does increase the amount of testing effort if something in the common fragment changes.
+
+Here is an example:
+
+[sourcecode language="html" gutter="false"]
+<sql id="selectItem_fragment">
+         FROM items
+         WHERE parentid = 6
+</sql>
+<select id="selectItemCount" resultClass="int">
+         SELECT COUNT(*) AS total
+         <include refid="selectItem_fragment"/>
+</select>
+<select id="selectItems" resultClass="Item">
+         SELECT id, name
+         <include refid="selectItem_fragment"/>
+</select>
+[/sourcecode]
+<h3>Auto generated keys</h3>
+Supported by using the following XML code
+
+[sourcecode language="html" gutter="false"]
+<!—Oracle SEQUENCE Example -->
+<insert id="insertProduct-ORACLE" parameterClass="com.domain.Product">
+    <selectKey resultClass="int" >
+         SELECT STOCKIDSEQUENCE.NEXTVAL AS ID FROM DUAL
+    </selectKey>
+    insert into PRODUCT (PRD_ID,PRD_DESCRIPTION)
+    values (#[[#]]#id#[[#]]#,#[[#]]#description#[[#]]#)
+</insert>
+<!— Microsoft SQL Server IDENTITY Column Example -->
+<insert id="insertProduct-MS-SQL" parameterClass="com.domain.Product">
+    insert into PRODUCT (PRD_DESCRIPTION)
+    values (#[[#]]#description#[[#]]#)
+    <selectKey resultClass="int" >
+         SELECT @@IDENTITY AS ID
+    </selectKey>
+</insert>
+[/sourcecode]
+<h3>Calling Stored Procedures</h3>
+[sourcecode language="html" gutter="false"]
+<parameterMap id="swapParameters" class="map" >
+  <parameter property="email1" jdbcType="VARCHAR" javaType="java.lang.String" mode="INOUT"/>
+  <parameter property="email2" jdbcType="VARCHAR" javaType="java.lang.String" mode="INOUT"/>
+</parameterMap>
+<procedure id="swapEmailAddresses" parameterMap="swapParameters" >
+  {call swap_email_address (?, ?)}
+</procedure>
+[/sourcecode]
+
+The next steps are to start coding your CRUD operations on your objects.<a href="http://numberformat.wordpress.com/2011/03/28/using-datamanagers-to-perform-crud-using-ibatis/"> I talk about this in more detail at the following page </a>
+$blog_footer

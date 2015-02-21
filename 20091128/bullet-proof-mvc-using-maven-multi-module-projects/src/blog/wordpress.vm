@@ -1,0 +1,509 @@
+ge { margin: 0.79in } 		P { margin-bottom: 0.08in } -->This page will describe the process of setting up a multi-module project where each component of the MVC architecture is separated into its own sub-module. Separating each component of the MVC into modules results in protecting the code from leakage of Concerns.
+
+<!-- 		@page { margin: 0.79in } 		P { margin-bottom: 0.08in } 		H3 { margin-bottom: 0.08in } 		H3.western { font-family: "Arial", sans-serif } -->
+<h3>Background</h3>
+<!-- 		@page { margin: 0.79in } 		P { margin-bottom: 0.08in } 		H3 { margin-bottom: 0.08in } 		H3.western { font-family: "Arial", sans-serif } -->The model view controller architecture has been discussed for years. It was first introduced back in 1979 by a developer working on Smalltalk language. http://en.wikipedia.org/wiki/Model–view–controller
+
+But until recently implementing it religiously has been a challenge.
+<h3>Requirements</h3>
+<ul>
+	<li>Basic understanding of the Spring Framework</li>
+	<li>Basic understanding of MVC</li>
+	<li>Basic understanding of Maven2</li>
+</ul>
+<!-- 		@page { margin: 0.79in } 		P { margin-bottom: 0.08in } 		H3 { margin-bottom: 0.08in } 		H3.western { font-family: "Arial", sans-serif } -->
+<h3>Framework's ability to enforce MVC</h3>
+Although popular MVC framework claims to help developers separate concerns in software applications, they really don't live up to the promise.
+
+Developers end up implementing business logic within controllers and JSP's. If you have developed professionally you know what I am talking about. We all share horror stories of JSP's that look like they are controlling flow, and Controllers that look like they are making business decisions and executing JDBC queries directly and passing references to HttpServletRequest and HttpServlet into model objects.
+
+What we got was implementations that were “sort of” adhering to the model view controller pattern.
+
+Its not the framework's fault directly but the simple fact of allowing a developer to do bad things while working with it.
+
+<strong>Controller leaking into Model </strong>
+
+If there were a way to prevent the Model from even recognizing HttpServletRequest class would be adequate to stop leaking controller concerns into the model.
+
+<strong>Controller and Model leaking into View</strong>
+
+Many times Beans would leak into JSP's and cause JSP's to look like controllers. Scripts with if and while loops are a prime example of this. To turn scripting off in JSP's you may implement the following.
+
+<!-- 		@page { margin: 0.79in } 		P { margin-bottom: 0.08in } 		H3 { margin-bottom: 0.08in } 		H3.western { font-family: "Arial", sans-serif } -->
+<h3>Using EL instead of scriptlets</h3>
+The EL is intended to replace the use of Java scriptlets in developing JSP based web applications. It’s possible to disable the evaluation of scriptlets through configuration parameters. This allows a developer to make sure no one uses scriptlets. This allows best practices to be enforced at an application level.
+
+[sourcecode language="html"]
+<jsp-config>
+    <jsp-property-group>
+        <url-pattern>*.jsp</url-pattern>
+        <scripting-invalid>true</scripting-invalid>
+    </jsp-property-group>
+</jsp-config>
+[/sourcecode]
+
+If someone were to introduce scripting elements they would get an error like this.
+<blockquote>/results.jsp(13,5) Scripting elements ( &lt;%!, &lt;jsp:declaration, &lt;%=, &lt;jsp:expression, &lt;%, &lt;jsp:scriptlet ) are disallowed here.</blockquote>
+<h3>Using Maven to enforce MVC</h3>
+You will see shortly that Maven allowing with the techniques above allow to help enforce MVC. Maven allows system developers break up parts of MVC into their own sub modules. Since each module have their own dependencies you can customize what each module sees.
+
+For example you can stop controller leaking its concerns into the model by not specifying the controller as a dependency in the Model project. To prevent the controller and Model from leaking their concerns to the view the view module does not have a Java source directory! (that'll fix it). To prevent logic from appearing in JSP's you may turn off scriptlets in JSP in favor of using EL.
+
+All the components of the Model view controller come together when the application is built by Maven.
+
+All components go into what is called the Maven Reactor. The dependencies are resolved and the final artifacts are written to the target folder. Artifacts like EAR, WAR, Jar, Tar, Zip files are written ready to be deployed.
+<h3>The Demonstration</h3>
+The demonstration will consist of an application that retrieves a list of products and displays them on the homepage. Although an application like this could have been implemented with just a few lines code, the point here is to demonstrate Maven's ability separate MVC concerns into discrete modules for medium to large applications.
+
+<!-- 		@page { margin: 0.79in } 		P { margin-bottom: 0.08in } 		H3 { margin-bottom: 0.08in } 		H3.western { font-family: "Arial", sans-serif } --><strong>Key points to demonstrate</strong>
+<ul>
+	<li>Exhibit that the Model is unaware of the controller and view.</li>
+	<li>Ability for the Controller to reference the Model</li>
+	<li>Ability for the view to reference the Model and Controller 	but only for the purpose of gluing it all together to create a 	single WAR file.</li>
+	<li>There will be no Java source directory in the view and 	scriptlets will be disabled in JSP's.</li>
+</ul>
+<h3>Setting up the Parent Module</h3>
+The parent project consists of the following sub-modules.
+<ol>
+	<li>test-model – Model layer contains a bean that retrieves 	data from the persistence layer.</li>
+	<li>test-view – contains JSP's and HTML files</li>
+	<li>test-controller – contains servlets that will call the 	model layer.</li>
+</ol>
+mvn archetype:generate -DarchetypeArtifactId=maven-archetype-quickstart
+
+groupId: testPackage
+
+artifactId: test-parent
+
+cd test-parent
+
+edit the pom.xml file and change the package element to say "pom".
+
+﻿&lt;packaging&gt;pom&lt;/packaging&gt;
+
+<!-- 		@page { margin: 0.79in } 		P { margin-bottom: 0.08in } 		H1 { margin-bottom: 0.08in } 		H1.western { font-family: "Arial", sans-serif; font-size: 16pt } 		H1.cjk { font-family: "DejaVu Sans"; font-size: 16pt } 		H1.ctl { font-family: "DejaVu Sans"; font-size: 16pt } 		H3 { margin-bottom: 0.08in } 		H3.western { font-family: "Arial", sans-serif } -->
+<h3>Setting up the Model</h3>
+The model layer strictly contains the business logic. Model objects will also call persistence classes to store data. The model should be shielded from even the control logic because most control logic is implementation specific. For this reason the controller layer is not visible for this module.
+
+To implement the model layer we will be using the Spring framework. We will write a simple bean that will call a Data Manager in the persistence layer that returns a list of Products.
+
+In the test-parent directory
+
+mvn archetype:generate -DarchetypeArtifactId=maven-archetype-quickstart
+﻿groupId: testpackage
+﻿﻿artifactId: test-model
+cd test-model
+Create src/main/resources folder for the applicationContext.xml file.
+
+applicationContext.xml
+
+[sourcecode language="html"]
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC
+	"-//SPRING//DTD BEAN//EN"
+	"http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+	<bean id="testModel" class="testpackage.TestModelImpl">
+		<property name="testDataManager" ref="testDataManager"/>
+	</bean>
+
+	<bean name="testDataManager" class="testpackage.TestDataManagerImpl"/>
+</beans>
+[/sourcecode]
+
+Product.java
+
+[sourcecode language="java"]
+package testpackage;
+
+public class Product {
+	private Integer id;
+	private String name;
+
+	public Product(int id, String name) {
+		this.id = id;
+		this.name = name;
+	}
+
+	public Integer getId() {
+		return id;
+	}
+	public void setId(Integer id) {
+		this.id = id;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+}
+[/sourcecode]
+
+TestDataManager.java
+
+[sourcecode language="java"]
+package testpackage;
+import java.util.List;
+public interface TestDataManager {
+	public abstract List<Product> fetchProductList();
+}
+[/sourcecode]
+
+TestDataManagerImpl.java
+
+[sourcecode language="java"]
+package testpackage;
+import java.util.ArrayList;
+import java.util.List;
+public class TestDataManagerImpl implements TestDataManager {
+	public List<Product> fetchProductList() {
+		List<Product> productList = new ArrayList<Product>();
+		productList.add(new Product(1, "test 1"));
+		productList.add(new Product(2, "test 2"));
+		productList.add(new Product(3, "test 3"));
+		return productList;
+	}
+}
+[/sourcecode]
+
+TestModel.java
+
+[sourcecode language="java"]
+package testpackage;
+import java.util.List;
+public interface TestModel {
+	public abstract List<Product> fetchProducts(String userId);
+}
+[/sourcecode]
+
+TestModelImpl.java
+
+[sourcecode language="java"]
+package testpackage;
+
+import java.util.List;
+
+public class TestModelImpl implements TestModel {
+	private TestDataManager testDataManager;
+
+	public TestDataManager getTestDataManager() {
+		return testDataManager;
+	}
+
+	public void setTestDataManager(TestDataManager testDataManager) {
+		this.testDataManager = testDataManager;
+	}
+
+	/* (non-Javadoc)
+	 * @see testpackage.TestModel#[[#]]#fetchProducts(java.lang.String)
+	 */
+	public List<Product> fetchProducts(String userId) {
+		// identify the access level based on user id
+		// ...
+
+		// call the dataManger to get the filtered list of
+		// products.
+		List<Product> productList = getTestDataManager().fetchProductList();
+
+		return productList;
+	}
+}
+[/sourcecode]
+<h3>Setting up the View</h3>
+This module will be made up of JSP, HTML, XML. It will be void of all control logic. Control logic belongs in the controller module which we will define next. Since this is strictly view only module there is no place to put Java code.
+
+In the test-parent folder type:
+mvn archetype:generate -DarchetypeArtifactId=maven-archetype-webapp
+groupId: testPackage
+artifactId: test-view
+cd test-view
+
+open pom.xml and change packaging to war.
+It should look like this:
+
+[sourcecode language="xml"]
+<?xml version="1.0"?>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>test-parent</artifactId>
+		<groupId>testpackage</groupId>
+		<version>1.0-SNAPSHOT</version>
+	</parent>
+	<artifactId>test-view</artifactId>
+	<packaging>war</packaging>
+	<name>test-view Maven Webapp</name>
+	<url>http://maven.apache.org</url>
+	<build>
+		<finalName>test-view</finalName>
+		<plugins>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.0.2</version>
+				<configuration>
+					<source>1.5</source>
+					<target>1.5</target>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<configuration>
+					<downloadSources>true</downloadSources>
+					<downloadJavadocs>true</downloadJavadocs>
+					<wtpapplicationxml>true</wtpapplicationxml>
+					<wtpversion>1.5</wtpversion>
+
+					<classpathContainers>
+						<classpathContainer>org.eclipse.jst.server.core.container/org.eclipse.jst.server.tomcat.runtimeTarget/Apache Tomcat v6.0</classpathContainer>
+						<classpathContainer>org.eclipse.jst.j2ee.internal.web.container</classpathContainer>
+						<classpathContainer>org.eclipse.jst.j2ee.internal.module.container</classpathContainer>
+					</classpathContainers>
+					<additionalProjectFacets>
+						<jst.web>2.5</jst.web>
+					</additionalProjectFacets>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+			</plugin>
+
+			<plugin>
+				<groupId>org.mortbay.jetty</groupId>
+				<artifactId>jetty-maven-plugin</artifactId>
+				<version>7.0.0.v20091005</version>
+				<configuration>
+					<scanIntervalSeconds>1</scanIntervalSeconds>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>3.8.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+			<version>2.5.6</version>
+		</dependency>
+		<dependency>
+			<groupId>testpackage</groupId>
+			<artifactId>test-controller</artifactId>
+			<version>${version}</version>
+		</dependency>
+		<dependency>
+			<groupId>testpackage</groupId>
+			<artifactId>test-model</artifactId>
+			<version>${version}</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>jstl</artifactId>
+			<version>1.1.2</version>
+		</dependency>
+		<dependency>
+			<groupId>taglibs</groupId>
+			<artifactId>standard</artifactId>
+			<version>1.1.2</version>
+		</dependency>
+	</dependencies>
+</project>
+[/sourcecode]
+
+The following is what is in web.xml
+
+[sourcecode language="xml"]
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee
+    http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd" version="2.4">
+
+  <display-name>Archetype Created Web Application</display-name>
+
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>classpath:testpackage/applicationContext.xml</param-value>
+	</context-param>
+
+<!-- starts the spring framework for the model layer -->
+  	<listener>
+	<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+
+	<servlet>
+		<servlet-name>testServlet</servlet-name>
+		<servlet-class>testpackage.TestServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>testServlet</servlet-name>
+		<url-pattern>*.do</url-pattern>
+	</servlet-mapping>
+
+	<welcome-file-list>
+		<welcome-file>index.jsp</welcome-file>
+	</welcome-file-list>
+	<jsp-config>
+	    <jsp-property-group>
+	        <url-pattern>*.jsp</url-pattern>
+	        <scripting-invalid>true</scripting-invalid>
+	    </jsp-property-group>
+	</jsp-config>
+</web-app>
+[/sourcecode]
+
+The following is the JSP that displays the results.
+
+[sourcecode language="html"]
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+ <head>
+  <title>XHTML 1.0 Strict Template</title>
+  <meta http-equiv="Content-type" content="text/html; charset=iso-8859-1" />
+  <meta http-equiv="Content-Language" content="en-us" />
+ </head>
+
+ <body>
+	<table border="1">
+		<%--  <%="testing 123" %> Uncomment this to verify that scripts are disallowed --%>
+		<h3>Products</h3>
+		<c:forEach items="${productList}" var="product" varStatus="status">
+			<c:if test="${status.first}"><tr><th>Id</th><th>Name</th></tr></c:if>
+			<tr><td><c:out value="${product.id}"/></td><td><c:out value="${product.name}"/></td></tr>
+		</c:forEach>
+	</table>
+</body>
+</html>
+[/sourcecode]
+<h3>Setting up the Controller</h3>
+To keep things simple will define an application using standard servlets. Persistence layer won't be visible from here
+
+mvn archetype:generate -DarchetypeArtifactId=maven-archetype-quickstart
+groupId: testPackage
+artifactId: test-controller
+cd test-controller
+
+web.xml
+
+[sourcecode language="xml"]
+<?xml version="1.0"?>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>test-parent</artifactId>
+		<groupId>testpackage</groupId>
+		<version>1.0-SNAPSHOT</version>
+	</parent>
+	<artifactId>test-controller</artifactId>
+	<name>test-controller</name>
+	<url>http://maven.apache.org</url>
+	<dependencies>
+		<dependency>
+			<groupId>testpackage</groupId>
+			<artifactId>test-model</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.geronimo.specs</groupId>
+			<artifactId>geronimo-servlet_2.5_spec</artifactId>
+			<version>1.2</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>3.8.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring</artifactId>
+			<version>2.5.6</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+			<version>2.5.6</version>
+		</dependency>
+	</dependencies>
+</project>
+[/sourcecode]
+
+The following is the servlet.
+
+[sourcecode language="java"]
+package testpackage;
+
+import java.io.IOException;
+import java.util.List;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
+
+public class TestServlet extends HttpServlet {
+	private TestModel testModel;
+
+	@Override
+	public void init(ServletConfig config) throws ServletException {
+		ApplicationContext context = WebApplicationContextUtils.getWebApplicationContext(config.getServletContext());
+		testModel = (TestModel) context.getBean("testModel");
+		super.init(config);
+	}
+	// Direct access to the data persistence layer is prevented
+	// class is not visible
+	// private TestDataManagerImpl testDataManager;
+
+	@Override
+	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		System.out.println("servlet was called.");
+		List<Product> productList = testModel.fetchProducts("test123");
+		req.setAttribute("productList", productList);
+		req.getRequestDispatcher("/results.jsp").forward(req, resp);
+	}
+}
+[/sourcecode]
+<h3>Running the project</h3>
+If you are using jetty to run the project then place the following into the test-view modules pom.xml
+
+At this point you have 2 options to run the project. You can run it it Jetty. This is the easiest way but you need to do a mvn install on the parent each time you make a change to the code.
+
+mvn install
+
+cd test-view
+
+mvn jetty:run
+
+Or you can read the following page and setup the project to run in <a href="http://wp.me/pvUBW-km" target="_blank">Tomcat 6 using Eclipse WTP</a>.
+
+Navigate to http://localhost:8080/ if using jetty and /test-view/a.do if you are using tomcat 6 in WTP.
+<h3>Conclusion</h3>
+The project we just ran demonstrates the ability to separate the various components of the MVC into modules. It was also demonstrated that these modules are moderately protected by leakage of concerns.
+<h3>Taking it a step further</h3>
+The Model object above contains the business logic and its all clumped together in one module (jar). There is nothing really stopping anyone from creating multiple modules each representing a different concept. For example if you are creating a portal project for a sky diving company. You can write one module to handle the weather forecasting section, another one to handle scheduling and the other to handle life insurance calculations. In this scenario each model component is protected from one model leaking its concerns to the other.
+
+$blog_footer

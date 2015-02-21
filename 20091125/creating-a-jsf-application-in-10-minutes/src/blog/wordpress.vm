@@ -1,0 +1,253 @@
+This page describes the process of setting up a JSF project on Eclipse using Maven. We will create a sample project and verify that each of the wizards and JSF views provided by eclipse are in working order. This page also contains a sample application you may copy and paste right into your project. You may run this with the built in jetty plug-in or since this is a Eclipse WTP project you may also run it with Apache Tomcat or on the IBM Websphere Test Environment.
+<h3>Requirements</h3>
+<ul>
+	<li>Maven 2</li>
+	<li>Java 5</li>
+	<li>Servlet Spec 2.5</li>
+	<li>Covers JSF 1.2</li>
+</ul>
+<h3>Generate the web application</h3>
+First we start with a maven archetype
+
+mvn archetype:generate -DarchetypeArtifactId=maven-archetype-webapp
+
+For the group id enter: test
+
+For the artifactId enter: jsfTestWeb
+
+cd to the project’s folder
+Next we create the src/main/java folder since this is not done for us using the archetype.
+
+on unix you type: mkdir /src/main/java
+
+modify the pom.xml file. It should look like this...
+
+[sourcecode language="xml" light="true"]
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>test</groupId>
+	<artifactId>jsfTestWeb</artifactId>
+	<packaging>war</packaging>
+	<version>1.0-SNAPSHOT</version>
+	<name>jsfTestWeb Maven Webapp</name>
+	<url>http://maven.apache.org</url>
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>3.8.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.myfaces.core</groupId>
+			<artifactId>myfaces-api</artifactId>
+			<version>1.2.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.myfaces.tomahawk</groupId>
+			<artifactId>tomahawk</artifactId>
+			<version>1.1.9</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.myfaces.core</groupId>
+			<artifactId>myfaces-impl</artifactId>
+			<version>1.2.2</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>jstl</artifactId>
+			<version>1.1.2</version>
+		</dependency>
+		<dependency>
+			<groupId>taglibs</groupId>
+			<artifactId>standard</artifactId>
+			<version>1.1.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.geronimo.specs</groupId>
+			<artifactId>geronimo-servlet_2.5_spec</artifactId>
+			<version>1.2</version>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
+	<build>
+		<finalName>jsfTestWeb</finalName>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.0.2</version>
+				<configuration>
+					<source>1.5</source>
+					<target>1.5</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.mortbay.jetty</groupId>
+				<artifactId>jetty-maven-plugin</artifactId>
+				<version>7.0.0.v20091005</version>
+				<configuration>
+					<scanIntervalSeconds>2</scanIntervalSeconds>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<configuration>
+					<wtpapplicationxml>true</wtpapplicationxml>
+					<wtpversion>1.5</wtpversion>
+					<downloadSources>true</downloadSources>
+					<downloadJavadocs>true</downloadJavadocs>
+					<classpathContainers>
+						<classpathContainer>org.eclipse.jst.j2ee.internal.web.container</classpathContainer>
+						<classpathContainer>org.eclipse.jst.j2ee.internal.module.container</classpathContainer>
+					</classpathContainers>
+					<additionalProjectFacets>
+						<jst.web>2.5</jst.web>
+						<jst.jsf>1.2</jst.jsf>
+					</additionalProjectFacets>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
+
+[/sourcecode]
+
+<code>mvn eclipse:clean eclipse:eclipse</code>
+
+Import the Existing project (generated project) into eclipse.
+
+Modify the src/main/webapp/WEB-INF/web.xml
+
+[sourcecode language="xml" light="true"]
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	id="WebApp_ID" version="2.5">
+  <display-name>Archetype Created Web Application</display-name>
+
+  <servlet>
+  	<servlet-name>Faces Servlet</servlet-name>
+  	<servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
+  	<load-on-startup>1</load-on-startup>
+  </servlet>
+
+  <servlet-mapping>
+  	<servlet-name>Faces Servlet</servlet-name>
+  	<url-pattern>*.jsf</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>Faces Servlet</servlet-name>
+  	<url-pattern>/faces/*</url-pattern>
+  </servlet-mapping>
+
+  <welcome-file-list>
+  	<welcome-file>index.jsp</welcome-file>
+  </welcome-file-list>
+
+</web-app>
+[/sourcecode]
+
+Create a src/main/webapp/WEB-INF/faces-config.xml
+
+[sourcecode language="xml" light="true"]
+<?xml version='1.0' encoding='UTF-8'?>
+<faces-config xmlns="http://java.sun.com/xml/ns/javaee"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_1_2.xsd"
+              version="1.2">
+
+<managed-bean>
+	<managed-bean-name>message</managed-bean-name>
+	<managed-bean-class>java.lang.String</managed-bean-class>
+	<managed-bean-scope>session</managed-bean-scope>
+</managed-bean>
+<managed-bean>
+	<managed-bean-name>messageModel</managed-bean-name>
+	<managed-bean-class>test.MessageModel</managed-bean-class>
+	<managed-bean-scope>session</managed-bean-scope>
+</managed-bean>
+</faces-config>
+[/sourcecode]
+
+Create / Modify
+src/main/webapp/index.jsp
+
+[sourcecode language="html" light="true"]
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<html>
+<body>
+<h2>JSF Test Application</h2>
+<p><a href="<c:url value='helloWorld.jsf'/>">JSF Test Page</a></p>
+</body>
+</html>
+[/sourcecode]
+
+Create a jsp src/main/webapp/helloWorld.jsp
+
+[sourcecode language="html" light="true"]
+<!DOCTYPE html
+PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="f" uri="http://java.sun.com/jsf/core" %>
+<%@ taglib prefix="h" uri="http://java.sun.com/jsf/html" %>
+
+<f:view>
+    <html>
+    <head>
+        <title>Hello World JSF Example</title>
+    </head>
+    <body>
+    <h:form>
+		<p>This is a simple hello world page using Faces.</p>
+		<p>Enter your message here: <br/>
+		<h:inputText valueChangeListener="#[[#]]#{messageModel.printMessage}" value="#[[#]]#{message}" size="35"/></p>
+		<h:commandButton value="Submit" action="submit"/>
+    </h:form>
+    </body>
+    </html>
+</f:view>
+[/sourcecode]
+<h3>Create a managed Bean</h3>
+src/main/java/test/MessageModel.java
+
+Create the test directory below if it does not exist.
+src/main/java/test/MessageModel.java
+
+[sourcecode language="java" light="true"]
+package test;
+
+import javax.faces.event.ValueChangeEvent;
+
+public class MessageModel {
+	public void printMessage(ValueChangeEvent e) {
+		System.out.println("old value was: " + e.getOldValue());
+		System.out.println("new value is: " + e.getNewValue());
+	}
+}
+[/sourcecode]
+<h3>Run the JSF application</h3>
+Save all files and run the application in jetty.
+
+mvn jetty:run
+
+The application should come up when you point your browser to http://localhost:8080
+
+Type in some text and you should see some output on the console window.
+
+Right click on the page and click view source. You will notice JSF generated code.
+<h3>Faces Configuration Editor</h3>
+At this time you can close the faces-config.xml and open it again. This time around it should open using the Faces Configuration Editor. Take some time to get acquainted with the features of this editor.
+<h3>JSF JSP Editor</h3>
+Enable the Palette View by going to Windows -&gt; show View -&gt; Search for palette.
+
+Create a new JSP and you should be able to drag and drop JSF components from the palette onto the page.
+
+At this time you have an application that is ready for development. If you choose to proceed you will find a sample application you can integrate into the project you created above.
+<h3>That's all for Now!</h3>
+
+$blog_footer

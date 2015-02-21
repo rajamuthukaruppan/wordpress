@@ -1,0 +1,185 @@
+This page will describe the process to create and upload a new archetype to the repository.
+
+We will be creating an archetype of a basic spring MVC application that is pre-configured to make a test connection to a MySQL database. We will run this application using the built in servlet engine in Maven called jetty.
+
+Before starting please review the following article to learn how to publish artifacts to remote repositories.
+
+Requirements
+<ul>
+	<li><a href="http://maven.apache.org/download.html" target="_blank">Maven 2
+</a></li>
+	<li><a href="http://wp.me/pvUBW-P" target="_blank">Read Article on Maven and Nexus</a></li>
+	<li>Nexus repository manager</li>
+</ul>
+<h3>Create a Archetype Template</h3>
+We start by creating an archetype from well.... an archetype...
+
+Execute the following command
+
+mvn archetype:create -DgroupId=test -DartifactId=test-archetype -DarchetypeArtifactId=maven-archetype-archetype
+
+cd /test-archetype
+<h3>Code Your Application</h3>
+In this section we will take some time to code the project that we will install into this archetype. Since creating a Spring MVC application is beyond the scope of this page please navigate to the following page to see how this application was coded. We will move this application to this archetype so that it can be used as a starting point for new projects.
+
+<a href="http://wp.me/pvUBW-hV" target="_blank">MySQL Test Connection using Spring MVC</a>
+<h3>Import files into the new archetype</h3>
+At this time you can copy the files from the project you created using the above link into the <tt>src/main/resources/archetype-resources/</tt>
+
+Before we can proceed we need to make some small changes to the project we just created and imported into this archetype.
+
+These changes are necessary because when developers create project based on archetypes they are asked a few questions.
+<ul>
+	<li>group id</li>
+	<li>artifact id</li>
+	<li>version</li>
+</ul>
+The group id is important typically its (com.yourcompanyname). Since developers can provide anything in this field you need to modify your template code to take this parameter and place your code into the right java packages.
+<h3>Modify the project's pom.xml</h3>
+Before we can proceed we need to modify the template project's pom.xml file. Replace the groupId artifactId and version tag's with the following
+
+[sourcecode gutter="false" language="html"]
+  <groupId>${groupId}</groupId>
+  <artifactId>${artifactId}</artifactId>
+  <version>${version}</version>
+[/sourcecode]
+
+The above step is necessary since the developers that are using your archetype to create their own project can use any group artifact and version. When the project generates maven needs to create a pom.xml file for the project with the values that were specified by the developer.
+<h3>Modify the archetype descriptor</h3>
+The archetype descriptor contains a list of files that are part of the archetype we are creating. It is located in the following directory.
+
+test-archetype/src/main/resources/META-INF/maven/archetype.xml
+
+[sourcecode gutter="false" language="html"]
+<archetype>
+  <id>test-archetype</id>
+  <sources>
+    <source>src/main/java/test/DBParam.java</source>
+    <source>src/main/java/test/HelloWorldController.java</source>
+    <source>src/main/java/test/TestDBConnectionController.java</source>
+  </sources>
+  <resources>
+    <resource>src/main/webapp/WEB-INF/jsp/dbParameters.jsp</resource>
+    <resource>src/main/webapp/WEB-INF/jsp/helloWorld.jsp</resource>
+    <resource>src/main/webapp/WEB-INF/jsp/success.jsp</resource>
+    <resource>src/main/webapp/WEB-INF/spring-servlet.xml</resource>
+    <resource>src/main/webapp/WEB-INF/web.xml</resource>
+    <resource>src/main/webapp/index.jsp</resource>
+  </resources>
+</archetype>
+[/sourcecode]
+<h3>Modify the source files</h3>
+During the creation of a project maven asks the user for the groupId. Maven uses this to place the source files into packages that represent the user's groupId. For this reason we need to modify each of the source packages and change them to look like this...
+
+[sourcecode gutter="false" language="java"]
+package ${package}.test;
+[/sourcecode]
+
+So go ahead and modify the three java source files and spring-servlet.xml. replace the package statement with what you see above.
+<ul>
+	<li> src/main/java/test/DBParam.java</li>
+	<li> src/main/java/test/HelloWorldController.java</li>
+	<li> src/main/java/test/TestDBConnectionController.java</li>
+	<li> src/main/webapp/WEB-INF/spring-servlet.xml</li>
+</ul>
+<h3>Relocate Source If Necessary</h3>
+Also you may need to relocate the .java files so they represent the package statement. This means if you replaced the following with a ${package} statement then everything under that must be moved to the highlevel folder.
+
+com.mycompany.mygroup.program -&gt; ${package}.program
+
+In the above example the program package and everything under it needs to be moved to the top level (/src/main/java) folder.
+
+The xml file needs to be modified because we need to tell spring to scan a different package for controller beans.
+
+[sourcecode gutter="false" language="html"]
+	<context:component-scan base-package="${package}.test"/>[/sourcecode]
+<h3>Installing the archetype into Nexus</h3>
+Make sure the nexus repository is up and running.
+
+Before we publish the archetype we need to define the location of the Nexus repository.
+
+We do this in the archetype's pom.xml file
+
+After adding this section your pom.xml file should look like this.
+
+[sourcecode gutter="false" language="html"]
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>test</groupId>
+  <artifactId>test-archetype</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <name>Archetype - test-archetype</name>
+  <url>http://maven.apache.org</url>
+
+<distributionManagement>
+	<repository>
+		<id>releases</id>
+		<url>http://localhost:8081/nexus/content/repositories/releases</url>
+	</repository>
+
+	<snapshotRepository>
+		<id>snapshots</id>
+		<name>Internal Snapshots</name>
+		<url>http://localhost:8081/nexus/content/repositories/snapshots</url>
+	</snapshotRepository>
+</distributionManagement>
+</project>
+[/sourcecode]
+
+[sourcecode gutter="false" language="shell"]
+mvn deploy
+[/sourcecode]
+
+Open up the Nexus repository and verify that the archetype has been added. If it has not please review the instructions above before continuing.
+<h3>Running the Archetype</h3>
+In this section we will generate a project from an archetype we just created above.
+
+open up the command line and navigate to a clean working directory.
+
+[sourcecode gutter="false" language="shell"]
+mvn archetype:create \
+  -DarchetypeGroupId=test \
+  -DarchetypeArtifactId=test-archetype \
+  -DarchetypeVersion=1.0-SNAPSHOT \
+  -DgroupId=yourgroup \
+  -DartifactId=your-project
+[/sourcecode]</pre>
+
+You can also use the new format to generate a project form an archetype:
+[sourcecode gutter="false" language="shell"]
+mvn archetype:generate \
+  -DarchetypeGroupId=test \
+  -DarchetypeArtifactId=test-archetype \
+  -DarchetypeVersion=1.0-SNAPSHOT
+[/sourcecode]
+
+
+<h3>Running your newly generated project</h3>
+cd your-project
+mvn jetty:run
+
+At this point you can navigate to all the urls listed below:
+http://localhost:8080/
+http://localhost:8080/app/helloWorld
+http://localhost:8080/app/dbParameters
+<h3>Publishing your Archetype to a Website</h3>
+Good News! You don't need a Nexus server. Maven artifacts can be published to plain old web sites.
+
+To test this I have uploaded the test-archetype to the following location and used the following command to generate a project based on the archetype.
+
+[sourcecode gutter="false" language="shell"]
+mvn archetype:generate \
+  -DarchetypeGroupId=test \
+  -DarchetypeArtifactId=test-archetype \
+  -DarchetypeVersion=1.0-SNAPSHOT \
+  -DarchetypeRepository=http://your static site hostname/directory of your repository
+[/sourcecode]
+
+Maven makes a Http connection to the above archetypeRepository and gets all the data necessary to create the project.
+<h3>Summary</h3>
+As you can see creating an archetype is not much difficult. You can use this technique to create templates of small projects you find yourself creating often. Archetypes can be posted not only to Nexus repositories but static html sites as well.
+
+
+
+$blog_footer

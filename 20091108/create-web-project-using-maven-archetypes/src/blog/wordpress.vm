@@ -1,0 +1,154 @@
+This page describes the process of creating a standard web project using maven Archetypes. Afterwards we will run the web application in the built-in servlet container called jetty and an external one with Tomcat 6.
+
+Requirements
+<ol>
+	<li>Eclipse J2EE IDE</li>
+	<li><a href="http://wp.me/pvUBW-bz">Tomcat installed and integrated with eclipse WTP.</a></li>
+	<li><a href="http://wp.me/pvUBW-ev">Maven 2</a></li>
+	<li>Ability to command line on your machine</li>
+</ol>
+We start by creating the project
+
+mvn archetype:generate -DarchetypeArtifactId=maven-archetype-webapp
+
+By default the archetype does not create a javasource folder so go ahead and create the following directory under the project.
+
+src/main/java
+
+Also by default the web application is not a <a href="http://www.eclipse.org/webtools/" target="_blank">WTP</a> application, it has no idea how to run itself under jetty and does not know how to regenerate itself as an eclipse project.
+
+In order to make this project do all those cool things we need to add a couple lines of code in the plugins section of the pom.xml file.
+
+[sourcecode language="html"]
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-war-plugin</artifactId>
+			<configuration>
+				<warName>${artifactId}</warName>
+			</configuration>
+		</plugin>
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-eclipse-plugin</artifactId>
+			<configuration>
+				<projectNameTemplate>${artifactId}</projectNameTemplate>
+				<wtpapplicationxml>true</wtpapplicationxml>
+				<downloadSources>true</downloadSources>
+				<downloadJavadocs>true</downloadJavadocs>
+				<wtpversion>1.5</wtpversion>
+				<classpathContainers>
+					<classpathContainer>org.eclipse.jst.j2ee.internal.web.container</classpathContainer>
+					<classpathContainer>org.eclipse.jst.j2ee.internal.module.container</classpathContainer>
+				</classpathContainers>
+			</configuration>
+		</plugin>
+		<plugin>
+			<groupId>org.mortbay.jetty</groupId>
+			<artifactId>jetty-maven-plugin</artifactId>
+				<version>7.0.0.v20091005</version>
+		</plugin>
+[/sourcecode]
+
+By default the pom.xml that is created by this archetype does not specify to the other plugins what jvm version we will be using: In the build section of the pom.xml file put the following.
+
+[sourcecode language="html"]
+	<pluginManagement>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+		<configuration>
+			<source>1.6</source>
+			<target>1.6</target>
+		</configuration>
+			</plugin>
+		</plugins>
+	</pluginManagement>
+[/sourcecode]
+
+In order to create a web application you need additional dependencies to be added
+
+[sourcecode language="html"]
+<dependency>
+	<groupId>org.apache.geronimo.specs</groupId>
+	<artifactId>geronimo-servlet_2.5_spec</artifactId>
+	<version>1.2</version>
+	<type>jar</type>
+	<scope>provided</scope>
+</dependency>
+[/sourcecode]
+<h3>Regenerate the eclipse project</h3>
+[sourcecode language="html"]
+mvn eclipse:clean eclipse:eclipse
+[/sourcecode]
+
+Return to eclipse and refresh the project.
+<h3>Creating a servlet</h3>
+Create a test Servlet.
+
+[sourcecode language="java"]
+package com.test;
+
+import java.io.IOException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+public class TestServlet extends HttpServlet {
+
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		System.out.println("servlet ran successfully");
+		request.getRequestDispatcher("/index.jsp").forward(request, response);
+	}
+
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	}
+
+}
+[/sourcecode]
+
+Modify the xml to look like this:
+
+[sourcecode language="xml"]
+<!DOCTYPE web-app PUBLIC
+ "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+ "http://java.sun.com/dtd/web-app_2_3.dtd" >
+
+<web-app>
+  <display-name>Archetype Created Web Application</display-name>
+  <servlet>
+  	<servlet-name>TestServlet</servlet-name>
+  	<display-name>TestServlet</display-name>
+  	<description></description>
+  	<servlet-class>
+  	com.test.TestServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+  	<servlet-name>TestServlet</servlet-name>
+  	<url-pattern>/TestServlet</url-pattern>
+  </servlet-mapping>
+</web-app>
+[/sourcecode]
+<h3>Running the Web Project in Jetty</h3>
+In the project top level directory start the jetty servlet engine.
+
+mvn jetty:run
+
+Open browser and navigate to http://localhost:8080/ You should be seeing a hello world page. To test the servlet navigate to  http://localhost:8080/TestServlet
+
+When you run the servlet you should see "servlet ran successfully" printed to the console and the same Hello World message in the browser.
+
+When you are done with the test, shut down the jetty server by hitting CTRL-C on the command line window.
+<h3>Running the Web Project in Tomcat 6</h3>
+Please make sure you have shut-down jetty before proceeding... Unless you changed them both jetty and tomcat 6 run on the default port of 8080. They both can not run at the same time.
+
+Using Eclipse WTP all you need to do is make sure that Tomcat is defined and you are able to start and stop it. Right click on the project and click "Run On Server" option. Tomcat should show some output on the terminal. Follow the same steps you did while testing jetty. You should get the same results as above.
+<h3>Congratulations</h3>
+You have just configured a simple web application project using archetypes and hosted the application using both the built in web-app server called jetty and Tomcat 6 under eclipse using <a href="http://www.eclipse.org/webtools/" target="_blank">WTP</a>.
+
+You can also try out the following post. <a href="http://wp.me/pvUBW-jt" target="_blank">This is a simpler way to start a Spring MVC application from an archetype</a>.
+<h3>Thats all for now!</h3>
+
+$blog_footer

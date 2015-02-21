@@ -1,0 +1,254 @@
+This page describes the process of integrating the Spring framework with JSF. We will take an application that already has JSF and Spring components fully initialized and ready to go.
+
+On this page we will cover 2 aspects of Spring JSF integration.
+<ol>
+	<li>Getting a JSF managed Bean to deligate to a Spring Managed Bean.</li>
+	<li>Use a pure Spring Managed Bean in place of the JSF  bean.</li>
+</ol>
+<h3>Requirements</h3>
+<ul>
+	<li>Maven2</li>
+	<li>Basic understanding of IOC and The Spring</li>
+	<li>Basic understanding of JSF</li>
+</ul>
+Before we can start we need to create the sample project. We are going to use a maven archetype.
+<h3>Creating the Project</h3>
+We will create this project using an archetype and walk thru the different parts that make this all work.
+<h3>generate</h3>
+[sourcecode language="shell" gutter="false"]
+mvn archetype:generate -DarchetypeGroupId=org.vtechfw -DarchetypeArtifactId=springmvc-jsf-archetype -DarchetypeVersion=1.0-SNAPSHOT -DarchetypeRepository=http://www.vermatech.com/m2repo
+[/sourcecode]
+
+Ignore the warning about checksum file for now. (trying to figure out how to fix that. If you know then please comment)
+
+Maven will prompt you for some information. It is best to answer like the following.
+
+groupId: testpackage
+artifactId: springJSF
+
+Hit enter for defaults for the rest of the questions.
+<h3>Run</h3>
+cd to the project's directory. (cd springJSF)
+
+[sourcecode language="shell" gutter="false"]
+mvn jetty:run
+[/sourcecode]
+<h3>View the project</h3>
+Navigate to the following page: http://localhost:8080/
+<ol>
+	<li>The spring mvc configuration is read applicationContext.xml and spring-servlet.xml</li>
+	<li>The faces configuration file is read faces-config.xml</li>
+</ol>
+The system completes the initialization and the web application is ready to serve requests at http://localhost:8080
+
+The application displays a welcome page with 2 links. One points to the Faces JSP file that displays a text box that allows the user to enter values and submit. The second link displays a welcome page that is rendered by the SpringMVC framework.
+<h3>1. Having JSF Managed Beans Delegate to Spring Managed Beans</h3>
+You would typically want to do this if you already have jsf managed beans defined in the faces-config.xml file.
+
+If you are starting fresh and purely want to use Spring beans as JSF managed beans then skip to section 2.
+
+The DelegatingVariableResolver class provides the ability for Spring managed beans to be injected into JSF managed beans. This is a powerful technique to allow business logic that is managed in the spring container  available for JSF applications to use.
+<h3>How to get JSF to use Spring Beans</h3>
+Enable the JSF system to use DelegatingVariableResolver.
+
+Add the following in the faces-config.xml
+
+[sourcecode language="html" gutter="false"]
+<application>
+   <variable-resolver>org.springframework.web.jsf.DelegatingVariableResolver</variable-resolver>
+</application>
+[/sourcecode]
+<h3>Create a Spring Managed Bean</h3>
+Actually you dont need to create one if you already generated the project. For documentation purposes the bean is listed here.
+
+[sourcecode language="java" gutter="false"]
+package testpackage.quickstart.springmvc;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import org.springframework.stereotype.Service;
+
+@Service("datePrintModel")
+public class DatePrintModelImpl implements DatePrintModel {
+	private DateFormat dateFormat = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
+
+	public String getDateAsString() {
+		System.out.println("getDataAsString called.");
+		return dateFormat.format(new Date());
+	}
+}
+[/sourcecode]
+<h3>Setup the JSF Managed Bean</h3>
+Add the DatePrintModel and its setters and getters to the managed been below.
+
+After the change it should look something like this.
+
+[sourcecode language="java" gutter="false"]
+package testpackage.jsftest;
+
+import javax.faces.event.ValueChangeEvent;
+
+import testpackage.quickstart.springmvc.DatePrintModel;
+
+public class MessageModel {
+
+	private DatePrintModel datePrintModel;
+
+	public DatePrintModel getDatePrintModel() {
+		return datePrintModel;
+	}
+
+	public void setDatePrintModel(DatePrintModel datePrintModel) {
+		this.datePrintModel = datePrintModel;
+	}
+
+	public void printMessage(ValueChangeEvent e) {
+		System.out.println("old value was: " + e.getOldValue());
+		System.out.println("new value is: " + e.getNewValue());
+	}
+
+	public void callSpringModel() {
+		System.out.println("calling the spring model...");
+		datePrintModel.getDateAsString();
+	}
+}
+[/sourcecode]
+
+Modify the faces-config.xml to look like this...
+
+[sourcecode language="xml" gutter="false"]
+<?xml version='1.0' encoding='UTF-8'?>
+<faces-config xmlns="http://java.sun.com/xml/ns/javaee"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_1_2.xsd"
+              version="1.2">
+
+<managed-bean>
+	<managed-bean-name>message</managed-bean-name>
+	<managed-bean-class>java.lang.String</managed-bean-class>
+	<managed-bean-scope>session</managed-bean-scope>
+</managed-bean>
+<managed-bean>
+	<managed-bean-name>messageModel</managed-bean-name>
+	<managed-bean-class>testpackage.jsftest.MessageModel</managed-bean-class>
+	<managed-bean-scope>session</managed-bean-scope>
+	<managed-property>
+		<property-name>datePrintModel</property-name>
+		<value>#[[#]]#{datePrintModel}</value>
+	</managed-property>
+</managed-bean>
+</faces-config>
+[/sourcecode]
+
+As you can see above the managed-bean property has been added.
+<h3>Modify the JSP</h3>
+helloWorld.jsp
+
+[sourcecode language="xml" gutter="false"]
+<!DOCTYPE html
+PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="f" uri="http://java.sun.com/jsf/core" %>
+<%@ taglib prefix="h" uri="http://java.sun.com/jsf/html" %>
+
+<f:view>
+    <html>
+    <head>
+        <title>Hello World JSF Example</title>
+    </head>
+    <body>
+    <h:form>
+		<p>This is a simple hello world page using Faces.</p>
+		<p>Enter your message here: <br/>
+		<h:inputText valueChangeListener="#[[#]]#{messageModel.printMessage}" value="#[[#]]#{message}" size="35"/></p>
+		<h:commandButton value="Submit" action="#[[#]]#{messageModel.callSpringModel}"/>
+    </h:form>
+    <p>after submit check server console for output.</p>
+    </body>
+    </html>
+</f:view>
+[/sourcecode]
+<h3>Run and view The Project</h3>
+[sourcecode language="shell" gutter="false"]
+mvn jetty:run
+[/sourcecode]
+
+http://localhost:8080
+<h3>2. Use a pure Spring Managed Bean in place of the JSF  bean.</h3>
+<h4>Getting JSF to Purely use Spring Bean</h4>
+As you have seen above you can take an existing managed bean and inject spring managed beans. This next section will show you how to use a spring managed bean as a JSF backing bean.
+
+Doing it this way simplifies the faces-config.xml.
+
+Create the following file in
+src/java/main/com/test/quickstart/springmvc/SpringManagedBean.java
+
+[sourcecode language="java" gutter="false"]
+package com.test.quickstart.springmvc;
+
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Controller;
+
+@Controller("springManagedBean")
+@Scope("session")
+public class SpringManagedBean {
+	private String message;
+	public String getMessage() {
+		return message;
+	}
+	public void setMessage(String message) {
+		this.message = message;
+	}
+	public void testMethod() {
+		System.out.println("test method ran with message: " + message);
+	}
+}
+[/sourcecode]
+
+Insert the following into your spring configuration...
+[sourcecode gutter="false"]
+<context:component-scan base-package="com.test.quickstart.springmvc"/>
+[/sourcecode]
+
+
+Create the following jsp:
+
+src/main/webapp/springManagedBean.jsp
+
+[sourcecode language="html" gutter="false"]
+<!DOCTYPE html
+PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="f" uri="http://java.sun.com/jsf/core" %>
+<%@ taglib prefix="h" uri="http://java.sun.com/jsf/html" %>
+
+<f:view>
+    <html>
+    <head>
+        <title>Spring Managed Bean Example</title>
+    </head>
+    <body>
+    <h:form>
+		<p>This is a simple hello world page using Faces and Spring Managed Bean.</p>
+		<p>Enter your message here: <br/>
+		<h:inputText value="#[[#]]#{springManagedBean.message}" size="35"/></p>
+		<h:commandButton value="Submit" action="#[[#]]#{springManagedBean.testMethod}"/>
+    </h:form>
+    <p>after submit check server console for output.</p>
+    </body>
+    </html>
+</f:view>
+[/sourcecode]
+<h3>Run and view The Project</h3>
+[sourcecode language="shell" gutter="false"]
+mvn jetty:run
+[/sourcecode]
+
+Navigate to:
+http://localhost:8080/springManagedBean.faces
+
+$blog_footer

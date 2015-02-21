@@ -1,0 +1,248 @@
+This page describes the process of setting up validation in a JSF application.
+<h3>JSF Standard Validators</h3>
+JSF comes with standard validators
+<ol>
+	<li>&lt;validateDoubleRange&gt; : validates to see if the value is a double</li>
+	<li>&lt;validateLongRange&gt; : validates to see if the value is a long.</li>
+	<li>&lt;validateLength&gt; : validates to see if the string value for length.</li>
+</ol>
+With all of the tags above you can specify a minimum and/or maximum value.
+<h3>Requirements</h3>
+<ul>
+	<li>Maven</li>
+	<li>That's pretty much it!</li>
+</ul>
+Generate the project from an archetype:
+
+[sourcecode language="shell" light="true"]
+mvn archetype:generate -DarchetypeGroupId=org.vtechfw -DarchetypeArtifactId=springmvc-jsf-archetype -DarchetypeVersion=1.0-SNAPSHOT -DarchetypeRepository=http://www.vermatech.com/m2repo
+[/sourcecode]
+
+groupId: com.test
+artifactId: jsf-validation
+
+The rest of the questions just hit enter choosing the defaults.
+
+test to see if the project comes up
+
+[sourcecode language="shell" light="true"]
+cd jsf-validation;
+mvn jetty:run;
+[/sourcecode]
+
+Navigate to the application <a href="http://localhost:8080/" target="_blank">http://localhost:8080/</a> It should come up with a homepage.
+
+<strong>If it does then the test is complete You can continue with the rest of the page.</strong>
+<h3>Message Resources Property File</h3>
+This file contains all the error messages we will display when validation fails.
+
+<strong>src/main/resources/com/test/jsftest/messages.properties</strong>
+
+[sourcecode light="true"]
+username_required=Username is required
+password_required=Password is required
+between=Value must be between 2 and 10.
+[/sourcecode]
+
+In the resource bundle if the key are composed of multilple word separated by ‘dot’(.),you should represent that key in the JSP page using the format #[[#]]#{msg['key']}.This is a must because ‘dot’(.) is considered as a special character in JSF expression language.
+
+The next step is to get the message bundle property registered in the application.
+
+<strong>src/main/webapp/WEB-INF/faces-config.xml</strong>
+
+[sourcecode language="html" light="true"]
+<application>
+    <resource-bundle>
+        <base-name>
+            com.test.jsftest.messages
+        </base-name>
+        <var>msgs</var>
+    </resource-bundle>
+</application>
+[/sourcecode]
+
+As an alternative you can also type the following in each JSP: 
+
+[sourcecode language="java" light="true"]
+<f:loadBundle basename="com.test.jsftest.messages" var="msgs"/>
+[/sourcecode]
+
+<h3>Create the Managed Bean Java Class</h3>
+In the Reference section below get the source for UserManagedBean.java and create it in your source directory.
+<strong>src/main/java/com/test/jsftest/UserManagedBean.java</strong>
+
+[sourcecode language="java" light="true"]
+package com.test.jsftest;
+
+public class UserManagedBean {
+	private String username = "";
+	private String password = "";
+
+	public String getUsername() {
+		return username;
+	}
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+}
+[/sourcecode]
+
+Open up faces-config.xml and insert this right above the managed beans.
+<strong>src/main/webapp/WEB-INF/faces-config.xml</strong>
+
+[sourcecode language="html" light="true"]
+<managed-bean>
+	<managed-bean-name>userManagedBean</managed-bean-name>
+	<managed-bean-class>com.test.jsftest.UserManagedBean</managed-bean-class>
+	<managed-bean-scope>session</managed-bean-scope>
+</managed-bean>
+[/sourcecode]
+<h3>Setup the Form Page</h3>
+Next we set up the form page that the user will pull up to enter the username and pssword. The complete source for this page is located in the Reference section. Please copy and paste the source into your webapp/faces directory now.
+
+Once you are done then run the project using
+
+[sourcecode language="shell" light="true"]
+mvn jetty:run
+[/sourcecode]
+<h3><span style="color:#[[#]]#ff0000;">Run The Application</span></h3>
+<a href="http://localhost:8080/faces/login.faces" target="_blank">http://localhost:8080/faces/login.faces</a>
+<h3>Discussions</h3>
+As you can see below the following is a snippit of what is defined in the login.jsp file.
+
+[sourcecode language="html" light="true"]
+		<p>Enter your username here: <br/>
+		<h:inputText id="username" value="#[[#]]#{username}" size="35"
+			required="true" requiredMessage="#[[#]]#{msgs.username_required}"
+			validatorMessage="#[[#]]#{msgs.between}">
+			<f:validateLength minimum="2" maximum="10" />
+		</h:inputText>
+		<h:message for="username"/>
+		</p>
+[/sourcecode]
+
+I am trying to find out how to place 2 and 10 with parameter markers. If you guys know how to do this then please post a comment.
+<h3>Adding Color</h3>
+[sourcecode language="html" light="true"]
+<h:message for="username" style="color: red;"/>
+[/sourcecode]
+<h3>Showing Bulleted list of errors</h3>
+In order to show a bulleted list of errors on top or bottom of the screen just put this tag at the desired location.
+
+[sourcecode language="html" light="true"]
+<h:messages showDetail="#[[#]]#{true}" showSummary="#[[#]]#{false}" />
+[/sourcecode]
+<h3>For Reference</h3>
+In case you got lost the complete source for each file is included here:
+
+<strong>src/main/java/com/test/jsftest/UserManagedBean.java</strong>
+
+[sourcecode language="java" light="true"]
+package com.test.jsftest;
+
+public class UserManagedBean {
+	private String username = "";
+	private String password = "";
+
+	public String getUsername() {
+		return username;
+	}
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+}
+[/sourcecode]
+
+<strong>src/main/webapp/WEB-INF/faces-config.xml</strong>
+
+[sourcecode language="xml" light="true"]
+<?xml version='1.0' encoding='UTF-8'?>
+<faces-config xmlns="http://java.sun.com/xml/ns/javaee"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_1_2.xsd"
+              version="1.2">
+<application>
+    <resource-bundle>
+        <base-name>
+            com.test.jsftest.messages
+        </base-name>
+        <var>msgs</var>
+    </resource-bundle>
+</application>
+
+<managed-bean>
+	<managed-bean-name>userManagedBean</managed-bean-name>
+	<managed-bean-class>com.test.jsftest.UserManagedBean</managed-bean-class>
+	<managed-bean-scope>session</managed-bean-scope>
+</managed-bean>
+
+</faces-config>
+[/sourcecode]
+
+<strong>src/main/webapp/faces/login.jsp</strong>
+
+[sourcecode language="html" light="true"]
+<!DOCTYPE html
+PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="f" uri="http://java.sun.com/jsf/core" %>
+<%@ taglib prefix="h" uri="http://java.sun.com/jsf/html" %>
+
+<f:view>
+    <html>
+    <head>
+        <title>Login Page</title>
+    </head>
+    <body>
+	<h:messages showDetail="#[[#]]#{true}" showSummary="#[[#]]#{false}" />
+    <h:form>
+		<p>This is a simple login page using Faces.</p>
+		<p>Enter your username here: <br/>
+
+		<h:inputText id="username" value="#[[#]]#{userManagedBean.username}" size="35"
+			required="true" requiredMessage="#[[#]]#{msgs.username_required}"
+			validatorMessage="#[[#]]#{msgs.between}">
+			<f:validateLength minimum="2" maximum="10" />
+		</h:inputText>
+		<h:message for="username" style="color: red;"/>
+		</p>
+		<p>Enter your password here: <br/>
+		<h:inputText id="password" value="#[[#]]#{userManagedBean.password}" size="35"
+			required="true" requiredMessage="#[[#]]#{msgs.password_required}">
+			<f:validateLength minimum="2" maximum="10" />
+		</h:inputText> <h:message for="password"/>
+		</p>
+		<h:commandButton value="Submit" action="submit"/>
+    </h:form>
+    </body>
+    </html>
+</f:view>
+[/sourcecode]
+
+<strong>src/main/resources/com/test/jsftest/messages.properties</strong>
+
+[sourcecode light="true"]
+username_required=Username is required
+password_required=Password is required
+between=Value must be between 2 and 10.
+[/sourcecode]
+<h3>Thats all for now!</h3>
+
+$blog_footer

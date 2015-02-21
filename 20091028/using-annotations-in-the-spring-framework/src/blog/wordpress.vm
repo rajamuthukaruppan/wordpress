@@ -1,0 +1,273 @@
+The new features of the Java 5 framework include Annotations. Annotations is a sort of meta-data about classes. These new Java 5 feature allow the developer to describe additional information about java classes methods and fields. This additional metadata can be used to generate boilerplate code used to configure the application at runtime.
+<h3>Spring Framework and XML</h3>
+If you have worked with the spring framework long enough you get to know that a lot of configuration is xml based. While this is great for very large application it can get to be a hassle for small project. Also if you are creating a rapid proto-type you want your codeing experience to be free-flowing. You dont really want to create a class and then have to write xml code inject it into another class.
+
+In the following tutorial we will cover the basics of how to create a simple standalone spring application that will auto-wire itself with very little xml configuration. Spring XML configuration will be 2-3 lines of code&nbsp; (not including the header).
+
+<h3>Start a new project</h3>
+
+[sourcecode language="shell" gutter="false"]
+mvn archetype:generate -DarchetypeArtifactId=maven-archetype-quickstart
+[/sourcecode]
+Answer the rest of the questions like this:
+Group ID: com.test   
+Artifact Id: springAnnotation
+
+
+cd springAnnotation
+
+We first start out by creating a plain old Java Application in the eclipse project. You can go ahead and create one and put a Maven 2 pom.xml file seen below.
+
+pom.xml
+[sourcecode language="xml" gutter="false"]
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.test</groupId>
+	<artifactId>springAnnotation</artifactId>
+	<packaging>jar</packaging>
+	<version>1.0-SNAPSHOT</version>
+	<name>springAnnotation</name>
+	<url>http://maven.apache.org</url>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.0.2</version>
+				<configuration>
+					<source>1.5</source>
+					<target>1.5</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>3.8.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring</artifactId>
+			<version>2.5.5</version>
+		</dependency>
+	</dependencies>
+</project>
+[/sourcecode]
+
+<h3>Regenerate the project</h3>
+Regenerate the project in eclipse by typing: mvn eclipse:clean eclipse:eclipse
+
+<h3>Annotation Based configuration</h3>
+
+Create the resources folder if it does not exist. and create the applicationContext.xml file.
+
+src/main/resources/applicationContext.xml
+[sourcecode language="xml" gutter="false"]
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:context="http://www.springframework.org/schema/context"
+        xsi:schemaLocation="http://www.springframework.org/schema/beans
+ 
+http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+ 
+http://www.springframework.org/schema/context
+ 
+http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+    
+    <context:annotation-config/>
+
+	<context:component-scan base-package="com.test"/>
+ 
+</beans>
+[/sourcecode]
+
+
+<h3>@Required</h3>
+Indicates that this field is required to be injected. If this bean did not get injected by the time the injection step completes then the container shuts down and prints an error message.
+<h3>@Autowired or @Resource (JSR-250) method</h3>
+Used on setters to auto inject dependencies into beans. Prefer using @Resource because it is a Java Standard.
+<h3>@Qualifier</h3>
+Used for fine tuning of what gets selected for injection.
+<h3>Example Application</h3>
+
+src/main/java/com/test/ClassA.java
+[sourcecode language="java" gutter="false"]
+package com.test;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Required;
+import org.springframework.stereotype.Component;
+
+@Component("classAA")
+public class ClassA {
+	private IClassB classB;
+
+	public IClassB getClassB() {
+		return classB;
+	}
+	@Autowired
+	@Required
+	public void setClassB(IClassB classB) {
+		this.classB = classB;
+	}
+
+}
+[/sourcecode]
+
+src/main/java/com/test/ClassB.java
+[sourcecode language="java" gutter="false"]
+package com.test;
+
+import org.springframework.stereotype.Component;
+
+@Component
+public class ClassB implements IClassB {
+
+	public void testMethod() {
+		System.out.println("\n\n\nSpring Annotations are Easy!!!\n\n\n");
+	}
+}
+[/sourcecode]
+
+src/main/java/com/test/IClassB.java
+[sourcecode language="java" gutter="false"]
+package com.test;
+
+public interface IClassB {
+	public abstract void testMethod();
+}
+[/sourcecode]
+
+The following is a test class that will print the results to the console.
+
+src/test/java/com/test/AppTest.java
+[sourcecode language="java" gutter="false"]
+package com.test;
+
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.util.CollectionUtils;
+
+public class AppTest extends TestCase {
+	public AppTest(String testName) {
+		super(testName);
+	}
+
+	public static Test suite() {
+		return new TestSuite(AppTest.class);
+	}
+
+	public void testApp() {
+		ApplicationContext context = new ClassPathXmlApplicationContext(
+				"applicationContext.xml");
+		System.out.println(CollectionUtils.arrayToList(context
+				.getBeanDefinitionNames()));
+		ClassA classA = (ClassA) context.getBean("classAA");
+		classA.getClassB().testMethod();
+	}
+}
+[/sourcecode]
+
+<h3>Run the test</h3>
+At the root directory for the project type the following.
+
+mvn test
+
+This should print out the following to the console:
+
+[sourcecode gutter="false"]
+[org.springframework.context.annotation.internalCommonAnnotationProcessor, org.springframework.context.annotation.internalAutowiredAnnotationProcessor, org.springframework.context.annotation.internalRequiredAnnotationProcessor, classAA, classB]
+
+
+
+Spring Annotations are Easy!!!
+
+
+
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.338 sec
+
+Results :
+
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESSFUL
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 1 second
+[INFO] Finished at: Sun Jun 06 22:03:36 EDT 2010
+[INFO] Final Memory: 15M/159M
+[INFO] ------------------------------------------------------------------------
+
+[/sourcecode]
+<h3>Component Scanning</h3>
+In the previous section we reviewed how to inject beans that are already defined in the application Context injected into new beans using @Autowired or @Resource.
+
+In this section we will go over how those beans got into the application context in the first place.
+
+The magic starts with specifying a comma separated list of packages that will be scanned for Annotations. Put the following line into the spring configuration file.
+
+[sourcecode language="html" gutter="false"]
+
+<context:component-scan base-package="test"/>
+
+[/sourcecode]
+
+The system will scan the test package for components that should be added to the application context. There is no need to define them in an xml file. You do need to put the following annotation at the class level so they get recognized.
+<h3>Component Scan Annotations</h3>
+<strong>@Repository</strong> - this was added as part of Spring 2.0 to indicate that this class serves the role of a datamanager or DAO.
+<strong>@Component </strong>- this annotation indicates that this class is a general purpose spring managed bean. The @Repository, @Service, and @Controller are specializations of this base bean. You can always use @Component for all beans, but its not a good idea.
+<strong>@Service</strong> - this annotation indicates that this is a class that contains Business Logic and serves as the Service/Model bean.
+<strong>@Controller</strong> - Typically indicates that this class is used as a Controller in a Web Application.
+<h3>Naming Component Scanned Beans</h3>
+By default unless other wise specified a bean name will be the same name as the class however the first letter will not be capatalized. For example the following class will appear as movieFinderImpl
+
+[sourcecode language="java" gutter="false"]
+@Repository
+public class MovieFinderImpl implements MovieFinder {
+//...
+}
+[/sourcecode]
+
+If you want to specify a custom name for a bean all you need to specify is the following and the bean will be known as specialMovieFinder in the spring container.
+
+[sourcecode language="java" gutter="false"]
+@Repository("specialMovieFinder")
+public class MovieFinderImpl implements MovieFinder {
+//...
+}
+[/sourcecode]
+
+<h3>Constructor Injection</h3>
+If your beans use constructor injection instead of setter injection you can still use annotations. Just use the @Qualifier annotation for each constructor parameter. 
+
+[sourcecode language="java" gutter="false" highlight="10,11,12"]
+@Component("classAA")
+public class ClassA {
+    private IClassB classB;
+ 
+    public IClassB getClassB() {
+        return classB;
+    }
+
+    @Autowired
+    public ClassA(@Qualifier("classB") IClassB classB) {
+        this.classB = classB;
+    }
+}
+[/sourcecode]
+
+
+<h3>Scalar Values</h3>
+At this moment it does not look like you can specify scalar values based on annotations. But after a few minutes of thinking this thru, why would you want to? You can always set the scaler value in the constructor or where you are defining the attributes. With spring 3 you may use @Value annotation.
+
+$blog_footer

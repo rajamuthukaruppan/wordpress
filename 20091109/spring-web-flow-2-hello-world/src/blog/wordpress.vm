@@ -1,0 +1,335 @@
+Wizards are sequence of pages that allow the user to progress thru a work flow. Each step of the way the user provides additional information. This information can be used to walk the user thru steps (possibly skiping steps along the way if necessary). This page describes the process of setting up a simple 4 step wizard application.
+
+The steps of the wizard we will be coding are as follows.
+<ul>
+	<li>Step 1 - Personal Info</li>
+	<li>Step 2 - Custom Message</li>
+	<li>Step 3 - Shipping Info</li>
+	<li>Step 4 - Confirmation</li>
+</ul>
+User will be allowed to navigate forward and backward between the first 3 steps. The confirmation page will show the results of the operation and allow the user to return to the main index.jsp page for the application or return to start a new workflow on step 1.
+<h3>Lets get Started</h3>
+Create a web application project following <a href="http://wp.me/pvUBW-ha" target="_blank">these instructions</a>.
+
+Open the pom.xml file and add the following dependencies
+
+[sourcecode language="html"]
+		<!-- Spring WEb Flow specific -->
+		<dependency>
+			<groupId>org.springframework.webflow</groupId>
+			<artifactId>spring-binding</artifactId>
+			<version>2.0.8.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.webflow</groupId>
+			<artifactId>spring-js</artifactId>
+			<version>2.0.8.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.webflow</groupId>
+			<artifactId>spring-webflow</artifactId>
+			<version>2.0.8.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>ognl</groupId>
+			<artifactId>ognl</artifactId>
+			<version>2.7.3</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring</artifactId>
+			<version>2.5.6</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+			<version>2.5.6</version>
+		</dependency>
+		<!-- These are to enable JSTL in jsp's -->
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>jstl</artifactId>
+			<version>1.1.2</version>
+		</dependency>
+		<dependency>
+			<groupId>taglibs</groupId>
+			<artifactId>standard</artifactId>
+			<version>1.1.2</version>
+		</dependency>
+[/sourcecode]
+
+regenerate the eclipse project: mvn eclipse:clean eclipse:eclipse
+
+Refresh the eclipse project.
+
+Modify the WEB-INF/web.xml file. It should look similar to this one.
+
+[sourcecode language="html"]
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	id="WebApp_ID" version="2.5">
+
+	<listener>
+	<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+
+	<servlet>
+		<servlet-name>spring</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>spring</servlet-name>
+		<url-pattern>/app/*</url-pattern>
+	</servlet-mapping>
+
+	<welcome-file-list>
+		<welcome-file>index.jsp</welcome-file>
+	</welcome-file-list>
+</web-app>
+[/sourcecode]
+
+WEB-INF/spring-servlet.xml
+
+[sourcecode language="html"]
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC
+	"-//SPRING//DTD BEAN//EN"
+	"http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>	
+	<!-- Define the default handler adapter in Spring MVC -->
+	<!-- Enables plain Controllers -->
+	<bean
+		class="org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter" />
+
+	<!--
+		Its important to declare this since spring MVC will not look for it if
+		you have already defined the FlowHandlerMapping
+	-->
+	<bean
+		class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping">
+		<property name="order" value="0" />
+	</bean>
+
+	<bean name="/helloWorld" class="test.HelloWorldController"/>	
+
+	<bean id="viewResolver"
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/jsp/" />
+		<property name="suffix" value=".jsp" />
+	</bean>
+
+	<!-- We import the flow-config.xml located in the same directory -->
+	<import resource="flow-config.xml"/>
+	<!-- Importing allows us to keep this configuration file simple. -->
+
+</beans>
+[/sourcecode]
+
+WEB-INF/flow-config.xml
+
+[sourcecode language="html"]
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:webflow="http://www.springframework.org/schema/webflow-config"
+	xsi:schemaLocation="
+           http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+           http://www.springframework.org/schema/webflow-config
+           http://www.springframework.org/schema/webflow-config/spring-webflow-config-2.0.xsd">
+
+	<!--
+		The following 2 entries are common no matter what framework you use.
+		(spring mvc, struts etc...)
+	-->
+	<webflow:flow-registry id="flowRegistry" base-path="/WEB-INF">
+		<webflow:flow-location path="/flows/letterPrinting/printLetter.xml" />
+	</webflow:flow-registry>
+
+	<!-- FlowExecutor is the central service for executing flows: -->
+	<webflow:flow-executor id="flowExecutor"
+		flow-registry="flowRegistry" />
+
+	<!-- Enables FlowHandler URL mapping -->
+	<bean class="org.springframework.webflow.mvc.servlet.FlowHandlerAdapter">
+		<property name="flowExecutor" ref="flowExecutor" />
+	</bean>
+
+	<!--
+		Maps request paths to flows in the flowRegistry; e.g. a path of
+		/hotels/booking looks for a flow with id "hotels/booking"
+	-->
+	<bean class="org.springframework.webflow.mvc.servlet.FlowHandlerMapping">
+		<property name="flowRegistry" ref="flowRegistry" />
+		<property name="order" value="1" />
+	</bean>
+
+</beans>
+[/sourcecode]
+
+Create a WEB-INF/applicationContext.xml file.
+
+[sourcecode language="html"]
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC
+	"-//SPRING//DTD BEAN//EN"
+	"http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+<!-- Blank for now, but who knows, maybe we will have some business logic beans here. -->
+</beans>
+[/sourcecode]
+
+Create a folder under WEB-INF called flows/letterPrinting. This folder will contain the steps of our wizard.
+Add the following files there.
+WEB-INF/flows/letterPrinting/printLetter.xml
+
+[sourcecode language="html"]
+<?xml version="1.0" encoding="UTF-8"?>
+<flow xmlns="http://www.springframework.org/schema/webflow"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/webflow
+                          http://www.springframework.org/schema/webflow/spring-webflow-2.0.xsd">
+	
+	<view-state id="enterPersonalDetails">		
+		<transition on="next" to="enterCustomMessage"/>
+	</view-state>
+
+	<view-state id="enterCustomMessage">
+		<transition on="next" to="enterShippingAddress"/>
+		<transition on="prev" to="enterPersonalDetails"/>
+		<transition on="startOver" to="enterPersonalDetails"/>
+	</view-state>
+	
+	<view-state id="enterShippingAddress">
+		<transition on="next" to="confirm"/>
+		<transition on="prev" to="enterCustomMessage"/>
+		<transition on="startOver" to="enterPersonalDetails"/>
+	</view-state>
+			
+	<end-state id="confirm" view="confirmPage.jsp" />
+</flow>
+[/sourcecode]
+
+The above file is the xml file that describes the steps of this flow. It describes all the steps in the wizard and the associated events. On each event it describes what the next state will be. In these examples we use a submit button to generate events. But these events could have been generated by html links or hidden form fields.
+
+WEB-INF/flows/letterPrinting/enterPersonalDetails.jsp
+
+[sourcecode language="html"]
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+ <head>
+  <title>Enter Personal Details</title>
+  <meta http-equiv="Content-type" content="text/html; charset=iso-8859-1" />
+  <meta http-equiv="Content-Language" content="en-us" />
+ </head>
+
+<body>
+<h2>Step 1</h2>
+<h3>Enter Personal Details</h3> 
+<form action="" method="post">
+<input type="text"/><br/>
+<input type="submit" name="_eventId_next" value="next"/>
+
+</form> 
+</body>
+</html>
+[/sourcecode]
+
+WEB-INF/flows/letterPrinting/enterCustomMessage.jsp
+
+[sourcecode language="html"]
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+ <head>
+  <title>Enter Custom Message</title>
+  <meta http-equiv="Content-type" content="text/html; charset=iso-8859-1" />
+  <meta http-equiv="Content-Language" content="en-us" />
+ </head>
+
+<body>
+<h2>Step 2</h2>
+<h3>Enter Custom Message</h3> 
+<form action="" method="post">
+<input type="text"/><br/>
+<input type="submit" name="_eventId_next" value="next"/><br/>
+<input type="submit" name="_eventId_prev" value="prev"/> Try clicking this to go back<br/>
+<input type="submit" name="_eventId_startOver" value="startOver"/><br/>
+
+<p>Hint: Also try clicking the browser back button... Web flows don't allow you to suffer with those annoying messages that ask you to "Repost"</p>
+
+</form> 
+</body>
+</html>
+[/sourcecode]
+
+WEB-INF/flows/letterPrinting/enterShippingAddress.jsp
+
+[sourcecode language="html"]
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+ <head>
+  <title></title>
+  <meta http-equiv="Content-type" content="text/html; charset=iso-8859-1" />
+  <meta http-equiv="Content-Language" content="en-us" />
+ </head>
+
+<body>
+<h2>Step 3</h2>
+<h3>Enter Shipping Address</h3> 
+<form action="" method="post">
+<input type="text"/><br/>
+<input type="submit" name="_eventId_next" value="next"/>
+<input type="submit" name="_eventId_prev" value="prev"/><br/>
+<input type="submit" name="_eventId_startOver" value="startOver"/><br/>
+
+</form> 
+</body>
+</html>
+[/sourcecode]
+
+WEB-INF/flows/letterPrinting/confirmPage.jsp
+
+[sourcecode language="html"]
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+ <head>
+  <title></title>
+  <meta http-equiv="Content-type" content="text/html; charset=iso-8859-1" />
+  <meta http-equiv="Content-Language" content="en-us" />
+ </head>
+
+<body>
+<h3>Print Confirmation</h3> 
+
+<p>This is the last page of the Wizard.</p>
+<a href="<c:url value='/app/flows/letterPrinting'/>">Start new Wizard Flow</a>
+
+<p>This is the end state of this flow. Notice when you click the above link or click the back button it will
+it will start a new flow regardless.... </p>
+
+<p>No matter what you do you can not mess up what was submitted in step 3.</p>
+</body>
+</html>
+[/sourcecode]
+
+Save all the files and start up your servlet container. Navigate to http://localhost:8080/ if you are using jetty. The page should come up and ask you to start. If you are using tomcat be sure to include the context root of where you installed the application.
+
+After the app comes up navigate the wizard by clicking next and prev. 
+
+<h3>That's all for now!</h3>
+
+$blog_footer

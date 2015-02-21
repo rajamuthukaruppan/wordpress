@@ -1,0 +1,39 @@
+[sourcecode language="html"]
+   <Resource
+      name="jms/MyQCF"
+      auth="Container"
+      type="com.ibm.mq.jms.MQQueueConnectionFactory"
+      factory="com.ibm.mq.jms.MQQueueConnectionFactoryFactory"
+      description="JMS Queue Connection Factory for sending messages"
+      HOST="<mymqserver>"
+      PORT="1414"
+      CHAN="<mychannel>"
+      TRAN="1"
+      QMGR="<myqueuemanager>"/>
+   <Resource
+      name="jms/MyQ"
+      auth="Container"
+      type="com.ibm.mq.jms.MQQueue"
+      factory="com.ibm.mq.jms.MQQueueFactory"
+      description="JMS Queue for receiving messages from Dialog"
+      QU="<myqueue>"/>
+
+[/sourcecode]
+
+In the web.xml you need to specify
+
+[sourcecode language="html"]
+  <resource-env-ref>
+    <resource-env-ref-name>jms/MyQCF</resource-env-ref-name>
+    <resource-env-ref-type>javax.jms.QueueConnectionFactory</resource-env-ref-type>
+  </resource-env-ref>
+
+  <resource-env-ref>
+    <resource-env-ref-name>jms/MyQ</resource-env-ref-name>
+    <resource-env-ref-type>javax.jms.Queue</resource-env-ref-type>
+  </resource-env-ref>
+[/sourcecode]
+
+for more information visit:
+http://forum.springsource.org/showthread.php?t=75282
+$blog_footer

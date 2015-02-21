@@ -1,0 +1,57 @@
+Spring MVC has tools that allow file uploads from form submission easy.
+
+We will be using commons fileupload therfore you need to add the following to your pom.xml file.
+[sourcecode language="html"]
+		<dependency>
+			<groupId>commons-fileupload</groupId>
+			<artifactId>commons-fileupload</artifactId>
+			<version>1.2.1</version>
+		</dependency>
+[/sourcecode]
+
+First start with setting up a MultipartResolver
+[sourcecode language="html"]
+	<bean id="multipartResolver"
+	    class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
+[/sourcecode]
+
+Setup the jsp to allow the user to specify a file.
+
+[sourcecode language="html"]
+<h1>Please upload a file</h1>
+<form method="post" enctype="multipart/form-data" name="step0">
+	<input type="hidden" name="name"/>
+    <input type="file" name="file" onchange="javascript:step0.name.value=this.value"/><br/>
+        
+    <input type="text" name="url"/><br/><br/>
+    <input type="submit"/>
+</form>
+[/sourcecode]
+
+The following controller has an initBinder defined to convert the file into a byte[]
+
+[sourcecode language="java"]
+	protected void initBinder(HttpServletRequest request,
+			ServletRequestDataBinder binder) throws Exception {
+		// to actually be able to convert Multipart instance to a String
+		// we have to register a custom editor
+		binder.registerCustomEditor(byte[].class, new ByteArrayMultipartFileEditor());
+		// now Spring knows how to handle multipart object and convert them
+	}
+[/sourcecode]
+
+When the form is eventually submitted the following code will allow you to read the file via a byte array.
+ 
+[sourcecode language="java"]
+	protected ModelAndView onSubmit(HttpServletRequest request,
+			HttpServletResponse response, Object command, BindException errors)
+			throws Exception {
+		ImageInfo imageInfo = (ImageInfo)command;
+		byte[] file = imageInfo.getFile();
+        }
+[/sourcecode]
+
+One thing you may have noticed is that the name of the file has been posted as part of another hidden input field in the form. This field is updated via javascript. If you guys have a better way of getting the file name that was selected by the user then please post a comment with the solution.
+
+
+$blog_footer

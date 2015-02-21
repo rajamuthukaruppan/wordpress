@@ -1,0 +1,50 @@
+This page describes the process of setting up a connection pool using DBCP and spring framework.
+
+This is good for small or prototypes applications that are running standalone and don't have access to JNDI resources typically provided by a Java application server.
+
+Include the following in your pom.xml file and regenerate the project to ensure you have dbcp in the classpath.
+[sourcecode language="html" gutter="false"]
+		<dependency>
+			<groupId>commons-dbcp</groupId>
+			<artifactId>commons-dbcp</artifactId>
+			<version>1.2.1</version>
+		</dependency>
+[/sourcecode]
+
+Inside the spring configuration file you should define the following.
+
+[sourcecode language="html" gutter="false"]
+	<bean id="dataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="url" value="<put database connection url here>" />
+		<property name="username" value="XXXXXX" />
+		<property name="password" value="XXXXXXXX" />
+		<property name="driverClassName" value="<database driver here>" />
+	</bean>
+	
+	<bean id="pool" class="org.apache.commons.pool.impl.GenericObjectPool">
+        <property name="minEvictableIdleTimeMillis"><value>300000</value></property>
+        <property name="timeBetweenEvictionRunsMillis"><value>60000</value></property>
+    </bean>
+
+    <bean id="dsConnectionFactory" class="org.apache.commons.dbcp.DataSourceConnectionFactory">
+        <constructor-arg><ref bean="dataSource"/></constructor-arg>
+    </bean>
+
+    <bean id="poolableConnectionFactory" class="org.apache.commons.dbcp.PoolableConnectionFactory">
+        <constructor-arg index="0"><ref bean="dsConnectionFactory"/></constructor-arg>
+        <constructor-arg index="1"><ref bean="pool"/></constructor-arg>
+        <constructor-arg index="2"><null/></constructor-arg>
+        <constructor-arg index="3"><null/></constructor-arg>
+        <constructor-arg index="4"><value>false</value></constructor-arg>
+        <constructor-arg index="5"><value>true</value></constructor-arg>
+    </bean>
+
+    <bean id="pooledDS" class="org.apache.commons.dbcp.PoolingDataSource" depends-on="poolableConnectionFactory">
+        <constructor-arg><ref bean="pool"/></constructor-arg>
+    </bean>
+[/sourcecode]
+
+you can now inject "pooledDS" bean into any other spring enabled bean and use it just like any other dataSource.
+
+$blog_footer
