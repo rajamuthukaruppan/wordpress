@@ -3,11 +3,8 @@ This page is about how the web.xml header should look like for various versions 
 The following URL contains information about deployment descriptors for the Java Enterprise Applications.
 <h3>web.xml for a Java EE 6 application</h3>
 [sourcecode language="xml"]
-<web-app id="WebApp_9" version="2.4" xmlns="http://java.sun.com/xml/ns/javaee"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
-  http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
-
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee                       http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
      <display-name>Sample Web Application</display-name>
 </web-app>
 [/sourcecode]
