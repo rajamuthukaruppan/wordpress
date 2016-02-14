@@ -1,0 +1,94 @@
+This page describes the process of setting up a simple database for the purpose of rapid development and prototyping. 
+
+<h3>Background</h3>
+HSQLDB is a database is implemented purely in Java. It has a very small footprint and can run within the same JVM as the program being tested. Developing database applications using HSQLDB allows developers to rapidly develop and integration test their front end code or business logic without having a live database connection. Since all the data is stored and persisted locally, developers are free to work from locations that might not have database connectivity. For example outside the company firewall. 
+
+<h3>Requirements</h3>
+<ul>
+	<li>Java 5</li>
+	<li>Maven</li>
+	<li>Understanding of JDBC and SQL</li>
+	<li>Basic understanding of Relational Databases</li>
+</ul>
+<h3>Start a new project</h3>
+Start the project by creating one using a maven archetype.
+
+[sourcecode language="shell" gutter="false"]
+mvn archetype:generate --batch-mode \
+  -DarchetypeArtifactId=maven-archetype-quickstart \
+  -DgroupId=com.test \
+  -DartifactId=hsqldbTest
+[/sourcecode]
+
+Once the project is created, then "cd to the project folder" and add the following depencency section in the pom.xml file
+
+vi pom.xml
+[code  gutter="false"]
+#include("pom.xml")
+[/code]
+
+Regenerate the eclipse project by typing
+
+mvn eclipse:clean eclipse:eclipse
+
+Import the project into eclipse.
+<h3>Configuration</h3>
+There are 2 ways to configure the database.
+<ul>
+	<li>Pure In memory database URL (InMemory): jdbc:hsqldb:mem:databaseName</li>
+	<li>Persistant URL (File system): jdbc:hsqldb:file:databaseFilename</li>
+</ul>
+The following is how it was done for this example:
+<ul>
+	<li>File system database was chosen since we want the data to remain persistant after the program ends. The File system databse is s specified in the url.</li>
+	<li>The database files are placed in the location specified in the URL (src/main/resources/db/)</li>
+	<li>The database will be called "mydbname" (database and parent folders will be created if they don't exist already)</li>
+	<li>The default credentials to use HSQLDB is "sa" and the password is blank. (Specified during JDBC connection)</li>
+</ul>
+<h3>Test the database</h3>
+The following test case
+<ol>
+	<li>creates a table if one does not exit already</li>
+	<li>inserts some data. Once data is inserted it</li>
+	<li>selects the data and displays it to the console.</li>
+</ol>
+See complete output of the test case below
+
+
+vi src/test/java/com/test/AppTest.java
+[code  gutter="false"]
+#include("src/test/java/com/test/AppTest.java")
+[/code]
+
+
+
+<h3>Run the test case</h3>
+At this point you have 2 options.
+<ol>
+	<li>Run the test case in eclipse using JUnit test runner</li>
+	<li>Run the test by executing "mvn test" on the command line.</li>
+</ol>
+Either way you will see output similar to this...
+
+[sourcecode gutter="false"]
+Hello World! 1275621161302
+Hello World! 1275621164539
+Hello World! 1275621179581
+Hello World! 1275621424099
+total rows returned: 4
+[/sourcecode]
+<h3>Be sure to Shutdown</h3>
+All you need to do is to issue a SQL SHUTDOWN command to instruct HSQLDB to initiate a shutdown procedure. This is an important step to allow the data in memory to be saved to the disk.
+
+You will notice that 2 files have been created in the src/main/resources/db directory.
+<ul>
+	<li>mydbname.properties - contains the settings for the database.</li>
+	<li>mydbname.script - contains the data for the tables</li>
+</ul>
+<h3>References</h3>
+<ul>
+	<li><a href="http://trapo.posterous.com/maven-hibernate-spring-hsqldb-your-tests-runn" target="_blank">http://trapo.posterous.com/maven-hibernate-spring-hsqldb-your-tests-runn</a></li>
+	<li><a href="http://hsqldb.org/doc/2.0/guide/" target="_blank">http://hsqldb.org/doc/2.0/guide/</a></li>
+</ul>
+
+$blog_header

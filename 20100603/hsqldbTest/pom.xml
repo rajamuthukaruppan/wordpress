@@ -1,0 +1,53 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.test</groupId>
+	<artifactId>hsqldbTest</artifactId>
+	<packaging>jar</packaging>
+	<version>20100603</version>
+	<name>hsqldbTest</name>
+	<url>http://maven.apache.org</url>
+	
+	<pluginRepositories>
+		<pluginRepository> <!-- Ignore this repository. Its only used for document publication. -->
+			<id>numberformat-releases</id>
+			<url>https://raw.githubusercontent.com/numberformat/wordpress/master/20130213/repo/</url>
+		</pluginRepository>
+	</pluginRepositories>
+		
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>3.8.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hsqldb</groupId>
+			<artifactId>hsqldb</artifactId>
+			<version>2.3.3</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+<build>
+		<plugins>
+			<plugin> <!-- Ignore this plugin. Its only used for document publication. -->
+				<groupId>github.numberformat</groupId>
+				<artifactId>blog-plugin</artifactId>
+				<version>1.0-SNAPSHOT</version>
+				<configuration>
+					<gitUrl>https://github.com/numberformat/wordpress/tree/master/${project.version}/${project.artifactId}</gitUrl>
+				</configuration>
+				<executions>
+					<execution>
+						<id>1</id>
+						<phase>site</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+</build>	
+</project>
