@@ -1,0 +1,228 @@
+This page describes the process one can take to send automated emails based on a velocity template, Maven and the Spring Framework. The page also covers how to send email with inline resources. These emails have the images included in the message as mime attachments.
+
+Requirements
+<ul>
+	<li>Velocity Template Library</li>
+	<li>Spring Framework</li>
+	<li>Maven</li>
+	<li>SMTP port 25 access (eg. mail.yourhostname.com)</li>
+</ul>
+This page requires you have access to a mail server that can accept mail from your machine. You may typically test this by running telnet mail.yourhostname.com 25. Test this by manually sending a message and verify that it gets sent.
+
+<h3>Start the project</h3>
+
+[sourcecode language="shell" light="true"]
+mvn archetype:generate -DarchetypeArtifactId=maven-archetype-quickstart
+[/sourcecode]
+
+groupId: com.test
+artifactId: test-email
+
+Hit enter for the rest of the questions leaving them default.
+
+After creating the project edit the pom.xml file and add the following dependencies.
+
+[sourcecode language="html" light="true"]
+	<dependency>
+	  <groupId>javax.mail</groupId>
+	  <artifactId>mail</artifactId>
+	  <version>1.4</version>
+	</dependency>
+	<dependency>
+		<groupId>org.springframework</groupId>
+		<artifactId>spring</artifactId>
+		<version>2.5.6</version>
+	</dependency>	
+	<dependency>
+		<groupId>velocity</groupId>
+		<artifactId>velocity</artifactId>
+		<version>1.5</version>
+	</dependency>
+[/sourcecode]
+
+<h3>Creating a template</h3>
+The first step in the process is to create a email template. The template contains email layout. This is similar to creating a JSP page.
+
+[sourcecode language="html" light="true"]
+<html>
+<body>
+<h3>Hi ${user.userName}, welcome!</h3>
+
+<div>
+   Your email address is <a href="mailto:${user.emailAddress}">${user.emailAddress}</a>.
+</div>
+</body>
+</html>
+[/sourcecode]
+<h3>Configuration</h3>
+Since we are using the autowiring functionality of the spring framework we dont really need to explicitly define the beans in xml. Instead all we need are the next few lines.
+
+[sourcecode language="html" light="true"]
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+http://www.springframework.org/schema/context
+http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+
+<!-- The following is used for the @Autowired and @Required, @Resource etc... -->
+	<context:annotation-config/>
+	<context:component-scan base-package="com.test"/>
+
+   <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+      <property name="host" value="mail.hostname.com"/>
+   </bean>
+
+   <bean id="velocityEngine" class="org.springframework.ui.velocity.VelocityEngineFactoryBean">
+      <property name="velocityProperties">
+         <value>
+            resource.loader=class
+            class.resource.loader.class=org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader
+         </value>
+      </property>
+   </bean>
+
+</beans>
+[/sourcecode]
+<h3>Creating the application</h3>
+The following is the code to a simple java main application that will call the method that sends out the email.
+
+[sourcecode language="java" light="true"]
+package com.test;
+
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.mail.internet.MimeMessage;
+
+import org.apache.velocity.app.VelocityEngine;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Required;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.mail.javamail.MimeMessagePreparator;
+import org.springframework.stereotype.Component;
+import org.springframework.ui.velocity.VelocityEngineUtils;
+
+@Component("app")
+public class App {
+	private JavaMailSender mailSender;
+	private VelocityEngine velocityEngine;
+
+	public JavaMailSender getMailSender() {
+		return mailSender;
+	}
+
+	@Autowired
+	@Required
+	public void setMailSender(JavaMailSender mailSender) {
+		this.mailSender = mailSender;
+	}
+
+	public VelocityEngine getVelocityEngine() {
+		return velocityEngine;
+	}
+
+	@Autowired
+	@Required
+	public void setVelocityEngine(VelocityEngine velocityEngine) {
+		this.velocityEngine = velocityEngine;
+	}
+
+	public static void main(String[] args) {
+		// initialize spring context
+		ApplicationContext context = new ClassPathXmlApplicationContext(
+				new String[] { "applicationContext.xml" });
+		App app = (App) context.getBean("app");
+		// call the method
+		app.testEmail();
+	}
+
+	public void testEmail() {
+		final User user = new User();
+		user.setEmailAddress("neeraj.verma@hostname.com");
+		user.setUserName("verma");
+
+		MimeMessagePreparator preparator = new MimeMessagePreparator() {
+			public void prepare(MimeMessage mimeMessage) throws Exception {
+				MimeMessageHelper message = new MimeMessageHelper(mimeMessage);
+				message.setTo(user.getEmailAddress());
+				message.setFrom("neeraj.verma@hostname.com"); // could be
+				// parameterized...
+				Map model = new HashMap();
+				model.put("user", user);
+				String text = VelocityEngineUtils.mergeTemplateIntoString(
+						velocityEngine, "com/test/email-template.vm", model);
+				message.setText(text, true);
+			}
+		};
+		this.mailSender.send(preparator);
+	}
+}
+[/sourcecode]
+
+<h3>User</h3>
+[sourcecode language="java" light="true"]
+package com.test;
+
+public class User {
+	private String userName;
+	private String emailAddress;
+	
+	public String getUserName() {
+		return userName;
+	}
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+	public String getEmailAddress() {
+		return emailAddress;
+	}
+	public void setEmailAddress(String emailAddress) {
+		this.emailAddress = emailAddress;
+	}	
+}
+[/sourcecode]
+
+<h3>Running the code</h3>
+run the code by executing the following command.
+
+[sourcecode language="shell" light="true"]
+mvn exec:java -Dexec.mainClass="com.test.App"
+[/sourcecode]
+<h2>In-line resources using Velocity Templates.</h2>
+<h3>Change template to include images</h3>
+[sourcecode language="html" light="true"]
+<html>
+<body>
+<h3>Hi ${user.userName}, welcome!</h3>
+
+<div>
+   Your email address is <a href="mailto:${user.emailAddress}">${user.emailAddress}</a>.
+</div>
+<br/>
+<img src="cid:identifier1234"/>
+</body>
+</html>
+[/sourcecode]
+<h3>Convert to send multi-part messages</h3>
+[sourcecode language="html" light="true"]
+	MimeMessageHelper message = new MimeMessageHelper(mimeMessage, true); // multipart
+[/sourcecode]
+<h3>Add the image(s)</h3>
+Be careful with the order in which you add the resources. It may not work if it is not ordered  "correctly".
+
+[sourcecode language="java" light="true"]
+	FileSystemResource res = new FileSystemResource(new File(
+			"/home/verma/Desktop/wallpaper/wright.jpg"));
+	message.addInline("identifier1234", res);
+
+[/sourcecode]
+
+$blog_footer

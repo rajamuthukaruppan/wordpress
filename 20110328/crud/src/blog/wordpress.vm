@@ -1,0 +1,238 @@
+The following page describes how to create a simple web application that performs CRUD operations against the database using Ibatis SQL Mapper and the Spring Framework and an in-memory Java database called HyperSQL. Since we are using HSQLDB there is no need to set-up an external database. This page contains all the code you need to have a working database driven application.
+
+<strong>Note:</strong> This page was originally written on Nov 6 2009.
+
+$blog_header
+
+<h3>Background</h3>
+CRUD = <strong>C</strong>reate <strong>R</strong>ead <strong>U</strong>pdate <strong>D</strong>elete. 
+
+The application described here presents the user with a simple html form that allows them to create read update and delete items in the database. The Spring JDBC template and Ibatis is used to execute SQL statements. 
+
+<h3>Requirements</h3>
+<ol>
+	<li>Maven 2</li>
+	<li>Java 6</li>
+	<li>Servlet 2.5</li>
+	<li>Ibatis 2</li>
+	<li>Spring 2.5</li>
+	<li>Basic understanding of Spring and Ibatis</li>
+</ol>
+
+<h3>Procedure</h3>
+
+<h4>Outline</h4>
+<ol>
+	<li><a href="#1">Create a new Project</a></li>
+	<li><a href="#2">Database Setup and Configuration</a></li>
+	<li><a href="#3">Spring Application</a></li>
+	<li><a href="#4">Integration with Ibatis</a></li>
+	<li><a href="#5">Tying it all Together with Spring MVC</a></li>
+	<li><a href="#6">Web Application Configuration</a></li>
+	<li><a href="#7">Test the application</a></li>
+</ol>
+
+<a name="1"></a>
+<h3>Create a new project</h3>
+
+[sourcecode language="shell" gutter="false"]
+mvn archetype:generate -DarchetypeArtifactId=maven-archetype-webapp
+[/sourcecode]
+
+groupId: com.test
+artifactId: crud
+
+Answer the rest of the questions with defaults “Just hit the enter key”,
+
+cd to the project base folder.
+
+cd crud
+
+Since this is a web project maven2 does not create the java source folder.
+
+Create missing folders now.
+mkdir -p src/main/java/com/test
+mkdir -p src/main/resources/com/test
+mkdir -p src/main/webapp/WEB-INF/jsp
+
+Modify the project Configuration
+
+The pom.xml file should look something like this.
+
+
+vi pom.xml
+[sourcecode language="xml" gutter="false"]
+#include("pom.xml")
+[/sourcecode]
+<a name="2"></a>
+<h3>Database Setup and Configuration</h3>
+The following configuration file is used by Apache DDLUtils to generate apply the schema changes each time the application restarts. Changes are made incrementally and every attempt is made to preserve the data. For more information about DDLUtils <a href="http://numberformat.wordpress.com/2011/03/31/schema-maintenance-using-ddlutils/">please see my other tutorial</a>.
+
+vi src/main/resources/ddl.xml
+[sourcecode language="xml" gutter="false"]
+#include("src/main/resources/ddl.xml")
+[/sourcecode]
+
+Since we are working with HSQLDB, it is critical that we gracefully shut-down the database when the application stops. Otherwise the data that was cached in memory will be lost.
+
+We will use a "ServletContextListener" to listen for the application shut-down event. This will allow us to execute code to graceful shut-down the HSQLDB database. 
+
+vi src/main/java/com/test/DBLifecycleContextListener.java
+[sourcecode language="java" gutter="false"]
+#include("src/main/java/com/test/DBLifecycleContextListener.java")
+[/sourcecode]
+<a name="3"></a>
+<h3>Spring Application</h3>
+
+The Spring application consists of a 
+<ul>
+	<li>Item - POJO that represents the individual item</li>
+	<li>ItemModel - Service Interface</li>
+	<li>ItemModelImpl - Implementation of the Service</li>
+	<li>ItemDataManager - DataManager Interface</li>
+	<li>ItemDataManagerImpl - DataManager Implementation</li>
+</ul>
+
+The majority of the configuration is Annotation Based. For more information on annotation based spring configuration please see my other tutorial "<a href="http://numberformat.wordpress.com/2009/10/28/using-annotations-in-the-spring-framework/">using annotations in the spring framework</a>". Also checkout the following: "<a href="http://numberformat.wordpress.com/2009/09/02/hello-world-spring-mvc-with-annotations/">hello world spring mvc with annotations</a>".
+
+<h3>Item Bean</h3>
+
+vi src/main/java/com/test/Item.java
+[sourcecode language="java" gutter="false"]
+#include("src/main/java/com/test/Item.java")
+[/sourcecode]
+
+
+<h3>Spring Model classes</h3>
+
+The following interface and implementation classes are currently being used a pass-thru to the data manager. Its not adding any value to the application but once we start using Spring Transactions we will be glad we did it this way.
+
+vi src/main/java/com/test/ItemModel.java
+[sourcecode language="java" gutter="false"]
+#include("src/main/java/com/test/ItemModel.java")
+[/sourcecode]
+
+The following is the implementation class.
+
+vi src/main/java/com/test/ItemModelImpl.java
+[sourcecode language="java" gutter="false"]
+#include("src/main/java/com/test/ItemModelImpl.java")
+[/sourcecode]
+
+<h3>Spring Data Managers</h3>
+
+Data Managers isolate the Model from the implementation of the data store.
+
+vi src/main/java/com/test/ItemDataManager.java
+[sourcecode language="java" gutter="false"]
+#include("src/main/java/com/test/ItemDataManager.java")
+[/sourcecode]
+
+The following is the data manager implementation class.
+
+vi src/main/java/com/test/ItemDataManagerImpl.java
+[sourcecode language="java" gutter="false"]
+#include("src/main/java/com/test/ItemDataManagerImpl.java")
+[/sourcecode]
+
+
+<h3>Spring Configuration</h3>
+Most of the spring configuration was done using Java Annotations, therefore this file is not too large.
+
+vi src/main/resources/applicationContext.xml
+[sourcecode language="html" gutter="false"]
+#include("src/main/resources/applicationContext.xml")
+[/sourcecode]
+
+Configure simple logging to the console.
+
+vi src/main/resources/log4j.properties
+[sourcecode gutter="false"]
+#include("src/main/resources/log4j.properties")
+[/sourcecode]
+
+<a name="4"></a>
+<h3>Integration with IBATIS</h3>
+The following needs to be defined in the spring configuration. The SQLMapClientTemplate is the primary class that will be used by our data-mangers to query the database thru SQL statements and stored procedure calls. It needs a reference to sqlMapClient that we just created.
+
+The following is the ibatis main configuration file. Since we are using spring framework there is not much configuration that you need to put in here. All that is required is that ibatis knows where the xml files for all the Data Managers are located. 
+
+For more information on ibatis please see my other tutorial "<a href="http://numberformat.wordpress.com/2009/10/27/ibatis-2-3-spring-2-5-hello-world/">ibatis 2.3 spring 2.5 hello world</a>"
+
+vi src/main/webapp/WEB-INF/mapper-config.xml
+[sourcecode language="java" gutter="false"]
+#include("src/main/webapp/WEB-INF/mapper-config.xml")
+[/sourcecode]
+
+vi src/main/resources/com/test/ItemDataManager.xml
+[sourcecode language="html" gutter="false"]
+#include("src/main/resources/com/test/ItemDataManager.xml")
+[/sourcecode]
+
+<a name="5"></a>
+<h3>Tying it all Together with Spring MVC</h3>
+
+The following is the controller class that handles the http form submissions.
+
+vi src/main/java/com/test/ItemController.java
+[sourcecode language="java" gutter="false"]
+#include("src/main/java/com/test/ItemController.java")
+[/sourcecode]
+
+<h3>Create the Test HTML Form</h3>
+The following form issues a POST request to the spring MVC controller. The form is missing the "action" attribute because by default the form posts back to the originating URL. In this case the originating URL is "/apps/item"
+
+vi src/main/webapp/WEB-INF/jsp/index.jsp
+[sourcecode language="html" gutter="false"]
+#include("src/main/webapp/WEB-INF/jsp/index.jsp")
+[/sourcecode]
+
+<a name="6"></a>
+<h3>Web Application Configuration</h3>
+
+The ordering of the listeners are important. You want to make sure that the spring application context is initialized before the DBLifecycleListener.
+
+vi src/main/webapp/WEB-INF/web.xml
+[sourcecode language="xml" gutter="false"]
+#include("src/main/webapp/WEB-INF/web.xml")
+[/sourcecode]
+
+vi src/main/webapp/WEB-INF/spring-servlet.xml
+[sourcecode language="xml" gutter="false"]
+<?xml version="1.0" encoding="UTF-8"?>
+#include("src/main/webapp/WEB-INF/spring-servlet.xml")
+[/sourcecode]
+
+<h3>Start Jetty Servlet Engine</h3>
+[sourcecode language="shell" gutter="false"]
+mvn clean compile jetty:run
+[/sourcecode]
+
+<a name="7"></a>
+<h3>Test the application</h3>
+	<li>Navigate to: <a href="http://localhost:8080/crud/app/item">http://localhost:8080/crud/app/item</a> and enter some data</li>
+
+Test the following as well.
+<ol>
+	<li>then shutting down jetty - CTRL-C</li>
+	<li>verify the data survived in the src/main/webapp/WEB-INF/db directory.</li>
+</ol>
+
+<h3>Creating a WAR file</h3>
+If you want to run the application in another environment you can create a war file and drop it into a server of your choice. This method will also package up any runtime dependencies and put them in the /WEB-INF/lib folder of the WAR file.
+
+[sourcecode language="shell" gutter="false"]
+mvn clean compile package
+[/sourcecode]
+
+The war file should appear in the following location…
+
+target/crud-1.0-SNAPSHOT.war
+
+<h3>Next Steps</h3>
+<ul>
+	<li><a href="http://numberformat.wordpress.com/2011/04/20/extjs-spring-mvc-validation-using-commons-validator/">Part II in this series is about how to use an extJS form panel.</a></li>
+	<li><a href="http://numberformat.wordpress.com/2011/04/07/restful-crud-using-extjs/">Part III is about using extJS Grid to do the same.</a></li>
+</ul>
+
+$blog_footer

@@ -1,0 +1,341 @@
+<h3>Introduction</h3>
+There are many products out there that allow for conversions of XML to java and Back. One of the popular tools I have used in the past is Betwixt from the Apache commons project. Other tools out there include XStream. The following page describes how to use JAXB to convert xml to java and Java to XML. If you have used web services you know what I am talking about.
+
+With the introduction of the Java 5 Annotations and the new JAX-WS standard I thought it would be a good idea to learn more about JAXB. Betwixt was great for small projects but some heavy weight stuff like web services I would use something like the following.
+
+<h3>Example 1: Marshalling a simple Customer POJO</h3>
+In this example we will marshal a customer pojo object from java to XML and un-marshal it from xml back to Java.
+
+Start by creating a Customer.java class in the customer package.
+
+[code language="java" gutter="false"]
+package customerpackage;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+/**
+ * Represents a customerpackage
+ */
+@XmlRootElement
+public class Customer {
+	private Integer id;
+	private String firstName;
+	private String lastName;
+	private String SSN;
+
+	public Integer getId() {
+		return id;
+	}
+	public void setId(Integer id) {
+		this.id = id;
+	}
+	@XmlElement(nillable=true)
+	public String getFirstName() {
+		return firstName;
+	}
+
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+	@XmlElement(nillable=true)
+	public String getLastName() {
+		return lastName;
+	}
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+	@XmlElement(name="socialSecurityNumber")
+	public String getSSN() {
+		return SSN;
+	}
+	public void setSSN(String sSN) {
+		SSN = sSN;
+	}
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append("FirstName: " + this.firstName);
+		sb.append("\nLastName: " + this.lastName);
+		sb.append("\nSSN: " + this.SSN);
+		return sb.toString();
+
+	}
+}
+[/code]
+
+In order for the JAXB to work you need to have an ObjectFactory.java class in the customer package;
+
+[sourcecode language="java" gutter="false"]
+package customerpackage;
+
+import javax.xml.bind.annotation.XmlRegistry;
+
+@XmlRegistry
+public class ObjectFactory {
+
+	public ObjectFactory() {
+	}
+
+	public Customer createCustomer() {
+		return new Customer();
+	}
+}
+
+[/sourcecode]
+
+Create a simple java main application to test.
+
+[sourcecode language="java"]
+package customerpackage;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+
+/**
+ * Simple java main class that runs our example
+ *
+ */
+public class JAXApp {
+
+	public static void main(String args[]) throws Exception {
+		objectToXML();
+
+		//xmlToObject();
+	}
+
+	/**
+	 * Marshall information into an xml file.
+	 */
+	private static void objectToXML() throws Exception {
+		JAXBContext jc = JAXBContext.newInstance( "customerpackage" );
+		Customer cust = new Customer();
+		cust.setId(1);
+		cust.setFirstName("Neeraj");
+		cust.setLastName("Verma");
+		cust.setSSN("123-45-6789");
+		Marshaller m = jc.createMarshaller();
+		m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+		m.marshal( cust, System.out );
+
+	}
+
+	private static void xmlToObject() throws Exception {
+		JAXBContext jc = JAXBContext.newInstance( "customerpackage" );
+		Unmarshaller u = jc.createUnmarshaller();
+		Customer customer = (Customer)u.unmarshal( ClassLoader.getSystemResourceAsStream("customer.xml") );
+		System.out.println(customer);
+	}
+
+}
+
+[/sourcecode]
+
+<h3>Result</h3>
+Running the above application should print something like this to the console.
+[sourcecode gutter="false"]
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<customer>
+    <firstName>Neeraj</firstName>
+    <id>1</id>
+    <lastName>Verma</lastName>
+    <socialSecurityNumber>123-45-6789</socialSecurityNumber>
+</customer>
+[/sourcecode]
+
+<h3>Example 2: Marshalling a POJO containing a list of Other Objects</h3>
+In this example we will marshal a Manager object that contains a list of Employee's.
+
+Create a package named workpackage and put the following classes in it:
+
+Manager.java
+
+[sourcecode language="java" gutter="false"]
+package workpackage;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
+public class Manager {
+	private Integer managerId;
+	private String firstName;
+	private String lastName;
+	private List<Employee> employees = new ArrayList<Employee>();
+
+	public Integer getManagerId() {
+		return managerId;
+	}
+	public void setManagerId(Integer managerId) {
+		this.managerId = managerId;
+	}
+	public String getFirstName() {
+		return firstName;
+	}
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+	public String getLastName() {
+		return lastName;
+	}
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+	public List<Employee> getEmployees() {
+		return employees;
+	}
+	public void setEmployees(List<Employee> employees) {
+		this.employees = employees;
+	}
+
+	public String toString() {
+		StringBuffer buffer = new StringBuffer();
+		buffer.append("Manager Name: " + firstName + "\n");
+		buffer.append("employees: \n");
+		buffer.append(employees);
+		return buffer.toString();
+	}
+}
+
+[/sourcecode]
+
+Employee.java
+
+[sourcecode language="java" gutter="false"]
+package workpackage;
+
+public class Employee {
+	private Integer id;
+	private String firstName;
+
+	public Employee() {
+	}
+
+	public Employee(Integer id, String firstName, String lastName) {
+		this.id = id;
+		this.firstName = firstName;
+		this.lastName = lastName;
+	}
+
+	public Integer getId() {
+		return id;
+	}
+	public void setId(Integer id) {
+		this.id = id;
+	}
+	public String getFirstName() {
+		return firstName;
+	}
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+	public String getLastName() {
+		return lastName;
+	}
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+	private String lastName;
+
+	public String toString() {
+		return "id: "+ id + " Name: " + firstName + " " + lastName;
+	}
+}
+
+[/sourcecode]
+
+The following is the main application that is used to test. Be sure to enable the correct line in the main method.
+
+ManagerApp.java
+
+[sourcecode language="java" gutter="false"]
+package workpackage;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+
+public class ManagerApp {
+	public static void main(String args[]) throws Exception {
+		// enable the next line to print xml to the console
+		//objectToXML();
+
+		// copy the output to the console to manager.xml
+
+		// enable the following line to read from manager.xml in the root of the project.
+		xmlToObject();
+	}
+
+	/**
+	 * Marshall information into an xml file.
+	 */
+	private static void objectToXML() throws Exception {
+		JAXBContext jc = JAXBContext.newInstance( "workpackage" );
+		Manager manager = new Manager();
+		manager.setManagerId(1);
+		manager.setFirstName("Neeraj");
+		manager.setLastName("Verma");
+		manager.getEmployees().add(new Employee(1, "John", "Doe"));
+		manager.getEmployees().add(new Employee(2, "Jane", "Doe"));
+
+		Marshaller m = jc.createMarshaller();
+		m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+		m.marshal( manager, System.out );
+
+	}
+
+	private static void xmlToObject() throws Exception {
+		JAXBContext jc = JAXBContext.newInstance( "workpackage" );
+		Unmarshaller u = jc.createUnmarshaller();
+		Manager manager = (Manager)u.unmarshal( ClassLoader.getSystemResourceAsStream("manager.xml") );
+		System.out.println(manager);
+	}
+
+}
+[/sourcecode]
+
+should print something like this on the console:
+
+[sourcecode language="xml" gutter="false"]
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<manager>
+    <employees>
+        <firstName>John</firstName>
+        <id>1</id>
+        <lastName>Doe</lastName>
+    </employees>
+    <employees>
+        <firstName>Jane</firstName>
+        <id>2</id>
+        <lastName>Doe</lastName>
+    </employees>
+    <firstName>Neeraj</firstName>
+    <lastName>Verma</lastName>
+    <managerId>1</managerId>
+</manager>
+[/sourcecode]
+
+The second method should print something like this to the console:
+
+[sourcecode language="shell" gutter="false"]
+Manager Name: Neeraj
+employees: 
+[id: 1 Name: John Doe, id: 2 Name: Jane Doe]
+[/sourcecode]
+
+<h3>Excluding fields from the xml</h3>
+If you don't want some fields from your bean to show just use the following annotation. 
+[sourcecode language="java" gutter="false"]
+	@XmlTransient
+	public String getDontWantThis() {
+		return dontWantThis;
+	}
+[/sourcecode]
+The above will exclude a field from the output.
+
+<h3>Thats all for now!</h3>
+
+
+$blog_footer

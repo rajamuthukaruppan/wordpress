@@ -1,0 +1,248 @@
+$blog_header
+
+The following tutorial will show you how you can get started with your own spring MVC project.
+
+Before you continue further I would like to say one thing about developing web projects in eclipse or any other modern IDE. <strong>If you are not using maven by now then stop and familiarize yourself. <a href="http://maven.apache.org/">http://maven.apache.org/</a></strong>. The maven-eclipse-plugin makes development a hell of allot easer and less frustrating.
+
+It all starts with a maven pom.xml file. Be sure to customize the project coordinates and classpathContainer section of the file to your tastes.
+
+I am on the Eclipse Platform Version: 3.4.0 Build id: I20090313-0100 with Tomcat v6.0 running in the default WTP environment that comes with my version of eclipse. 
+
+Don't let that stop you. The method you see below should work for other versions as well.
+
+[sourcecode language="xml" gutter="false"]
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.vermatech.test</groupId>
+  <artifactId>testWeb</artifactId>
+<packaging>war</packaging>
+  <version>1.0.1-SNAPSHOT</version>
+  <name>testWeb</name>
+  <url>http://maven.apache.org</url>
+
+  <build>
+  <sourceDirectory>src</sourceDirectory>
+		<resources>
+			<resource>
+				<directory>src</directory>
+			</resource>	
+		</resources>
+<plugins>
+<plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.0.2</version>
+        <configuration>
+          <source>1.6</source>
+          <target>1.6</target>
+       </configuration>
+     </plugin>
+<plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-war-plugin</artifactId>
+		<configuration>
+			<webResources>
+				<resource>
+					<directory>WebContent</directory>
+				</resource>
+			</webResources>
+			<outputDirectory>WebContent/WEB-INF/classes</outputDirectory>
+			<warSourceDirectory>WebContent</warSourceDirectory>
+			<warName>TestWeb</warName>
+			<webXml>WebContent/WEB-INF/web.xml</webXml>
+		</configuration>
+	</plugin>
+<plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-eclipse-plugin</artifactId>
+		<configuration>
+					<downloadSources>true</downloadSources>
+					<downloadJavadocs>true</downloadJavadocs>
+<projectNameTemplate>TestWeb</projectNameTemplate>
+			<wtpapplicationxml>true</wtpapplicationxml>
+			<wtpversion>1.5</wtpversion>
+			<outputDirectory>WebContent/WEB-INF/classes</outputDirectory>
+			<classpathContainers>
+				
+				<classpathContainer>org.eclipse.jst.server.core.container/org.eclipse.jst.server.tomcat.runtimeTarget/Apache Tomcat v6.0</classpathContainer>
+				<classpathContainer>org.eclipse.jst.j2ee.internal.web.container</classpathContainer>
+				<classpathContainer>org.eclipse.jst.j2ee.internal.module.container</classpathContainer>
+			</classpathContainers>
+			<additionalProjectFacets>
+		 	<jst.web>2.5</jst.web>
+ 			</additionalProjectFacets>
+		</configuration>
+	</plugin>
+   </plugins>
+
+  </build>
+  <repositories>
+  </repositories>
+	<dependencies>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.14</version>
+			<exclusions>
+				<exclusion>					<groupId>javax.mail</groupId>
+				<artifactId>mail</artifactId>
+				</exclusion>
+				<exclusion>
+			<groupId>javax.jms</groupId>
+				<artifactId>jms</artifactId>
+				</exclusion>
+				<exclusion>
+			<groupId>com.sun.jdmk</groupId>
+				<artifactId>jmxtools</artifactId>
+				</exclusion>
+				<exclusion>
+			<groupId>com.sun.jmx</groupId>
+				<artifactId>jmxri</artifactId>
+				</exclusion>
+				<exclusion>
+			<groupId>javax.activation</groupId>
+			<artifactId>activation</artifactId>
+				</exclusion>
+			</exclusions>			
+		</dependency>
+
+		<dependency>
+		  <groupId>org.springframework</groupId>
+		  <artifactId>spring</artifactId>
+		  <version>2.5.6</version>
+		</dependency>
+		<dependency>
+		  <groupId>org.springframework</groupId>
+		  <artifactId>spring-webmvc</artifactId>
+		  <version>2.5.6</version>
+		</dependency>		
+
+	</dependencies>
+</project>
+
+[/sourcecode]
+
+Drop to the command prompt and cd to the project's folder. Type mvn eclipse:clean eclipse:eclipse
+
+The system will regenerate the eclipse project. Return to eclipse and refresh the project folder.
+
+The following is how the web.xml should look like. In this example the name of the dispatcher servlet is important because the system will look for a file in the WEB-INF folder with the same name appended with -servlet.xml.
+
+For example if the dispatcher servlet name is called spring then the system will look for /WEB-INF/spring-servlet.xml
+
+<strong>WEB-INF/web.xml file will look like this:</strong>
+
+[sourcecode language="xml" gutter="false"]
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	id="WebApp_ID" version="2.5">
+	<display-name>TestWeb</display-name>
+	<listener>
+	<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+
+	<servlet>
+		<servlet-name>spring</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>spring</servlet-name>
+		<url-pattern>/app/*</url-pattern>
+	</servlet-mapping>
+
+	<welcome-file-list>
+		<welcome-file>index.jsp</welcome-file>
+	</welcome-file-list>
+</web-app>
+[/sourcecode]
+
+<strong>/WEB-INF/spring-servlet.xml</strong>
+
+[sourcecode language="xml" gutter="false"]
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC
+	"-//SPRING//DTD BEAN//EN"
+	"http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>	
+
+	<bean name="/helloWorld" class="test.HelloWorldController">
+	</bean>
+
+	<bean id="viewResolver"
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+<property name="prefix" value="/WEB-INF/jsp/" />
+<property name="suffix" value=".jsp" />
+	</bean>
+
+</beans>
+[/sourcecode]
+
+<strong>/WEB-INF/applicationContext.xml should look like this:</strong>
+
+[sourcecode language="xml" gutter="false"]
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC
+	"-//SPRING//DTD BEAN//EN"
+	"http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+</beans>
+[/sourcecode]
+
+<strong>Create a java class that looks like this...</strong>
+
+[sourcecode language="java" gutter="false"]
+package test;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.AbstractController;
+
+public class HelloWorldController extends AbstractController {
+	@Override
+	protected ModelAndView handleRequestInternal(HttpServletRequest request,
+			HttpServletResponse response) throws Exception {
+
+		ModelAndView mav = null;
+		// control logic goes here
+		mav = new ModelAndView("helloWorld");
+		return mav;
+	}
+}
+
+[/sourcecode]
+
+And finally create a jsp to display the results /WEB-INF/jsp/helloWorld.jsp
+
+[sourcecode language="html" gutter="false"]
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"  
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">  
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">  
+ <head>  
+ <title>HelloWorld test page</title>  
+ <meta http-equiv="Content-type" content="text/html; charset=iso-8859-1" />  
+ <meta http-equiv="Content-Language" content="en-us" />
+
+ </head>
+<body>
+ Hello World page!
+</body>
+</html>
+[/sourcecode]
+
+Deploy the application to a WTP compatible server.
+
+<strong>Navigate to the web application</strong>
+http://localhost:8080/testWeb/app/helloWorld
+
+$blog_footer

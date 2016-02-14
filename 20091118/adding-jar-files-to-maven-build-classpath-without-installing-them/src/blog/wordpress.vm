@@ -1,0 +1,119 @@
+This page describes the process of adding JAR files to the build classpath without installing them into the local or remote repository. You typically would <strong>NOT</strong> want to do this unless absolutely necessary.
+
+We will create 2 projects where the second project will depend on the first one.
+<h3>Create the first project</h3>
+[sourcecode language="shell"]
+Define value for groupId: : test
+Define value for artifactId: : test
+Define value for version:  1.0-SNAPSHOT: :
+Define value for package:  test: :
+Confirm properties configuration:
+groupId: test
+artifactId: test
+version: 1.0-SNAPSHOT
+package: test
+ Y: :
+[/sourcecode]
+
+mvn install
+This will create a test-1.0-SNAPSHOT.jar file inside target folder.
+<h3>Create the second project</h3>
+cd ..
+mvn archetype:generate -DarchetypeArtifactId=maven-archetype-quickstart
+
+[sourcecode language="shell"]
+Define value for groupId: : test2
+Define value for artifactId: : test2
+Define value for version:  1.0-SNAPSHOT: :
+Define value for package:  test2: :
+Confirm properties configuration:
+groupId: test2
+artifactId: test2
+version: 1.0-SNAPSHOT
+package: test2
+ Y: :
+[/sourcecode]
+
+cd test2
+
+We will modify the second project and put in the dependencies to the first project and attempt to do a build. This build will naturally fail because test2 project does not have access to the jars for test project.
+
+Modify src/main/java/test2/App.java
+
+[sourcecode language="java"]
+package test2;
+
+public class App
+{
+    public static void main( String[] args )
+    {
+        test.App app = new test.App(); // this line contains a dependency on test project.
+        app.main(args);
+        System.out.println( "Hello World test2.App!" );
+    }
+}
+[/sourcecode]
+
+mvn install
+
+you should get the following errors.
+
+[sourcecode language="shell"]
+[ERROR] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Compilation failure
+/home/verma/workspace/test2/src/main/java/test2/App.java:[13,5] package test does not exist
+/home/verma/workspace/test2/src/main/java/test2/App.java:[13,24] package test does not exist
+[/sourcecode]
+
+In test2 project folder do the following.
+
+mkdir lib
+
+cp ../test/target/test-1.0-SNAPSHOT.jar lib
+
+modify pom.xml file inside the test2 project.
+
+[sourcecode language="xml"]
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>test2</groupId>
+  <artifactId>test2</artifactId>
+  <packaging>jar</packaging>
+  <version>1.0-SNAPSHOT</version>
+  <name>test2</name>
+  <url>http://maven.apache.org</url>
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>doesntMatter</groupId>
+      <artifactId>doesntMatter</artifactId>
+      <version>doesntMatter</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/lib/test-1.0-SNAPSHOT.jar</systemPath>
+    </dependency>
+  </dependencies>
+</project>
+[/sourcecode]
+<h3>Finally</h3>
+Retry the build and this time it should succeed.
+
+mvn install
+
+[sourcecode language="shell"]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESSFUL
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 2 seconds
+[INFO] Finished at: Wed Nov 18 21:56:33 EST 2009
+[INFO] Final Memory: 27M/433M
+[INFO] ------------------------------------------------------------------------
+[/sourcecode]
+
+$blog_footer

@@ -1,0 +1,94 @@
+This page describes the process of creating an Android application that will present the user with a Navigation Menu. When the user clicks they will be directed to either the "Product" or "Location" page. The "breakout" pages will have a back button that allows the user to return to the main menu.
+
+$blog_header
+
+<h3>Background</h3>
+This page Covers:
+<ul>
+	<li>Page Layouts</li>
+	<li>Creating ListView with menu items and icons</li>
+	<li>Creating Buttons and defining onClickListeners</li>
+	<li>Creating and starting Activities using Intents</li>
+</ul>
+
+<h3>Requirements</h3>
+<ul>
+	<li><a title="Setting up for Android 2.2 Development " href="http://numberformat.wordpress.com/2010/11/17/setting-up-for-android-2-2-development/" target="_blank">Android Development Environment</a></li>
+	<li><a title="Android ListView Layout Manager" href="http://numberformat.wordpress.com/2010/11/20/android-listview-layout-manager/" target="_blank">Basic Understanding of Android Applications</a></li>
+</ul>
+<h3>Create a new Project</h3>
+<ol>
+	<li>In eclipse Right click New -> project, choose “Android Project”</li>
+	<li>Project Name: AndroidNav</li>
+	<li>Package name: com.test</li>
+	<li>Create Activity: MainMenuActivity</li>
+	<li>Click Finish</li>
+</ol>
+<h3>Define the Resources</h3>
+Define the resource strings
+
+res/values/strings.xml
+[sourcecode language="xml" gutter="false"]
+#include("res/values/strings.xml")
+[/sourcecode]
+
+<h3>Layout Files</h3>
+Main Menu Activity presents a ListView containing 2 choices. Each item in the list has an icon to the left and to the right of the text. When the user clicks on the item a new page displays.
+
+/res/layout/main.xml
+[sourcecode language="xml" gutter="false"]
+#include("/res/layout/main.xml")
+[/sourcecode]
+
+Each row of the ListView seen above is defined by the following xml file. Each row contains an icon to the left and right of the text. An additional LinearLayout was required to get the icon to align/justify to the right.
+
+/res/layout/row.xml
+[sourcecode language="xml" gutter="false"]
+#include("/res/layout/row.xml")
+[/sourcecode]
+
+The Product and the Location page are the "breakout" pages. They have a back button on the bottom.
+
+/res/layout/product.xml
+[sourcecode language="xml" gutter="false"]
+#include("/res/layout/product.xml")
+[/sourcecode]
+
+/res/layout/locations.xml
+[sourcecode language="xml" gutter="false"]
+#include("/res/layout/locations.xml")
+[/sourcecode]
+
+<h3>Activity Classes</h3>
+The following is the main activity class. This class listens to events from the ListView. It contains a switch statement that directs the user to the appropriate page based on their selection. I know its not really the best way to do it, if you guys have a suggestion to improve it please post a comment.
+
+src/com/test/MainMenuActivity.java
+[sourcecode language="java" gutter="false"]
+#include("src/com/test/MainMenuActivity.java")
+[/sourcecode]
+
+The following two activities are very similar. The implementation of the Back functionality in both are done by calling finish(). This might not be the best way of doing it since the main menu could have already been killed by android to re-claim memory.
+
+src/com/test/LocationMenuActivity.java
+[sourcecode language="java" gutter="false"]
+#include("src/com/test/LocationMenuActivity.java")
+[/sourcecode]
+
+src/com/test/ProductMenuActivity.java
+[sourcecode language="java" gutter="false"]
+#include("src/com/test/ProductMenuActivity.java")
+[/sourcecode]
+
+<h3>Android Manifest</h3>
+The manifest file contains definitions for:
+<ol>
+	<li>Application Name (Label)</li>
+	<li>Icon that represents the application</li>
+	<li>Each Activity</li>
+	<li>The "Main" Activity that will run when the application starts</li>
+</ol>
+AndroidManifest.xml
+[sourcecode language="xml" gutter="false"]
+#include("AndroidManifest.xml")
+[/sourcecode]
+$blog_footer

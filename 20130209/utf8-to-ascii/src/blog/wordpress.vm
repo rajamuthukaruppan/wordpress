@@ -1,0 +1,34 @@
+This page describes how to convert utf-8 or Unicode strings with diacritical characters or Unicode punctuation marks into Latin 1 encoding with minimal loss of information. 
+
+$blog_header
+
+There is a 2 step process to get this done.
+
+<h3>Step 1</h3>
+Use java.text.Normalizer to convert <a href="http://en.wikipedia.org/wiki/Diacritic">diacritical characters</a> with accents into ASCII characters.
+
+[sourcecode language="java" gutter="false"]
+str = Normalizer.normalize(str, Form.NFD).replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+[/sourcecode]
+
+<h3>Step 2</h3>
+
+Convert Symbols and punctuation marks into latin-1 equivalents.
+
+Currently the best way to get this done is to search and replace as seen below.
+
+<h3>Sample Swing App</h3>
+
+The following app demonstrates how to convert Unicode to ASCII latin-1.
+
+vi src/main/java/github/numberformat/utf/Norm.java
+[sourcecode language="java" gutter="false"]
+#include("src/main/java/github/numberformat/utf/Norm.java")
+[/sourcecode]
+
+To run the app just type the following:
+[sourcecode language='shell' gutter='false']
+mvn exec:java -Dexec.mainClass=github.numberformat.utf.Norm
+[/sourcecode]
+
+$blog_footer

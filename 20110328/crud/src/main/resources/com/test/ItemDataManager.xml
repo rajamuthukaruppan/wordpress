@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap
+        PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="Item">
+  
+<typeAlias alias="Item" type="com.test.Item" />
+  
+    <select id="allItems" resultClass="Item">
+        select item_id as itemId,
+        oem_id as oemId,
+        item_x as name,
+        description as description,
+        color as color,
+        image_url as imageURL,
+        price as price,
+        length as length,
+        width as width,
+        height as height,
+        weight as weight,
+        stock_qty as stockQty
+        from item;
+    </select>
+    <select id="getItemInfo" parameterClass="int" resultClass="Item">
+        select item_id as itemId,
+        oem_id as oemId,
+        item_x as name,
+        description as description,
+        color as color,
+        image_url as imageURL,
+        price as price,
+        length as length,
+        width as width,
+        height as height,
+        weight as weight,
+        stock_qty as stockQty
+        from item where item_id = #id#;
+    </select>
+   
+    <insert id="itemInsert" parameterClass="Item">
+        insert into item (oem_id,
+            item_x,
+            description,
+            color,
+            image_url,
+            price,
+            length,
+            width,
+            height,
+            weight,
+            stock_qty)
+        values ( #oemId#, #name#, #description#, #color#,
+            #imageURL#, #price#, #length#, #width#,
+            #height#, #weight#, #stockQty# );
+        <selectKey resultClass="int" >
+            <!-- HSQLDB -->
+            CALL IDENTITY();
+            <!-- MySQL -->
+            <!-- SELECT LAST_INSERT_ID(); -->
+        </selectKey>
+    </insert>
+    <update id="updateItem" parameterClass="Item">
+        update item set oem_id = #oemId#, item_x = #name#, description=#description#,
+            color = #color#, image_url = #imageURL#, price = #price#, length = #length#,
+            width = #width#, height = #height#, weight = #weight#, stock_qty = #stockQty#
+        where item_id = #itemId#;
+    </update>
+    <delete id="deleteItem" parameterClass="java.lang.Integer">
+        delete from item where item_id = #itemId#;
+    </delete>
+</sqlMap>

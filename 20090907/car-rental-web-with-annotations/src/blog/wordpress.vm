@@ -1,0 +1,104 @@
+$blog_header
+Annotations can be used with Spring MVC to process HTML form input. After the form input is processed the user is forwarded to a confirmation page. This article will focus on the Car Rental application we developed earlier in this series. We will take that application and convert it to use Annotation based configuration.
+
+If you have not done so already please make sure you satisfied the following requirements.
+
+Requirements
+<ul>
+	<li><a href="http://numberformat.wordpress.com/2009/08/08/car-rental-web-application/" target="_blank">Car Rental Web Application</a></li>
+</ul>
+The car rental web application is a standard "classic" Spring MVC project that takes input from the user and processes it. Then it forwards to the next page. In later versions of that application commons validation and valang were  added as part of the processing but that is beyond the scope of what we want to cover here.
+
+After configuring and testing the Car Rental Web Application you can add support for annotations by adding the following 3 lines to your spring-servlet.xml file.
+
+[sourcecode language='xml']
+<context:component-scan base-package="test"/>
+<bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping"/>
+<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter"/>
+[/sourcecode]
+
+The first line accepts a comma separated list of packages that need to be searched for annotations. Since all the files are located inside the "test" package we can leave this line as-is. <strong>
+</strong>
+
+To use annotation and non-annotation controllers together just specify the BeanNameUrlHandlerMapping and an order attribute.
+
+[sourcecode language='xml']
+    <bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping">
+<property name="order" value="1" />
+    </bean>
+    <bean class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping">
+<property name="order" value="0" />
+    </bean>
+    <bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+    </bean>
+[/sourcecode]
+
+Since we will be mixing pre 2.5 Spring MVC with the latest Annotation based controllers we need to specify the following line as well. The reason for this is that the Spring Dispatcher servlet pre-configures its self with sensible defaults. The handlerAdapter is one of the defaults it has. If you specify another handler adapter implementation it will blindly use it. For this purpose you need to restore the default handler adapter below.
+
+[sourcecode language='xml']
+<bean class="org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter" />
+[/sourcecode]
+
+The NewRequestFormController is a SimpleFormController. These type of controllers are specifically designed for Form Processing. Form interaction is a 2 step process. The first step is to display a blank, or pre-filled form to the user. The user fills out the form and submits it back to the application. The application takes the form data validates and processes it and forwards the user on to the success page.
+
+Lets prepare our annotated class to accept user data.
+
+In our class we will put the following annotation to handle requests that come in as GET requests.
+
+<strong>@RequestMapping(method = RequestMethod.GET)</strong>
+
+[sourcecode language='java']
+package test;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+@Controller
+@RequestMapping("/newRequestAnnotation")
+public class NewRequestAnnotationController {
+
+	@RequestMapping(method = RequestMethod.GET)
+	public String processGET(ModelMap model) {
+		CarReservation carReservation = new CarReservation();
+		carReservation.getAddress().setName("Frank Default");
+		model.addAttribute("carReservation", carReservation);
+		return "carNew";
+	}
+
+}
+[/sourcecode]
+
+In the above example we specify that the processGET() method will be called when the page is first requested. In the first request we will initialize the carReservation command bean and associate it with the request. This is a perfect time to pre-fill the form before the user starts inputting values.
+
+In the next step the user will be presented with the form. They will fill it out and hit submit. At this time the control will return to this bean. It's method will be a POST since we specified it as such in the form.
+
+Add the following to the NewRequestAnnotationController
+
+[sourcecode language='java']
+	@RequestMapping(method = RequestMethod.POST)
+	public String processPost(
+			@ModelAttribute("carReservation") CarReservation carReservation,
+			BindingResult result, SessionStatus status) {
+
+		System.out.println("processing post request.");
+		System.out.println("FirstName:"
+				+ carReservation.getParty().getFirstName());
+		System.out.println("LastName:"
+				+ carReservation.getParty().getLastName());
+
+		return "selectDate";
+	}
+[/sourcecode]
+
+In this example we have specified the form in the @ModelAttribute annotation in the method parameter list.
+
+The methods that are responsible for processing the post request are flexable. There are a few variations you can specify. In order to get a more detailed understanding please see my related article. <a href="http://wp.me/pvUBW-8J">HelloWorld Spring MVC with Annotations</a>
+
+You can run this example by navigating to the following URL:
+http://localhost:8080/carRentalWeb/app/newRequestAnnotation
+
+<strong>That's All!!!</strong>
+
+$blog_footer

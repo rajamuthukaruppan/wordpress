@@ -1,0 +1,28 @@
+For rapid prototyping within a web application you can run database queries directly from JSP's.
+
+Here is an example
+
+[sourcecode language="html"]
+<pre><%@ taglib uri="http://java.sun.com/jsp/jstl/sql" prefix="sql" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
+<sql:query var="rs" dataSource="jdbc/TestDB">
+select id, foo, bar from testdata
+</sql:query>
+
+<html>
+  <head>
+    <title>DB Test</title>
+  </head>
+  <body>
+<h2>Results</h2>
+<c:forEach var="row" items="${rs.rows}">
+    Foo ${row.foo}
+    Bar ${row.bar}
+</c:forEach>
+
+  </body>
+</html></pre>
+[/sourcecode]
+
+$blog_footer

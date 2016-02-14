@@ -1,0 +1,56 @@
+The following page describes the process of creating a simple spring MVC application using an archetype. The archetype was created my me for testing purposes. All it does is print a simple message to the browser when you navigate to the application.
+<h3>Requirements</h3>
+<a href="http://wp.me/pvUBW-ev" target="_blank">Maven</a>
+
+Access to the command prompt
+
+The Maven page above talks about eclipse you don't need eclipse to install and run the simple springMVC application described here.
+<h3>Creating the Project</h3>
+Execute the following archetype to create the spring MVC application
+
+[sourcecode language="shell" gutter="false"]
+mvn archetype:generate -DarchetypeGroupId=com.vermatech \
+-DarchetypeArtifactId=springmvc-archetype -DarchetypeVersion=1.0-SNAPSHOT \
+-DarchetypeRepository=http://www.vermatech.com/m2repo
+[/sourcecode]
+
+Answer some simple questions:
+
+[sourcecode language="shell" gutter="false"]
+Define value for groupId: : com.test2
+Define value for artifactId: : vtSpringTest
+Define value for version:  1.0-SNAPSHOT: :
+Define value for package:  com.test2: :
+Confirm properties configuration:
+groupId: com.test2
+artifactId: vtSpringTest
+version: 1.0-SNAPSHOT
+package: com.test2
+ Y: :
+[/sourcecode]
+<h3>Running the Application in Jetty</h3>
+Execute the following in the project's folder.
+
+[sourcecode language="shell" gutter="false"]
+mvn jetty:run
+[/sourcecode]
+
+Navigate to the following url http://localhost:8080/ and you should see a Welcome page come up.
+<h3>Advanced Jetty Settings</h3>
+The following allows jetty to serve from a different context root. It also allows the application to be reloaded 2 seconds after a change is detected to the classes or the web.xml file.
+[sourcecode language="html" gutter="false"]
+	<plugin>
+		<groupId>org.mortbay.jetty</groupId>
+		<artifactId>jetty-maven-plugin</artifactId>
+				<version>7.0.0.v20091005</version>
+		<configuration>
+			<scanIntervalSeconds>2</scanIntervalSeconds>
+			<webAppConfig>
+				<contextPath>/biggerstrongerbetterfaster</contextPath>			
+			</webAppConfig>
+		</configuration>
+	</plugin> 
+[/sourcecode]
+
+<h3>Thats All!</h3>
+$blog_footer

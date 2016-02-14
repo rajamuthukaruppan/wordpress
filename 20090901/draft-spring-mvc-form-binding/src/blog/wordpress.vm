@@ -1,0 +1,354 @@
+$blog_header
+The SimpleFormController handles the form processing life-cycle. This includes displaying the initial form, form binding and validation.
+
+The following activity diagram
+
+<img class="alignnone size-full wp-image-631" title="SimpleFormControllerActivity" src="http://numberformat.wordpress.com/files/2009/08/simpleformcontrolleractivity1.png" alt="SimpleFormControllerActivity" width="655" height="582" />
+
+When the simple form controler gets a request it first checks to see if it was a form submission. If it was not a form submission The request is forwarded to the formView. The system displays the input page so that the user can fill out the form for the first time. If the request is a form submission then validation is done if necessary. If there were any errors then the user is returned to the formView. Otherwise the system handles the form submit.
+<h2><strong>Example 1 - Simple form submission</strong></h2>
+In this example we will submit a simple form that contains the following attributes.
+<ul>
+	<li>Name</li>
+	<li>Street Address</li>
+	<li>City</li>
+	<li>State</li>
+	<li>Zip</li>
+</ul>
+<h2>Example 1a - nested beans</h2>
+In this example we will submit a form that has nested properties. The layout of the form will look similar to the example above however instead of storing the address in a flat command bean we will nest an Address bean within the Employee bean.
+
+<img class="alignnone size-full wp-image-636" style="border:1px solid black;" title="employee_address" src="http://numberformat.wordpress.com/files/2009/08/employee_address.png" alt="employee_address" width="211" height="348" />
+
+The command bean looks like this...
+
+[sourcecode language="java"]
+package test;
+
+public class Employee {
+	private String name;
+	private Address address = new Address();
+
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public Address getAddress() {
+		return address;
+	}
+	public void setAddress(Address address) {
+		this.address = address;
+	}
+}
+
+[/sourcecode]
+
+The controller looks like this:
+
+[sourcecode language="java"]
+package test;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.web.servlet.mvc.SimpleFormController;
+
+public class EmployeeController extends SimpleFormController {
+	private static final Log logger = LogFactory.getLog(EmployeeController.class);
+
+	public EmployeeController() {
+		setSuccessView("employeeInfo");
+		setFormView("employeeInfo");
+		setCommandClass(Employee.class);
+		setCommandName("employee");
+	}
+
+	@Override
+	protected void doSubmitAction(Object _command) throws Exception {
+		// by this time the form has been validated and ready to use.
+		Employee employee = (Employee)_command;
+		logger.debug("employee.name: " + employee.getName());
+		logger.debug("employee.address.street: " + employee.getAddress().getStreet());
+		logger.debug("employee.address.city: " + employee.getAddress().getCity());
+		logger.debug("employee.address.state: " + employee.getAddress().getState());
+		logger.debug("employee.address.zip: " + employee.getAddress().getZip());
+	}
+}
+[/sourcecode]
+
+Add the following line to your spring-servlet.xml
+
+[sourcecode language="xml"]
+	
+[/sourcecode]
+
+Lastly your jsp should look like this.
+
+[sourcecode language="html"]
+
+
+
+
+ 
+  <title>Employee Info</title>
+  
+  
+ 
+
+<h2>Employee Info</h2>
+<a href="">Return to Main Menu</a>
+<div id="body">
+<form method="post">
+Name
+<form />
+<h3>Address</h3>
+Street
+<form />
+City
+<form />
+State
+<form />
+Zip
+<form />
+
+
+</form></div>
+
+
+[/sourcecode]
+
+After running the program you should see the following in the log output
+
+[sourcecode language="shell"]
+
+2009-09-01 00:08:30,714 DEBUG test.EmployeeController - employee.name: a
+2009-09-01 00:08:30,714 DEBUG test.EmployeeController - employee.address.street: b
+2009-09-01 00:08:30,714 DEBUG test.EmployeeController - employee.address.city: c
+2009-09-01 00:08:30,714 DEBUG test.EmployeeController - employee.address.state: d
+2009-09-01 00:08:30,714 DEBUG test.EmployeeController - employee.address.zip: e
+
+[/sourcecode]
+<h2><strong>Example 2 - creating a command bean from a list of html submitted items.</strong></h2>
+Name
+Schools Attended
+1. IS 145
+2. Aviation High School
+3. Polytechnic University
+
+We will crate a command bean that looks like this:
+
+[sourcecode language="java"]
+	private String name;
+	private String[] school;
+[/sourcecode]
+
+Will be the same as if we created a command bean like this:
+
+[sourcecode language="java"]
+	private String name;
+	private List school;
+[/sourcecode]
+
+Spring MVC is smart enough to convert the html input objects into either Arrays or Lists.
+
+The HTML items are named the same so when the form is submitted the List gets all the text values from the form.
+<h2><strong>Example 3 - Reading form elements into an Array or a List.</strong></h2>
+The following is a "proper" way of working with Lists or array of objects that are submitted by html forms. Since the formBacking object is reconstructed on each request it needs to know how many blank Address Objects to add to the address list.
+
+In this example we have a button that allows the user to add another address object. The object will then be printed to the console.
+
+Note: the problem with this approach is that when the submit button is pressed the form gets bound to the command bean. Since this is not a session bean, a new Command bean is created. The new command bean has only 2 spaces for address to hold 4 address fields that were submitted by the form. PROBLEM!!!. We need a way to tell the binding logic to allocate enough address objects on the list so that the form does not cause an index out of bound exception.
+
+We used a few concepts here.
+1. JSTL to loop over the array of addresses
+2. spring form tags to display the values of the beans
+3. The count maintains the number of address objects to add to the addressList.
+
+This is what the form looks like
+
+[sourcecode language="html"]
+<form method="post">
+Name
+<form />
+<form />
+
+
+<h3>Address ${status.count}</h3>
+Street
+<form />
+City
+<form />
+State
+<form />
+Zip
+<form />
+
+
+Add/Delete Address
+<form />
+<form />
+
+
+</form>
+[/sourcecode]
+
+The following is what the command class looks like
+
+[sourcecode language="java"]
+package test;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Represents a customer.
+ */
+public class Customer {
+	private String name;
+	private Integer addressCount;
+	private List<Address> addresses = new ArrayList();
+	private String addressAction;
+
+	public Integer getAddressCount() {
+		return addressCount;
+	}
+
+	public void setAddressCount(Integer addressCount) {
+		this.addressCount = addressCount;
+	}
+
+	public String getAddressAction() {
+		return addressAction;
+	}
+
+	public void setAddressAction(String addressAction) {
+		this.addressAction = addressAction;
+	}
+
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public List<Address> getAddresses() {
+		return addresses;
+	}
+	public void setAddresses(List<Address> addresses) {
+		this.addresses = addresses;
+	}
+}
+
+[/sourcecode]
+
+As you can see the above class has a constructor that initializes the 2 address beans. Typically you will have the controller class do this for you.
+
+This is the Address class
+
+[sourcecode language="java"]
+package test;
+
+/**
+ * Represents a US based address.
+ */
+public class Address {
+	private String street;
+	private String city;
+	private String state;
+	private String zip;
+
+	public String getStreet() {
+		return street;
+	}
+	public void setStreet(String street) {
+		this.street = street;
+	}
+	public String getCity() {
+		return city;
+	}
+	public void setCity(String city) {
+		this.city = city;
+	}
+	public String getState() {
+		return state;
+	}
+	public void setState(String state) {
+		this.state = state;
+	}
+	public String getZip() {
+		return zip;
+	}
+	public void setZip(String zip) {
+		this.zip = zip;
+	}
+}
+[/sourcecode]
+
+This is what the controller looks like
+
+[sourcecode language="java"]
+package test;
+
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.SimpleFormController;
+
+public class OrderController extends SimpleFormController {
+	public OrderController() {
+		setSuccessView("customerInfo");
+		setFormView("customerInfo");
+		setCommandClass(Customer.class);
+		setCommandName("customer");
+	}
+
+	protected ModelAndView onSubmit(HttpServletRequest request, javax.servlet.http.HttpServletResponse response, Object _command, org.springframework.validation.BindException errors) throws Exception {
+		Customer customer = (Customer)_command;
+
+		if ("delete".equals(customer.getAddressAction())) {
+			customer.getAddresses().remove(customer.getAddresses().size()-1);
+			customer.setAddressCount(customer.getAddressCount()-1);
+		}
+		if ("add".equals(customer.getAddressAction())) {
+			customer.getAddresses().add(new Address());
+			customer.setAddressCount(customer.getAddressCount()+1);
+		}
+
+		request.setAttribute("customer", customer);
+		ModelAndView mav = new ModelAndView("customerInfo");
+		mav.addObject(customer);
+		return mav;
+	};
+
+	@Override
+	protected Object formBackingObject(HttpServletRequest request)
+			throws Exception {
+
+		String addressCountStr = request.getParameter("addressCount");
+
+		if(addressCountStr==null) {
+			addressCountStr = "1";
+
+		}
+		Integer addressCount = Integer.valueOf(addressCountStr);
+		Customer customer = new Customer();
+		customer.setAddressCount(addressCount);
+
+		List addresses = customer.getAddresses();
+		// allocate the addresses
+		for(int i=0; i< addressCount; i++) {
+			addresses.add(new Address());
+		}
+
+		return customer;
+	}
+}
+[/sourcecode]
+
+<strong>Note: If  you are populating the initial form display with data via the referenceData() method then you need to make sure you allocate enough containers in the formBackingObject.</strong>
+
+
+$blog_footer

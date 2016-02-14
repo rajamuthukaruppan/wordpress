@@ -1,0 +1,265 @@
+This page will show you how to create an Jave Enterprise application using Maven's multi-module and archetype capabilities.
+<h3>Requirements</h3>
+<ul>
+	<li>Maven</li>
+	<li>Eclipse IDE</li>
+	<li>Java 5 or above</li>
+	<li>Access to the Command Prompt</li>
+</ul>
+<h3>Hello Enterprise</h3>
+In the example we will name the application HelloEnterprise. This will be the parent project. The project will have 3 sub-projects listed below.
+<ol>
+	<li>HelloModel - contains the business logic</li>
+	<li>HelloWeb - contains the Web application flow control logic</li>
+	<li>HelloEar - small sub-project used simply to create the ear</li>
+</ol>
+<h3>Create the Parent Project</h3>
+The first step we will do is to create the parent project. This project will contain the others. Name the project something that is generic to the problem at hand.
+
+mvn archetype:generate -DarchetypeArtifactId=maven-archetype-quickstart
+
+[sourcecode language="shell"]
+Define value for groupId: : test
+Define value for artifactId: : hello-enterprise
+Define value for version:  1.0-SNAPSHOT: :
+Define value for package:  test: :
+Confirm properties configuration:
+groupId: test
+artifactId: hello-enterprise
+version: 1.0-SNAPSHOT
+package: test
+ Y: :
+[/sourcecode]
+
+cd hello-enterprise
+Edit the pom.xml and change the packaging to say pom instead of jar.
+<h3>Create the Model project</h3>
+For this step we will create a very simple model project that simply contains a single Model class. Though this is a very simple project it does show you how you can combine sub-modules into one ear file in the end.
+
+mvn archetype:generate -DarchetypeArtifactId=maven-archetype-quickstart
+
+This time answer the artifact id should be "hello-enterprise-model".
+
+Go ahead and create the model class
+
+cd hello-enterprise-model
+
+mvn eclipse:eclipse
+
+Import the project into eclipse and create the following class and interface
+
+<strong>Bean</strong>
+
+[sourcecode language="java"]
+package test;
+
+import java.math.BigDecimal;
+
+public class Product {
+	private Integer id;
+	private String name;
+	private BigDecimal price;
+
+	public Product(Integer id, String name, BigDecimal price) {
+		this.id = id;
+		this.name = name;
+		this.price = price;
+	}
+
+	public Integer getId() {
+		return id;
+	}
+	public void setId(Integer id) {
+		this.id = id;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public BigDecimal getPrice() {
+		return price;
+	}
+	public void setPrice(BigDecimal price) {
+		this.price = price;
+	}
+}
+[/sourcecode]
+
+<strong>Interface</strong>
+
+[sourcecode language="java"]
+package test;
+
+import java.util.List;
+
+public interface ProductDataManager {
+
+	public abstract List<Product> getAllProducts();
+
+}
+[/sourcecode]
+
+<strong>Class</strong>
+
+[sourcecode language="java"]
+package test;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
+public class ProductDataManagerImpl implements ProductDataManager {
+	/* (non-Javadoc)
+	 * @see test.ProductDataManager#[[#]]#getAllProducts()
+	 */
+	public List<Product> getAllProducts() {
+		List<Product> list = new ArrayList<Product>();
+
+		list.add(createProduct(1, "test1", BigDecimal.valueOf(12)));
+		list.add(createProduct(2, "test2", BigDecimal.valueOf(13)));
+		list.add(createProduct(3, "test3", BigDecimal.valueOf(14)));
+
+		return list;
+	}
+	private Product createProduct(Integer id, String name, BigDecimal price) {
+		Product product = new Product(id, name, price);
+		return product;
+	}
+}
+[/sourcecode]
+
+cd ..
+<h3>Create the web project</h3>
+To create the web project we will use an existing archetype that was created my me. It is an archetype of a very simple spring MVC application that prints some static text on the screen.
+
+[sourcecode language="shell"]
+mvn archetype:generate -DarchetypeGroupId=com.vermatech \
+-DarchetypeArtifactId=springmvc-archetype -DarchetypeVersion=1.0-SNAPSHOT \
+-DarchetypeRepository=http://www.vermatech.com/m2repo
+[/sourcecode]
+
+Answer the questions like this:
+
+[sourcecode language="shell"]
+Define value for groupId: : test
+Define value for artifactId: : hello-enterprise-web
+Define value for version:  1.0-SNAPSHOT: :
+Define value for package:  test: :
+Confirm properties configuration:
+groupId: test
+artifactId: hello-enterprise-web
+version: 1.0-SNAPSHOT
+package: test
+ Y: :
+[/sourcecode]
+
+You may test the project you just created from an archetype by typing mvn jetty:run from the hello-enterprise-web folder. Point your browser to: http://localhost:8080/ and verify everything is ok.
+
+When you are done return to the command prompt and cd to the hello-enterprise directory again.
+<h3>Create the Ear Project</h3>
+Finally we will create an EAR project that will allow us to create an EAR file.
+
+mvn archetype:generate -DarchetypeArtifactId=maven-archetype-quickstart
+
+Edit pom.xml and make sure it looks like the following.
+
+hello-enterprise/hello-enterprise-ear/pom.xml
+
+[sourcecode language="html"]
+<?xml version="1.0"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>hello-enterprise</artifactId>
+    <groupId>test</groupId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
+  <groupId>test</groupId>
+  <artifactId>hello-enterprise-ear</artifactId>
+  <packaging>ear</packaging>
+  <version>1.0-SNAPSHOT</version>
+  <name>hello-enterprise-ear</name>
+  <url>http://maven.apache.org</url>
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>test</groupId>
+      <artifactId>hello-enterprise-model</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>test</groupId>
+      <artifactId>hello-enterprise-web</artifactId>
+      <version>1.0-SNAPSHOT</version>
+      <type>war</type>
+    </dependency>
+
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-ear-plugin</artifactId>
+        <version>2.3.2</version>
+        <!-- configuring the ear plugin -->
+        <configuration>
+          <modules>
+            <webModule>
+              <groupId>test</groupId>
+              <artifactId>hello-enterprise-web</artifactId>
+            </webModule>
+          </modules>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
+[/sourcecode]
+
+Save and exit. Return to the hello-enterprise (parent) directory and run the following command:
+<h3>Start the build process</h3>
+mvn package
+
+You will see a bunch of stuff happen and at the end you will see the following results.
+
+[sourcecode language="shell"]
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary:
+[INFO] ------------------------------------------------------------------------
+[INFO] hello-enterprise ...................................... SUCCESS [1.194s]
+[INFO] hello-enterprise-model ................................ SUCCESS [0.938s]
+[INFO] springmvc-quickstart Maven Webapp ..................... SUCCESS [1.078s]
+[INFO] hello-enterprise-ear .................................. SUCCESS [0.647s]
+[INFO] ------------------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESSFUL
+[INFO] ------------------------------------------------------------------------
+[/sourcecode]
+
+At this time you can open the ear project's target folder and you will see the newly created ear.
+<h3>Deploy The Ear file</h3>
+Deploy the Ear to your Application server and do an application checkout.
+<h3>That's All</h3>
+<div id="_mcePaste" style="overflow:hidden;position:absolute;left:-10000px;top:3979px;width:1px;height:1px;">[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary:
+[INFO] ------------------------------------------------------------------------
+[INFO] hello-enterprise ...................................... SUCCESS [1.194s]
+[INFO] hello-enterprise-model ................................ SUCCESS [0.938s]
+[INFO] springmvc-quickstart Maven Webapp ..................... SUCCESS [1.078s]
+[INFO] hello-enterprise-ear .................................. SUCCESS [0.647s]
+[INFO] ------------------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESSFUL
+[INFO] ------------------------------------------------------------------------
+
+</div>
+
+$blog_footer

@@ -1,0 +1,224 @@
+<h3>Introduction</h3>
+This page explains how you can get a basic struts hello world application up and running using Maven 2.
+
+Lets start with the pom file and use it to regenerate our eclipse project.
+
+<h3>Implementation</h3>
+Start by creating a project from a Maven archetype.
+
+[sourcecode gutter="false"]
+mvn archetype:generate -DarchetypeArtifactId=maven-archetype-webapp
+[/sourcecode]
+
+Answer the rest of the questions like this… 
+
+[sourcecode gutter="false"]
+Define value for groupId: : com.test
+Define value for artifactId: : strutsTest
+Define value for version:  1.0-SNAPSHOT: :
+Define value for package:  com.test: :
+[/sourcecode]
+
+Hit enter for the rest of the defaults.
+
+cd to the project's folder
+Next we create the src/main/java folder since this is not done for us using the archetype.
+
+on unix you type: mkdir src/main/java
+
+Next we generate the eclipse project (optional). The project is still not ready however this step makes editing the pom.xml file easier.
+
+[sourcecode language="shell" gutter="false"]
+mvn eclipse:clean eclipse:eclipse
+[/sourcecode]
+
+Import the Existing project (generated project) into eclipse.
+
+Next steps are to typically modify the pom.xml file and insert the rest of the dependencies and regenerate the eclipse project by re-typing the above command and clicking refresh on the eclipse project.
+
+Update your pom.xml file to look like this...
+
+[sourcecode language="xml" gutter="false"]
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.test</groupId>
+  <artifactId>strutsTest</artifactId>
+  <packaging>war</packaging>
+  <version>1.0-SNAPSHOT</version>
+  <name>strutsTest Maven Webapp</name>
+  <url>http://maven.apache.org</url>
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>jstl</artifactId>
+            <version>1.1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>taglibs</groupId>
+            <artifactId>standard</artifactId>
+            <version>1.1.2</version>
+        </dependency>    
+		<dependency>
+			<groupId>org.apache.struts</groupId>
+			<artifactId>struts-core</artifactId>
+			<version>1.3.10</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.apache.geronimo.specs</groupId>
+		    <artifactId>geronimo-servlet_2.5_spec</artifactId>
+		    <version>1.2</version>
+		    <scope>provided</scope>
+		</dependency>    
+  </dependencies>
+  <build>
+    <finalName>strutsTest</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.mortbay.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <version>7.0.0.v20091005</version>
+                        <configuration>
+                         <scanIntervalSeconds>2</scanIntervalSeconds>
+                        </configuration>
+            </plugin>
+        </plugins>    
+  </build>
+</project>
+[/sourcecode]
+
+It all starts with the web.xml
+
+In the above code you see spring included as a dependency. Lets leave it there for now since this example is used to build a project that uses spring with struts together.
+
+Next we will modify the web.xml file
+
+src/main/webapp/WEB-INF/web.xml
+[sourcecode language="xml" gutter="false"]
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	id="WebApp_ID" version="2.5">
+	<display-name>strutsTest</display-name>
+	<welcome-file-list>
+		<welcome-file>index.jsp</welcome-file>
+	</welcome-file-list>
+
+	<servlet>
+		<servlet-name>action</servlet-name>
+		<servlet-class>org.apache.struts.action.ActionServlet</servlet-class>
+		<init-param>
+			<param-name>config</param-name>
+			<param-value>
+         /WEB-INF/struts-config.xml
+        </param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>action</servlet-name>
+		<url-pattern>*.do</url-pattern>
+	</servlet-mapping>
+
+</web-app>
+
+[/sourcecode]
+
+Next comes the struts-config.xml file. Both the web.xml and this file belong in the /WEB-INF folder.
+
+src/main/webapp/WEB-INF/struts-config.xml
+[sourcecode language="html" gutter="false"]
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+    <!DOCTYPE struts-config PUBLIC
+          "-//Apache Software Foundation//DTD Struts Configuration 1.3//EN"
+          "http://struts.apache.org/dtds/struts-config_1_3.dtd">
+
+<struts-config>
+	<action-mappings>
+		<action path="/HelloWorld"  type="com.test.HelloWorldAction">
+			<forward name="success" path="/helloWorld.jsp"></forward>
+		</action>
+	</action-mappings>
+</struts-config>
+[/sourcecode]
+
+Next is the hello world struts action
+src/main/java/com/test/HelloWorldAction.java
+[sourcecode language="java" gutter="false"]
+package com.test;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+
+public class HelloWorldAction extends org.apache.struts.action.Action {
+
+    private final static String SUCCESS = "success";
+
+    public ActionForward execute(ActionMapping mapping,ActionForm form,
+           HttpServletRequest request,HttpServletResponse response) throws Exception {
+
+        return mapping.findForward(SUCCESS);
+
+    }
+}
+[/sourcecode]
+
+Next we will create the JSP's used to display the pages.
+
+src/main/webapp/index.jsp
+[sourcecode language="html" gutter="false"]
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<html>
+<head>
+<title>Your Page Title</title>
+<meta http-equiv="REFRESH" content="0;url=<c:url value='/HelloWorld.do'/>"></HEAD>
+<BODY>
+Optional page text here.
+</BODY>
+</HTML>
+[/sourcecode]
+
+Next is the Hello World page
+
+src/main/webapp/helloWorld.jsp
+[sourcecode language="html" gutter="false"]
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+ <head>
+  <title>XHTML 1.0 Strict Template</title>
+  <meta http-equiv="Content-type" content="text/html; charset=iso-8859-1" />
+  <meta http-equiv="Content-Language" content="en-us" />
+ </head>
+Struts Hello World.
+ <body>
+</body>
+</html>
+[/sourcecode]
+
+<h3>Test the application</h3>
+Start up jetty and test your application
+
+mvn jetty:run
+
+navigate to http://localhost:8080/
+
+You should see a Hello World message.
+
+<a href="http://wp.me/pvUBW-ch">In the next section we will step thru the process of integrating spring with this simple struts application.</a>
+
+$blog_footer

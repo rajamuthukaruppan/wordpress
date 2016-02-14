@@ -1,0 +1,134 @@
+$blog_header
+In this article we will configure a Spring MVC project that uses Annotations with the popular Commons Validator Framework.
+
+Please ensure you have done the following before continuing with this article.
+
+<strong>Requirements</strong>
+<ul>
+	<li>Spring 2.5 or above</li>
+	<li>Java 5 or above</li>
+	<li><a href="http://wp.me/pvUBW-8Z" target="_blank">Car Rental Web With Annotations</a></li>
+</ul>
+After you have the car rental application functioning you can follow these simple steps to get your form validated with commons validator.
+
+Ensure you have the following keys defined in the resource property file.
+
+Insert the following into the resource bundle property file. If the values are not there then add them.
+
+[sourcecode language="shell" gutter="false"]
+info.firstName=First Name
+info.lastName=Last Name
+[/sourcecode]
+
+My validation.xml file looks like this...
+
+[sourcecode language="xml" gutter="false"]
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE form-validation PUBLIC
+ "-//Apache Software Foundation//DTD Commons Validator Rules Configuration 1.1.3//EN"
+ "http://jakarta.apache.org/commons/dtds/validator_1_1_3.dtd">
+
+<form-validation>
+
+ <formset>
+ <form name="carReservation">
+ <field property="party.firstName" depends="required">
+ <arg key="info.firstName" />
+ </field>
+ <field property="party.lastName" depends="required">
+ <arg key="info.lastName" />
+ </field>
+ </form>
+ </formset>
+
+</form-validation>
+[/sourcecode]
+
+All that needs to be done is to specify the name of the form and the fields that need validation.
+
+For each controller you need to inject the beanValidator so that it is available for the method that will handle the post.
+
+There are 2 ways to get this done.
+<ol>
+	<li>Define your bean in a spring configuration file</li>
+	<li>Use the @Autowired functionality</li>
+</ol>
+Option 1 kind of defeat's the purpose of using Annotation based controllers. The whole point was not to have your controller defined in a spring configuration file.
+
+Option 2 is better and that is what we will do here. Put the following into your Controller:
+[sourcecode language="java" gutter="false"]
+	@Autowired
+	@Qualifier("beanValidator")
+	private Validator beanValidator;	
+[/sourcecode]
+
+We don't need getters or setters for beanValidator, apparently spring takes care of setting the values internally.
+
+Put the following into the begining of the method that handles the POST.
+[sourcecode language="java" gutter="false"]
+		beanValidator.validate(carReservation, result);
+		if(result.hasErrors()) {
+			return "carNew";
+		}
+[/sourcecode]
+
+My NewRequestAnnotationController looks like this:
+[sourcecode language="java" gutter="false"]
+package test;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.Validator;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.support.SessionStatus;
+
+@Controller
+@RequestMapping("/newRequestAnnotation")
+public class NewRequestAnnotationController {
+
+	@Autowired
+	@Qualifier("beanValidator")
+	private Validator beanValidator;	
+
+	@RequestMapping(method = RequestMethod.GET)
+	public String processGET(ModelMap model) {
+		CarReservation carReservation = new CarReservation();
+		carReservation.getParty().setFirstName("John");
+		carReservation.getParty().setLastName("Doe");
+		model.addAttribute("carReservation", carReservation);		
+		return "carNew";
+	}
+	
+	@RequestMapping(method = RequestMethod.POST)
+	public String processPost(
+			@ModelAttribute("carReservation") CarReservation carReservation,
+			BindingResult result, SessionStatus status) {
+		
+		beanValidator.validate(carReservation, result);
+		if(result.hasErrors()) {
+			return "carNew";
+		}
+				
+		System.out.println("processing post request.");
+		System.out.println("FirstName:"
+				+ carReservation.getParty().getFirstName());
+		System.out.println("LastName:"
+				+ carReservation.getParty().getLastName());
+
+		return "selectDate";
+	}	
+}
+[/sourcecode]
+Save and restart...
+
+You can navigate to your application by typing
+http://localhost:8080/carRentalWeb/app/newRequestAnnotation
+
+<strong>That's All!!!</strong>
+
+$blog_footer

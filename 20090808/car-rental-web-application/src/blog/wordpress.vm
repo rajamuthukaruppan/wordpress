@@ -1,0 +1,177 @@
+$blog_header
+This article will show you how to modify the hello world application to accept user form input.
+
+The car rental web application allows the user to enter some basic information in a form. The form gets validated once the user submits.
+
+Requirements:
+<ul>
+	<li>A functioning Hello World Spring MVC Application <a href="http://numberformat.wordpress.com/2009/07/19/spring-mvc-hello-world/">please click here to have one created.</a></li>
+</ul>
+Please make sure you have went thru the instructions necessary to get a Spring MVC hello world application up and running. Once you have verified that it works continue below.
+
+The following is a declaration for a controller
+
+spring-servlet.xml
+
+[sourcecode language="xml" gutter="false"]
+	<bean name="/newRequest" class="test.NewRequestFormController">
+<property name="commandName" value="address"/>
+<property name="commandClass" value="test.Address"/>
+<property name="formView" value="carNew"/>
+<property name="successView" value="selectDate"/>
+	</bean>
+[/sourcecode]
+
+The following is the sourcecode for the NewRequestFormController
+
+[sourcecode language="java" gutter="false"]
+package test;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.web.bind.ServletRequestDataBinder;
+import org.springframework.web.servlet.mvc.SimpleFormController;
+
+public class NewRequestFormController extends SimpleFormController {
+	private CustomerModel customerModel;
+
+	public CustomerModel getCustomerModel() {
+		return customerModel;
+	}
+
+	public void setCustomerModel(CustomerModel customerModel) {
+		this.customerModel = customerModel;
+	}
+
+	@Override
+	protected void doSubmitAction(Object command) throws Exception {
+		CarReservation carReservation = (CarReservation)command;
+
+		Address address = carReservation.getAddress();
+		Party party = carReservation.getParty();
+
+		System.out.println("Processing the address object: " + address.getName());
+		System.out.println("Date successfully processed: " + address.getToday());
+		customerModel.reserveCar(carReservation);
+
+	}
+
+	@Override
+	protected void initBinder(HttpServletRequest request,
+			ServletRequestDataBinder binder) throws Exception {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        dateFormat.setLenient(false);
+        binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, true));
+	}
+}
+[/sourcecode]
+
+Next we will modify /WEB-INF/carNew.jsp
+
+[sourcecode language="html" gutter="false"]
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<%@ taglib uri="http://www.springmodules.org/tags/commons-validator" prefix="validator" %>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>XHTML 1.0 Transitional Document</title>
+<meta http-equiv="Content-type" content="text/html; charset=iso-8859-1" />
+<meta http-equiv="Content-Language" content="en-us" />
+
+</head>
+
+<body>
+<div id="header" align="center">Car Rental Request App</div>
+<div id="nav">
+<ul>
+	<li><a href="#">New Rental Request</a></li>
+</ul>
+</div>
+<div id="content">
+<h2>Step 1 | Enter Car pickup Address</h2>
+<div id="formcontainer">
+  	
+Please enter your information here: 
+  	<form:form commandName="address" name="address" method="post">
+<div class="clearfix">
+	  		<label>Name</label>
+	  		<form:input path="name"/>
+	  		<form:errors path="name" cssClass="error"/></div>
+<div class="clearfix">
+	  		<label>street</label>
+	  		<form:input path="street"/>
+	  		<form:errors path="street" cssClass="error"/></div>
+<div class="clearfix">
+	  		<label>city</label>
+	  		<form:input path="city"/>
+	  		<form:errors path="city" cssClass="error"/></div>
+<div class="clearfix">
+	  		<label>state</label>
+	  		<form:input path="state"/>
+	  		<form:errors path="state" cssClass="error"/></div>
+<div class="clearfix">
+	  		<label>zip</label>
+	  		<form:input path="zip"/>
+	  		<form:errors path="zip" cssClass="error"/></div>
+<div class="clearfix">
+	  		<label>today</label>
+	  		<form:input path="today"/> yyyy-MM-dd
+	  		<form:errors path="today" cssClass="error"/></div>
+<div class="clearfix" align="right">
+			<input type="submit"/></div>
+</form:form></div>
+</div>
+</body>
+</html>
+
+[/sourcecode]
+
+The following is the success page. It allow the user to continue the interaction.
+/WEB-INF/jsp/selectDate.jsp
+
+[sourcecode language="html" gutter="false"]
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>XHTML 1.0 Transitional Document</title>
+<meta http-equiv="Content-type" content="text/html; charset=iso-8859-1" />
+<meta http-equiv="Content-Language" content="en-us" />
+	<link href="<c:url value='/css/default.css'/>" rel="stylesheet" type="text/css"/>
+</head>
+
+<body>
+<div id="header" align="center">Car Rental Request App</div>
+<div id="nav">
+<ul>
+	<li><a href="#">New Rental Request</a></li>
+</ul>
+</div>
+<div id="content">
+<h2>Step 2 | Enter Car pickup Date</h2>
+</div>
+</body>
+</html>
+
+[/sourcecode]
+
+Navigate to the following url and you should see the input form.
+
+[yourcontextroot]/app/newRequest;
+
+Submit the form and you should be presented with the next page.
+
+At this point you can continue the tutorial and learn about how to add form validation:
+<a href="http://numberformat.wordpress.com/2009/08/01/spring-mvc-commons-validator-client-side-validation">http://numberformat.wordpress.com/2009/08/01/spring-mvc-commons-validator-client-side-validation</a>
+
+$blog_footer

@@ -1,0 +1,50 @@
+This page describes how to setup JDBC Resources in Tomcat 6.
+
+$blog_header
+
+<h3>Database Drivers</h3>
+
+Place the database driver jar file into the server/lib folder.
+
+<h3>Define the resource in Tomcat</h3>
+
+Place the following into the $CATALINA_BASE/conf/context.xml
+[sourcecode language="xml" gutter="false"]
+  <Resource name="jdbc/batch" auth="Container" type="javax.sql.DataSource"
+               maxActive="100" maxIdle="30" maxWait="10000"
+               username="username" password="password" driverClassName="com.mysql.jdbc.Driver"
+               url="jdbc:mysql://localhost:3306/batch"/>
+[/sourcecode]
+
+Please note that if you are running in Eclipse and have Tomcat 6 setup as a WTP project then this file is located in the "Server" project in your eclipse workspace.
+
+<h3>Create the resource reference</h3>
+The following step is important since every application server has their own JNDI Namespace. Defining the resource reference ensures that you don't tie your application to a particular proprietary implementation. <a href="http://numberformat.wordpress.com/2012/12/10/jndi-configuration-on-jboss-5/">(See my post on JNDI JBoss 5)</a>
+
+src/main/webapp/WEB-INF/web.xml
+[sourcecode language="xml" gutter="false"]
+#include("src/main/webapp/WEB-INF/web.xml")
+[/sourcecode]
+
+<h3>Test using Snoop JSP</h3>
+
+To test the datasource simply <a href="http://numberformat.wordpress.com/2010/01/02/snoopservlet-example/">create a snoop jsp to perform a lookup</a>.
+
+<h3>Test using your own Servlet</h3>
+
+src/main/java/com/test/TestServlet.java
+[sourcecode language="java" gutter="false"]
+#include("src/main/java/com/test/TestServlet.java")
+[/sourcecode]
+
+If you are using the popular spring framework you can do the following
+
+[sourcecode language="xml" gutter="false"]
+
+<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+    <property name="jndiName" value="jdbc/batch"/>
+    <property name="resourceRef" value="true"/>
+ </bean>
+[/sourcecode]
+
+$blog_footer

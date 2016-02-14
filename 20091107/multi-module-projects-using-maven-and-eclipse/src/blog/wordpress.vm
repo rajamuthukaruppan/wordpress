@@ -1,0 +1,598 @@
+Maven allows the programmer to create multi-module projects. A multi-module project is a special type of maven project - it does not produce any artifact. Its main purpose is to host modules - single maven projects - and to perform group operations for all modules. Each module specifies a parent-module. When parent modules are built they import all child modules into what maven calls a "reactor". When modules are inside the reactor they are build in the proper order. The proper order is determined by looking at each child module's dependencies.
+<h3>Requirements</h3>
+<ul>
+	<li>Eclipse 3.4 or above</li>
+	<li>Maven 2.0.9 or above</li>
+	<li>M2 Eclipse plug-in <a href="http://m2eclipse.sonatype.org/" target="_blank">http://m2eclipse.sonatype.org/</a></li>
+</ul>
+<h3>Maven Multi Modules projects in Eclipse</h3>
+Maven by default generates multi-module projects using a tree structure. The main project is at the top level and sub modules are nested below it.
+
+As of Eclipse 3.4 and Maven 2.0.9 when you use the eclipse plugin to generate the project it will take a maven project that has sub modules nested within it and flatten it out. However it will create soft links to the sub-modules of the parent. Therefore maven can keep its nested project structure and eclipse is happy. The m2 eclipse plugin tricks eclipse into thinking that all the projects are defined in the workspace directory at the top level.
+<h3>Example Application</h3>
+We will create a Web service Client that calls a web service that when passed a ip address it will return the location of an IP address. To demonstrate the capabilities of developing multi module projects using eclipse and Maven we will build 3 different front-ends for this web service.
+<ol>
+	<li>Java Main application (run from command line)</li>
+	<li>Swing Application (run from command line)</li>
+	<li>Web application (run from the integrated jetty app server)</li>
+</ol>
+Lets create a simple project in eclipse to start. This will be the parent project that will contain information about its one Web service and 3 front end modules.
+<h3>Parent Module</h3>
+This is the pom.xml file of the main module
+
+mvn archetype:generate -DarchetypeArtifactId=maven-archetype-quickstart
+
+Answer a few more questions. See responses below...
+
+[sourcecode language="shell"]
+32/33/34/35/36/37/38/39/40/41) 15: :
+Define value for groupId: : com.test
+Define value for artifactId: : parent
+Define value for version:  1.0-SNAPSHOT: :
+Define value for package:  com.test: :
+Confirm properties configuration:
+groupId: com.test
+artifactId: parent
+version: 1.0-SNAPSHOT
+package: com.test
+ Y: :
+[/sourcecode]
+
+After the project gets generated, cd to the parent directory and edit the pom.xml file. Change the packaging to pom
+
+[sourcecode language="java"]
+  <packaging>pom</packaging>
+[/sourcecode]
+
+Also add this to bottom of the file right before the end  tag
+
+[sourcecode language="html"]
+  <build>
+  	<pluginManagement>
+  		<plugins>
+  			<plugin>
+  				<groupId>org.apache.maven.plugins</groupId>
+  				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+  			</plugin>
+  		</plugins>
+  	</pluginManagement>
+  </build>
+[/sourcecode]
+
+save and exit.
+
+Type the following command.
+
+mvn archetype:generate -DarchetypeArtifactId=maven-archetype-quickstart
+
+Choose the same option as above and enter the same responses except the artifactId field: specify ip2GeoService. AFter returning to the command prompt type the following:
+
+mvn eclipse:clean eclipse:eclipse
+
+Open up eclipse and right click on the project explorer view and select import then import maven projects. Browse and select the parent project to import. Maven will automatically find the sub projects and import them as well to the top level. They are really not at the top level they just appear that way.
+<h3>Enable Apache CXF web service framework</h3>
+We will be hosting a web service for this exercise so we will host it using the popular Apache CXF framework. If you want to read more about apache CXF and how you can import web services you can <a href="http://wp.me/pvUBW-fw" target="_blank">read the following article</a>.
+
+Open the ip2GeoService/pom.xml file and add the following dependencies.
+
+[sourcecode language="html"]
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf</artifactId>
+			<version>2.1</version>
+			<type>pom</type>
+			<scope>compile</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-frontend-jaxws</artifactId>
+			<version>2.2.4</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-transports-http-jetty</artifactId>
+			<version>2.2.4</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+[/sourcecode]
+
+Save the file and regenerate the eclipse project: mvn eclipse:clean eclipse:eclipse
+
+Return to eclipse and refresh the parent and ip2GeoService project. Right click properties and observe the build classpath. YOu will notice that the ip2GeoService class has some additional jar files in the classpath while the parent project remains untouched.
+
+The next few steps I am going to copy and paste from my other blog page. These instructions are used to create a web service.
+
+open the ip2GeoService/pom.xml file and insert the following in the plugin tag in the build section of the pom.xml file.
+
+[sourcecode language="html"]
+  <build>
+  	<plugins>
+<plugin>
+	<groupId>org.apache.cxf</groupId>
+	<artifactId>cxf-codegen-plugin</artifactId>
+	<version>2.2.4</version>
+	<executions>
+		<execution>
+			<id>generate-sources</id>
+			<phase>generate-sources</phase>
+			<configuration>
+				<sourceRoot>generated/cxf</sourceRoot>
+				<wsdlOptions>
+					<wsdlOption>
+						<wsdl>document.wsdl</wsdl>
+					</wsdlOption>
+				</wsdlOptions>
+			</configuration>
+			<goals>
+				<goal>wsdl2java</goal>
+			</goals>
+		</execution>
+	</executions>
+</plugin>
+  	</plugins>
+  </build>
+
+[/sourcecode]
+
+Next obtain the <a href="http://ws.cdyne.com/ip2geo/ip2geo.asmx?wsdl">wsdl</a> file and save it to the document.wsdl in the root of the ip2GeoService project folder.
+
+Run the following command to generate a web service client classes from the WSDL.
+regenerate the eclipse project
+mvn eclipse:clean eclipse:eclipse
+
+Refresh the project in eclipse and you will notice that the code for the web service has been generated and put into the classpath. At this point the web service is ready to be called by our clients that we will be coding up shortly.
+<h3>Java Main Application sub module</h3>
+The first application we will be coding up is a simple java main() application that will run the web service via command line.
+
+return to the parent project and type the following:
+mvn archetype:generate -DarchetypeArtifactId=maven-archetype-quickstart
+
+Modify the pom.xml file and add the following
+
+[sourcecode language="html"]
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-frontend-jaxws</artifactId>
+			<version>2.2.4</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+[/sourcecode]
+
+Add the ip2GeoService as a dependency
+
+[sourcecode language="html"]
+		<dependency>
+			<groupId>com.test</groupId>
+			<artifactId>ip2GeoService</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>
+[/sourcecode]
+
+create a src/main/resources directory under the project.
+
+mvn eclipse:clean eclipse:eclipse on the subproject
+
+refresh the eclipse project
+
+create an app-context.xml file inside src/main/resources folder
+
+[sourcecode language="html"]
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:jaxws="http://cxf.apache.org/jaxws"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+
+    <jaxws:client id="ip2Geo"
+                  serviceClass="com.cdyne.ws.IP2GeoSoap"
+                  address="http://ws.cdyne.com/ip2geo/ip2geo.asmx" />
+</beans>
+[/sourcecode]
+
+Modify the com.test.App class that was generated for you by maven and make it look like this...
+
+[sourcecode language="java"]
+package com.test;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import com.cdyne.ws.IP2GeoSoap;
+import com.cdyne.ws.IPInformation;
+
+/**
+ * Hello world!
+ *
+ */
+public class App
+{
+    public static void main( String[] args )
+    {
+        System.out.println( "Hello World!" );
+		ApplicationContext context = new ClassPathXmlApplicationContext(new String[] {"app-context.xml"});
+
+		IP2GeoSoap ip2Geo = (IP2GeoSoap) context.getBean("ip2Geo");
+		IPInformation ipInformation = ip2Geo.resolveIP("12.12.12.12", "0");
+
+		System.out.println("City: " + ipInformation.getCity());
+		System.out.println("State: " + ipInformation.getStateProvince());
+		System.out.println("Country: " + ipInformation.getCountry());
+
+    }
+}
+[/sourcecode]
+
+Save and run the java main application by running the following command:
+mvn install
+mvn exec:java -Dexec.mainClass=com.test.App
+
+you should see output on your screen like this
+
+[sourcecode language="shell"]
+City: Anchorage
+State: AK
+Country: United States
+[/sourcecode]
+
+You have successfully created a standalone Java main application that is calling a web service thru a module dependency with IP2GeoService module. You may modify the java main application to get the ip address to pass to the web service thru the args[] string array.
+<h3>Web Application sub module</h3>
+To create a web application we will use the following command
+
+mvn archetype:generate -DarchetypeArtifactId=maven-archetype-webapp
+Answer the questions like this:
+
+[sourcecode language="shell"]
+[INFO] Generating project in Interactive mode
+Define value for groupId: : com.test
+Define value for artifactId: : ip2GeoWeb
+Define value for version:  1.0-SNAPSHOT: :
+Define value for package:  com.test: :
+Confirm properties configuration:
+groupId: com.test
+artifactId: ip2GeoWeb
+version: 1.0-SNAPSHOT
+package: com.test
+ Y: :
+[/sourcecode]
+
+mvn eclipse:clean eclipse:eclipse
+
+In eclipse right click on the parent project Refresh then select import. By default maven will not make the project a WTP compatible project. To make the web project easier to manage from within the eclipse environment we will enable WTP.
+
+Open the pom.xml file and edit the build section to look similar to the following:
+
+[sourcecode language="html"]
+	<build>
+	<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<configuration>
+					<warName>${artifactId}</warName>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<configuration>
+					<projectNameTemplate>${artifactId}</projectNameTemplate>
+					<wtpapplicationxml>true</wtpapplicationxml>
+					<downloadSources>true</downloadSources>
+					<downloadJavadocs>true</downloadJavadocs>
+					<wtpversion>1.5</wtpversion>
+					<outputDirectory>WebContent/WEB-INF/classes</outputDirectory>
+					<classpathContainers>
+						<classpathContainer>org.eclipse.jst.j2ee.internal.web.container</classpathContainer>
+						<classpathContainer>org.eclipse.jst.j2ee.internal.module.container</classpathContainer>
+					</classpathContainers>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.mortbay.jetty</groupId>
+				<artifactId>jetty-maven-plugin</artifactId>
+				<version>7.0.0.v20091005</version>
+				<configuration>
+					<scanIntervalSeconds>1</scanIntervalSeconds>
+				</configuration>
+			</plugin>
+	</plugins>
+    <finalName>ip2GeoWeb</finalName>
+  </build>
+[/sourcecode]
+
+We will also need to add the following dependency
+
+[sourcecode language="html"]
+    <dependency>
+    	<groupId>org.apache.geronimo.specs</groupId>
+    	<artifactId>geronimo-servlet_2.5_spec</artifactId>
+    	<version>1.2</version>
+    	<type>jar</type>
+    	<scope>compile</scope>
+    </dependency>
+[/sourcecode]
+
+Create a simple servlet that prints hello world.
+
+To test the web application we will be using a built in servlet engine called jetty.
+
+mvn jetty:run
+
+Close the server and implement the following code from within the goGet method of the servlet
+
+[sourcecode language="java"]
+package com.test.web;
+
+import java.io.IOException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import com.cdyne.ws.IP2GeoSoap;
+import com.cdyne.ws.IPInformation;
+
+public class IP2GeoServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+	private ApplicationContext context;
+
+	@Override
+    public void init() throws ServletException {
+		context = new ClassPathXmlApplicationContext(new String[] {"app-context.xml"});
+    	super.init();
+    }
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		request.setAttribute("ipInformation", new IPInformation());
+		request.getRequestDispatcher("/enterIp.jsp").forward(request, response);
+	}
+
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		IP2GeoSoap ip2Geo = (IP2GeoSoap) context.getBean("ip2Geo");
+		String ipAddress = (String) request.getParameter("ipAddress");
+		IPInformation ipInformation = new IPInformation();
+
+		if(ipAddress != null && !"".equals(ipAddress.trim())) {
+			System.out.println("finding location for: " + ipAddress);
+			ipInformation = ip2Geo.resolveIP(ipAddress, "0");
+			if("".equals(ipInformation.getCity())){
+				ipInformation.setCity("web service returned a blank response");
+			}
+		}
+		request.setAttribute("ipInformation", ipInformation);
+		request.getRequestDispatcher("/enterIp.jsp").forward(request, response);
+	}
+}
+[/sourcecode]
+
+The JSP looks like this...
+
+[sourcecode language="html"]
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<jsp:useBean id="ipInformation" type="com.cdyne.ws.IPInformation" scope="request"/>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+ <head>
+  <title>XHTML 1.0 Strict Template</title>
+  <meta http-equiv="Content-type" content="text/html; charset=iso-8859-1" />
+  <meta http-equiv="Content-Language" content="en-us" />
+ </head>
+
+<body>
+<form action="" method="post">
+	<label>ip address: </label>
+	<input type="text" name="ipAddress" value="12.12.12.12"/><br/>
+	<input type="submit" value="submit"/><br/>
+</form>
+<hr />
+
+Results:<br/>
+City: <jsp:getProperty property="city" name="ipInformation"/><br/>
+State: <jsp:getProperty property="stateProvince" name="ipInformation"/><br/>
+Country: <jsp:getProperty property="country" name="ipInformation"/><br/>
+
+</body>
+</html>
+[/sourcecode]
+
+you will notice that you get build errors. 2 reasons.
+1. spring is not listed as a dependency in the web application's pom.xml file.
+2. the ip2GeoService is not listed as a dependency
+
+Modify the pom.xml file to add these two dependencies. (spring will be brought in as a transitive dependency)
+
+[sourcecode language="html"]
+		<dependency>
+			<groupId>com.test</groupId>
+			<artifactId>ip2GeoService</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>
+[/sourcecode]
+
+Copy over the app-context.xml
+
+[sourcecode language="xml"]
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:jaxws="http://cxf.apache.org/jaxws"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+
+    <jaxws:client id="ip2Geo"
+                  serviceClass="com.cdyne.ws.IP2GeoSoap"
+                  address="http://ws.cdyne.com/ip2geo/ip2geo.asmx" />
+</beans>
+[/sourcecode]
+
+cd to parent/ip2GeoWeb
+
+mvn jetty:run
+
+navigate to: http://localhost:8080/IP2GeoServlet and you will see the output of the web service.
+<h3>Swing Application sub module</h3>
+Start the swing application by executing the following command:
+
+cd to the parent project
+mvn archetype:generate -DarchetypeArtifactId=maven-archetype-quickstart
+
+Answer the questions like this:
+
+[sourcecode language="shell"]
+Define value for groupId: : com.test
+Define value for artifactId: : ip2GeoSwing
+Define value for version:  1.0-SNAPSHOT: :
+Define value for package:  com.test: :
+Confirm properties configuration:
+groupId: com.test
+artifactId: ip2GeoSwing
+version: 1.0-SNAPSHOT
+package: com.test
+ Y: :
+[/sourcecode]
+
+Create a directory inside the swing project
+src/main/resources
+
+mvn eclipse:clean eclipse:eclipse
+refresh the parent project in eclipse and right click import the newly generated project.
+
+put the following file in the resource folder that was just created
+
+[sourcecode language="html"]
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:jaxws="http://cxf.apache.org/jaxws"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+
+    <jaxws:client id="ip2Geo"
+                  serviceClass="com.cdyne.ws.IP2GeoSoap"
+                  address="http://ws.cdyne.com/ip2geo/ip2geo.asmx" />
+</beans>
+[/sourcecode]
+
+Finally create the JFrame class that will run the web service and display the results.
+
+[sourcecode language="java"]
+package com.test;
+
+import java.awt.Color;
+import java.awt.Container;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JTextField;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import com.cdyne.ws.IP2GeoSoap;
+import com.cdyne.ws.IPInformation;
+
+public class App extends JFrame {
+	private JButton jButton;
+	private JTextField ipAddress;
+
+	private JTextField city;
+	private JTextField state;
+	private JTextField country;
+
+	private static final ApplicationContext context = new ClassPathXmlApplicationContext(
+			new String[] { "app-context.xml" });
+
+	private static final IP2GeoSoap ip2Geo = (IP2GeoSoap) context.getBean("ip2Geo");
+
+	public App() {
+		initFrame();
+
+	}
+
+	private JButton getWebServiceButton() {
+		JButton jButton = new JButton("execute Web Service");
+		jButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String ipValue = ipAddress.getText();
+				System.out.println("validating ip: " + ipValue);
+
+				IPInformation ipInformation = ip2Geo.resolveIP(ipValue, "0");
+
+				System.out.println("City: " + ipInformation.getCity());
+				System.out.println("State: " + ipInformation.getStateProvince());
+				System.out.println("Country: " + ipInformation.getCountry());
+				city.setText(ipInformation.getCity());
+				state.setText(ipInformation.getStateProvince());
+				country.setText(ipInformation.getCountry());
+
+			}
+		});
+
+		return jButton;
+	}
+
+	private void initFrame() {
+		this.setSize(400, 150);
+		Container content = this.getContentPane();
+		content.setBackground(Color.white);
+		content.setLayout(new FlowLayout());
+		this.addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				System.exit(0);
+			}
+		});
+
+		content.add(this.getWebServiceButton());
+		ipAddress = new JTextField("12.12.12.12");
+		content.add(ipAddress);
+
+		city = new JTextField("City");
+		state = new JTextField("State");
+		country = new JTextField("Country");
+
+		content.add(city);
+		content.add(state);
+		content.add(country);
+
+		this.setVisible(true);
+	}
+
+	public static void main(String[] args) {
+		App app = new App();
+	}
+
+}
+[/sourcecode]
+<h3>Wrap Up</h3>
+In Maven a parent project can have any number of sub projects under it. This makes management of each project easier. As you have seen we created a Web Service Client, and 3 different types of front ends for the web service client. In the real world the Web service sub-project would represent the Model layer. All common business logic would be available to all sub projects under the parent project.
+<h4><strong>Maven's capabilities that were exhibited above have really brought the Development in the Java Platform to another level. Code re-use can be maximized with thoughtful designs that separate projects out into their own areas.</strong></h4>
+For the Web applications Excel in allowing multiple users to access the application thru a very light weight medium. The Java main applications can be run from a non-interactive environments like distributed batch servers. Swing applications can be run where users require the updates to the screen which only a thick client application can provide.
+
+It is difficult to create a Single Java project that can accomplish all those responsibilities. But if you break up the project into parts where each sub-project handles its area of expertise and use the common business logic layer as a dependency, you can get the maximum code re-use.
+
+$blog_footer

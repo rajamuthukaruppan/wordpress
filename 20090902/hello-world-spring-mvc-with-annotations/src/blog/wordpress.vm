@@ -1,0 +1,107 @@
+$blog_header
+The spring framework prides itself as being non-invasive. To truly practice this creed you need to know a few things about using annotations.  This page describes how to create a simple hello world application using annotations.
+
+Requirements
+<ul>
+	<li><a href="http://wp.me/pvUBW-ev" target="_blank">Understanding of how to generate projects using Maven</a></li>
+	<li>A basic hello world application. <a href="http://numberformat.wordpress.com/2009/07/19/spring-mvc-hello-world/" target="_blank">please follow this link to create one</a></li>
+</ul>
+Once you have the basic hello world application up and running All  you need to do is modify the spring-servlet.xml file and specify the following lines:
+
+[sourcecode language="xml" gutter="false"]
+<context:component-scan base-package="package.to.search"/>
+<bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping"/>
+<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter"/>
+[/sourcecode]
+
+Note that the last 2 lines are optional. The DefaultAnnotationHandlerMapping will process @RequestMapping at the type level and AnnotationMethodHandlerAdaptor will be used to process method level annotations. These are defined as default when the Spring Dispatcher servlet initializes however if you have other handler mappings then this will need to be defined.
+
+Package.to.search is a package name where annotations will be found. you can also specify a comma separated list of packages.
+example:
+
+My spring-servlet.xml file looks like this:
+
+[sourcecode language="xml" gutter="false"]
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+
+	<context:component-scan base-package="test"/>
+    <bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping"/>
+    <bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter"/>
+
+	<bean id="viewResolver"
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+<property name="prefix" value="/WEB-INF/jsp/" />
+<property name="suffix" value=".jsp" />
+	</bean>
+</beans>
+[/sourcecode]
+
+The following can be used to simulate a SimpleFormController.
+
+[sourcecode language="java" gutter="false"]
+package test;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.support.SessionStatus;
+
+@Controller
+@RequestMapping("/AnnotationAddressForm")
+public class AnnotationAddressController {
+
+	@RequestMapping(method = RequestMethod.GET)
+	public String setupForm(ModelMap model) {
+		System.out.println("setup form called");
+
+		Address address = new Address();
+		address.setStreet("this is from db");
+
+		model.addAttribute("address", address);
+		return "index";
+	}
+
+	@RequestMapping(method = RequestMethod.POST)
+	public String processForm(@ModelAttribute("address") Address address, BindingResult result, SessionStatus status) {
+		System.out.println("processFormCalled");
+
+		return "index";
+	}
+}
+[/sourcecode]
+
+Finally you can navigate to the following url to test:
+
+http://localhost:8080/helloWorld/app/AnnotationAddressForm
+
+To use annotation and non-annotation controllers together just specify the BeanNameUrlHandlerMapping and an order attribute.
+
+[sourcecode language="xml" gutter="false"]
+    <bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping">
+<property name="order" value="1" />
+    </bean>
+    <bean class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping">
+<property name="order" value="0" />
+    </bean>
+    <bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+    </bean>
+<bean class="org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter">
+</bean>
+[/sourcecode]
+
+In the above configuration the BeanNameUrlHandlerMapping will be consulted first before a annotated controller is searched.
+
+$blog_footer

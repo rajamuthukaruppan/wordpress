@@ -1,0 +1,19 @@
+The following page shows how to integrate the ibatis framework with the spring framework. We will continue to describe one of the advanced declarative transactional features of the spring framework and show how they carry over to Ibatis.
+<h2>Outline</h2>
+<h3>Create a database</h3>
+We will create a simple database using MySQL server. This database will be used to store information on books in a online book store.
+<h3>First start with a blank spring application</h3>
+<h3>Add a data source</h3>
+We will add a datasource that will connect to mysql. To keep things simple we will define an unpooled datasource.
+<h3>configure Ibatis</h3>
+<h3>Do Inserts non transactionally</h3>
+run the sample code and observe the row being inserted
+
+introduce an exception in the model after the insert into the database
+<h3>Do inserts using declarative transactions</h3>
+make the the model transactional
+
+Rerun the code that throws an exception from the model layer.
+<h3>Verify rollback</h3>
+observe the work got rolled back.
+$blog_footer
