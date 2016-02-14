@@ -1,0 +1,104 @@
+There are three types of json:
+
+
+The server can output a string containing raw JSON data that the browser fetches with an XMLHTTPRequest and manually passes to the eval function. Example server-generated string: {'data': ['foo', 'bar', 'baz']} This type of json is restricted to the same origin policy.
+
+The server can output a string containing JavaScript code that assigns a JSON object to a variable; the browser would fetch this using a <script> tag and then extract the parsed object by referring to the variable by name. Example server-generated string: var result = {'data': ['foo', 'bar', 'baz']}; This type is surrounded by script tags.
+
+The server can output a string containing JavaScript code that passes a JSON object to a function specified in the request URL; the browser would fetch this using a <script> tag, which will automatically invoke the function as if it were an event callback, as soon as the JavaScript is parsed. Example server-generated string: handle_result({'data': ['foo', 'bar', 'baz']}); This type is surrounded by script tags.
+
+
+
+more information about building a get request
+
+http://www.gwtproject.org/doc/latest/tutorial/JSON.html#client
+
+
+
+Maing HTTP requests
+
+To use the HTTP types in your application, you'll need to first inherit the GWT HTTP module by adding the following <inherits> tag to your module XML file:
+
+<inherits name="com.google.gwt.http.HTTP" />
+
+
+Example Request:
+import com.google.gwt.http.client.*;
+...
+
+String url = "http://www.myserver.com/getData?type=3";
+RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, URL.encode(url));
+
+try {
+  Request request = builder.sendRequest(null, new RequestCallback() {
+    public void onError(Request request, Throwable exception) {
+       // Couldn't connect to server (could be timeout, SOP violation, etc.)
+    }
+
+    public void onResponseReceived(Request request, Response response) {
+      if (200 == response.getStatusCode()) {
+          // Process the response in response.getText()
+      } else {
+        // Handle the error.  Can get the status text from response.getStatusText()
+      }
+    }
+  });
+} catch (RequestException e) {
+  // Couldn't connect to server
+}
+
+
+
+{
+  "product": {
+    "name": "Widget",
+    "company": "ACME, Inc",
+    "partNumber": "7402-129",
+    "prices": [
+      { "minQty": 1, "price": 12.49 },
+      { "minQty": 10, "price": 9.99 },
+      { "minQty": 50, "price": 7.99 }
+    ]
+  }
+}
+
+
+Parsing JSON
+
+/*
+ * Takes in a JSON String and evals it.
+ * @param JSON String that you trust
+ * @return JavaScriptObject that you can cast to an Overlay Type
+ */
+public static <T extends JavaScriptObject> T parseJson(String jsonStr)
+{
+  return JsonUtils.safeEval(jsonStr);
+}
+
+
+Javascript overlay types
+
+var jsonData = [
+  { "FirstName" : "Jimmy", "LastName" : "Webber" },
+  { "FirstName" : "Alan",  "LastName" : "Dayal" },
+  { "FirstName" : "Keanu", "LastName" : "Spoon" },
+  { "FirstName" : "Emily", "LastName" : "Rudnick" }
+];
+
+// An overlay type
+class Customer extends JavaScriptObject {
+
+  // Overlay types always have protected, zero-arg ctors
+  protected Customer() { }
+
+  // Typically, methods on overlay types are JSNI
+  public final native String getFirstName() /*-{ return this.FirstName; }-*/;
+  public final native String getLastName()  /*-{ return this.LastName;  }-*/;
+
+  // Note, though, that methods aren't required to be JSNI
+  public final String getFullName() {
+    return getFirstName() + " " + getLastName();
+  }
+}
+
+
