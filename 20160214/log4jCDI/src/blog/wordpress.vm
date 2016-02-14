@@ -1,0 +1,75 @@
+This page describes how to configure log4j in a Java CDI stand-alone application.  
+
+All of us seen code that looks like this over and over again. 
+[code light='true']
+private Logger logger = Logger.getLogger(this.getClass().getName());
+[/code]
+
+We will use Java Contexts and Dependency Injection to create a custom log4j Logger for a service class.
+
+<h3>Modify the pom.xml</h3>
+vi pom.xml
+[code language="xml" gutter="false"]
+#include("pom.xml")
+[/code]
+
+
+Setup the log4j configuration files. We will be using a very basic file that outputs to the console.
+vi src/main/resources/log4j.xml
+[code language="xml" gutter="false"]
+#include("src/main/resources/log4j.xml")
+[/code]
+
+<h3>Producer (Factory)</h3>
+The following CDI Producer creates a log4j Logger whenever it encounters a @Inject. Java keeps track of all the methods that are annotated with @Producer. If it comes across an inject
+that requires a type produced by one of these producers then it calls the producer method to get this instance. The producer method here accepts a InjectionPoint metadata object that helps identify the location of where the injection is occuring. We will use this information to create a log4j logger custom to the class where its being injected into. 
+
+vi src/main/java/com/test/LoggerProducer.java
+[code  gutter="false"]
+#include("src/main/java/com/test/LoggerProducer.java")
+[/code]
+
+<h3>Service Class</h3>
+The following service class is responsible for printing out the different levels of log messages. 
+
+vi src/main/java/com/test/TestLogger.java
+[code  gutter="false"]
+#include("src/main/java/com/test/TestLogger.java")
+[/code]
+
+<h3>Junit Test Case</h3>
+Finally test the logging with a simple junit test case.
+
+vi src/test/java/log4jCDI/TestApp.java
+[code  gutter="false"]
+#include("src/test/java/log4jCDI/TestApp.java")
+[/code]
+
+<h3>Log4j xml file</h3>
+This bare bones log4j file will print all log levels to the console.
+
+vi src/main/resources/log4j.xml
+[code language="xml" gutter="false"]
+#include("src/main/resources/log4j.xml")
+[/code]
+
+
+<h3>beans.xml</h3>
+Finally create a blank beans.xml file in your src/main/java/META-INF folder.
+
+
+<h3>Run the Junit Test Case</h3>
+
+At this time you will see output of each of the messages to the console similar to this:
+
+[code light='true']
+2016-02-14 15:58:18,840 FATAL com.test.TestLogger - Method: writeLogAllLevels
+2016-02-14 15:58:18,841 ERROR com.test.TestLogger - Method: writeLogAllLevels
+2016-02-14 15:58:18,841 WARN  com.test.TestLogger - Method: writeLogAllLevels
+2016-02-14 15:58:18,841 INFO  com.test.TestLogger - Method: writeLogAllLevels
+[/code]
+
+$blog_header
+
+
+
