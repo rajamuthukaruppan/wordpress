@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.test</groupId>
 	<artifactId>log4jCDI</artifactId>
-	<version>20150214</version>
+	<version>20160214</version>
 
 	<pluginRepositories>
 		<pluginRepository> <!-- Ignore this repository. Its only used for document publication. -->
