@@ -3,10 +3,10 @@
 	xmlns="http://java.sun.com/xml/ns/javaee"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
 	id="WebApp_ID" version="3.0">
-	<display-name>JSFTest2</display-name>
+	<display-name>JSFTest</display-name>
 
 	<welcome-file-list>
-		<welcome-file>index.xhtml</welcome-file>
+		<welcome-file>ajaxExample.xhtml</welcome-file>
 	</welcome-file-list>
 
 	<context-param>
