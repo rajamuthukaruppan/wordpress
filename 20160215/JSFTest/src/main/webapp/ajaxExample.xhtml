@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:b="http://bootsfaces.net/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+<h:head>
+	<title>BootsFaces Basic Page</title>
+</h:head>
+<h:body>
+	<b:container>
+		<b:navBar brand="JSF Demo" brandHref="index.xhtml" inverse="true">
+			<b:navbarLinks>
+				<b:navLink value="More about Ajax"
+					href="http://www.primefaces.org/showcase/ui/ajax/basic.xhtml"></b:navLink>
+			</b:navbarLinks>
+		</b:navBar>
+		<h:form>
+
+			<b:panel title="Ajax Listener (on keyUp) View Scoped Bean" look="primary">
+				<h:outputText value="Keyup: " />
+				<p:inputText value="#{addressBeanViewScoped.address}">
+					<p:ajax event="keyup" update="out"
+						listener="#{addressBeanViewScoped.handleKeyEvent}" />
+				</p:inputText>
+				<h:outputText id="out" value="#{addressBeanViewScoped.address}" />
+			</b:panel>
+			<b:panel title="Ajax Listener (on keyUp) Request Scoped Bean" look="primary">
+				<h:outputText value="Keyup: " />
+				<p:inputText value="#{addressBeanRequestScoped.address}">
+					<p:ajax event="keyup" update="out2"
+						listener="#{addressBeanRequestScoped.handleKeyEvent}" />
+				</p:inputText>
+				<h:outputText id="out2" value="#{addressBeanRequestScoped.address}" />
+			</b:panel>
+
+		</h:form>
+
+	</b:container>
+</h:body>
+</html>

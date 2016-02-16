@@ -1,0 +1,57 @@
+This page will demonstrate the difference between a @RequestScope and @ViewScoped managed bean in a AJAX enabled JSF application. 
+
+<h3>Background</h3>
+
+The @RequestScoped bean lives as long as a single HTTP request-response cycle. This includes AJAX request and responses. At the end of the cycle the bean will be no longer available.
+
+The @ViewScoped managed bean lives as long as you are on the same view like action calls with post-backs that don't result in the page changing. This includes actions that result in output being sent to another component on the page. 
+
+To demonstrate the difference between @ViewScoped and @RequestScoped we will define 2 managed beans each with a different Scope and use them within a AJAX enabled JSF page. We will use the Java EE @PostConstruct and @PreDestroy annotations to print out when each bean is created and destroyed.
+
+$blog_header
+
+<h3>Requirements</h3>
+<ul>
+<li>Java 8 or above</li>
+<li>Maven 3 or above</li>
+<li>Tomcat 7</li>
+</ul>
+
+
+<h3>Create the pom.xml</h3>
+vi pom.xml
+[code language="xml" light='true']
+#include("pom.xml")
+[/code]
+
+The following is the Request Scoped Managed bean. 
+
+vi src/main/java/com/test/AddressBeanRequestScoped.java
+[code light="true"]
+#include("src/main/java/com/test/AddressBeanRequestScoped.java")
+[/code]
+
+The following is the View Scoped Managed bean.
+
+vi src/main/java/com/test/AddressBeanViewScoped.java
+[code light="true"]
+#include("src/main/java/com/test/AddressBeanViewScoped.java")
+[/code]
+
+The following AJAX enabled JSF page uses both beans. 
+vi src/main/webapp/ajaxExample.xhtml
+[code language='xml' light="true"]
+#include("src/main/webapp/ajaxExample.xhtml")
+[/code]
+
+And finally the web.xml file.
+
+vi src/main/webapp/WEB-INF/web.xml
+[code language='xml' light="true"]
+#include("src/main/webapp/WEB-INF/web.xml")
+[/code]
+
+Start tomcat 7 and navigate to the following page: 
+http://localhost:8080/JSFTest3/ajaxExample.xhtml
+
+You should be able to view the difference on the eclipse console or Tomcat 7 console log while you type within the text boxes on the JSF page.  
