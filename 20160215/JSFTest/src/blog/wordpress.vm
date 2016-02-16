@@ -52,6 +52,6 @@ vi src/main/webapp/WEB-INF/web.xml
 [/code]
 
 Start tomcat 7 and navigate to the following page: 
-http://localhost:8080/JSFTest3/ajaxExample.xhtml
+http://localhost:8080/JSFTest/ajaxExample.xhtml
 
 You should be able to view the difference on the eclipse console or Tomcat 7 console log while you type within the text boxes on the JSF page.  
