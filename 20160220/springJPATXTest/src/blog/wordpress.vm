@@ -1,0 +1,84 @@
+This page demonstrates how to use JPA EntityManager within a Spring Transaction using HSQLDB a Java in memory database. We will use a Spring DataManager responsible for database interaction,  Spring service class for transaction management.
+
+<a href="/2010/04/14/declarative-transactions-using-spring-framework/">This is a update for a blog post I written back in 2010.</a> That post dealt with the same topic using plain JdbcTemplate.
+
+<h3>Highlights</h3>
+<ul>
+	<li>Spring Pure Annotation based configuration (ZERO XML files) with an exception of the pom.xml file</li>
+	<li>Java JPA</li>
+	<li>HSQLDB</li>
+</ul>
+	
+<h3>Background</h3>
+Based on the default behavior, when the application throws a run time exception any method that is defined to be transactional issues a roll-back on whatever resource is currently participating in the transaction. To define a method as transactional just put an @Transactional annotation before it.
+
+$blog_header
+
+<h3>Requirements</h3>
+<ul>
+	<li>Java 8</li>
+</ul>
+<h3>Implementation</h3>
+The following example will demonstrate the transaction capabilities of the spring framework. Consider it a very basic "hello world" program for transactional code.
+
+<h3>Create the pom.xml</h3>
+vi pom.xml
+[code language="xml" light='true']
+#include("pom.xml")
+[/code]
+
+The following class uses Spring Annotation based configuration that sets up the data source and transaction manager. 
+
+vi src/main/java/com/test/SpringConfig.java
+[code light='true']
+#include("src/main/java/com/test/SpringConfig.java")
+[/code]
+
+The following is just an interface.
+
+vi src/main/java/com/test/TestTransactionDataManager.java
+
+[code light='true']
+#include("src/main/java/com/test/TestTransactionDataManager.java")
+[/code]
+
+vi src/main/java/com/test/TestTransactionDataManagerImpl.java
+
+[code light='true']
+#include("src/main/java/com/test/TestTransactionDataManagerImpl.java")
+[/code]
+
+Just an interface...
+
+vi src/main/java/com/test/TestTransactionModel.java
+
+[code light='true']
+#include("src/main/java/com/test/TestTransactionModel.java")
+[/code]
+
+This is our Model class. The model layer is a natural place to define unit of work. Model methods are called from "control layer" in the MVC architecture. (Struts actions, SpringMVC Command, or Servlets) THERE SHOULD BE AT MOST ONE call to a transaction enabled model method to get a the "unit of work" behavior. Otherwise if you have more than one call to these methods and one succeeds and the other fails you will not get the "unit of work" behavior. Please keep this in mind... <strong>Only one call to a transactional method from the "control layer".</strong>
+
+vi src/main/java/com/test/TestTransactionModelImpl.java
+
+[code light='true']
+#include("src/main/java/com/test/TestTransactionModelImpl.java")
+[/code]
+
+The following is the JPA Entity we will be writing to the database.
+vi src/main/java/com/test/DBRecord.java
+
+[code light='true']
+#include("src/main/java/com/test/DBRecord.java")
+[/code]
+
+The App.java JUnit Test doIt() method will call methods on the model layer.
+
+vi src/test/java/com/test/App.java
+
+[code light='true']
+#include("src/test/java/com/test/App.java")
+[/code]
+
+
+<h3>Results</h3>
+The results get saved to the HSQLDB database location that is specified in the SpringConfig.java file. It defaults to a file in the /tmp dir. Open the .script file and you will find the data saved to the table towards the bottom.
