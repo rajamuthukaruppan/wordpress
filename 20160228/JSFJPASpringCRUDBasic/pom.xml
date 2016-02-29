@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.test</groupId>
+	<artifactId>JSFJPASpringCRUDBasic</artifactId>
+	<version>20160228</version>
+	<packaging>war</packaging>
+	<name>JSFJPASpringCRUDBasic</name>
+	<pluginRepositories>
+		<pluginRepository> <!-- Ignore this repository. Its only used for document publication. -->
+			<id>numberformat-releases</id>
+			<url>https://raw.githubusercontent.com/numberformat/wordpress/master/20130213/repo/</url>
+		</pluginRepository>
+	</pluginRepositories>
+	<!-- It is possible to accidentally mix different versions of Spring JARs 
+		when using Maven. For example, you may find that a third-party library, or 
+		another Spring project, pulls in a transitive dependency to an older release. 
+		If you forget to explicitly declare a direct dependency yourself, all sorts 
+		of unexpected issues can arise. To overcome such problems Maven supports 
+		the concept of a "bill of materials" (BOM) dependency. You can import the 
+		spring-framework-bom in your dependencyManagement section to ensure that 
+		all spring dependencies (both direct and transitive) are at the same version. 
+		An added benefit of using the BOM is that you no longer need to specify the 
+		<version> attribute when depending on Spring Framework artifacts -->
+	<dependencyManagement>
+	    <dependencies>
+	        <dependency>
+	            <groupId>org.springframework</groupId>
+	            <artifactId>spring-framework-bom</artifactId>
+	            <version>4.1.4.RELEASE</version>
+	            <type>pom</type>
+	            <scope>import</scope>
+	        </dependency>
+	    </dependencies>
+	</dependencyManagement>
+
+	<repositories>
+		<repository>
+			<id>prime-repo</id>
+			<name>PrimeFaces Maven Repository</name>
+			<url>http://repository.primefaces.org</url>
+			<layout>default</layout>
+		</repository>
+	</repositories>
+	
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+		</dependency>
+<!-- Logging -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.7.1</version>
+		</dependency>
+<!-- Data Management -->
+		<dependency>
+			<groupId>org.hibernate.javax.persistence</groupId>
+			<artifactId>hibernate-jpa-2.0-api</artifactId>
+			<version>1.0.1.Final</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-entitymanager</artifactId>
+			<version>4.1.6.Final</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hsqldb</groupId>
+			<artifactId>hsqldb</artifactId>
+			<version>2.3.3</version>
+		</dependency>		
+<!-- Spring Framework -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-beans</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-jdbc</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-orm</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+		</dependency>
+<!-- JSF -->
+		<dependency>
+			<groupId>net.bootsfaces</groupId>
+			<artifactId>bootsfaces</artifactId>
+			<version>0.8.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.primefaces</groupId>
+			<artifactId>primefaces</artifactId>
+			<version>5.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.primefaces.themes</groupId>
+			<artifactId>bootstrap</artifactId>
+			<version>1.0.9</version>
+		</dependency>
+		<!-- If running this in a Servlet only container like Tomcat 7 enable this dependency 
+		<dependency> 
+			<groupId>org.glassfish</groupId>
+			<artifactId>javax.faces</artifactId>
+			<version>2.1.6</version>
+		</dependency>		
+		-->
+<!-- APIs for services provided by the containers -->		
+		<dependency>
+			<groupId>javax</groupId>
+			<artifactId>javaee-web-api</artifactId>
+			<version>6.0</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.opencsv</groupId>
+			<artifactId>opencsv</artifactId>
+			<version>2.3</version>
+		</dependency>
+	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+			<plugin> <!-- Ignore this plugin. Its only used for document publication. -->
+				<groupId>github.numberformat</groupId>
+				<artifactId>blog-plugin</artifactId>
+				<version>1.0-SNAPSHOT</version>
+				<configuration>
+					<gitUrl>https://github.com/numberformat/wordpress/tree/master/${project.version}/${project.artifactId}</gitUrl>
+				</configuration>
+				<executions>
+					<execution>
+						<id>1</id>
+						<phase>site</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>

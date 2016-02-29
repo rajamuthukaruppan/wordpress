@@ -1,0 +1,92 @@
+Title: HTML 5 Responsive AJAX based CRUD application using Spring 4, JPA 2, JSF 2
+
+This page shows how to create a transactional AJAX based HTML 5 responsive CRUD application to manage a company addressbook. In addition we will using annotations wherever possible. For ease of use we will use a HSQLDB in memory database that will automatically create a directory called data in your userid's home directory.
+
+$blog_header
+
+Requirements
+<ul>
+<li>Java 8</li>  
+<li>Spring 4</li>  
+<li>JPA 2</li>  
+<li>JSF 2.1</li>
+<li>HSQLDB</li>
+<li>JAVA EE 6 level containers like JBoss EAP 6.4 or Tomcat 7</li>
+</ul>
+
+<h3>Create the pom.xml</h3>
+First step is to create a pom.xml file. If you are using Tomcat 7 then enable the Glassfish dependency. Since Tomcat is only a servlet engine you will need implementation classes that don't exist in Tomcat but are provided by other more beefy web application servers.
+
+vi pom.xml
+[code language="xml" light='true']
+#include("pom.xml")
+[/code]
+
+<h3>Web Application Initialization</h3>
+This app depends on the Servlet 3.0 specification. The spec requires web application containers to search the classpath looking for Initializers. Classes that implement the the spring "WebApplicationInitializer" are the ones that will be picked up.
+
+vi src/main/java/com/test/WebAppInitializer.java
+[code light='true']
+#include("src/main/java/com/test/WebAppInitializer.java")
+[/code]
+
+
+<h3>Spring Configuration (No XML)</h3>
+
+vi src/main/java/com/test/SpringConfig.java
+[code light='true']
+#include("src/main/java/com/test/SpringConfig.java")
+[/code]
+
+<h3>Logging configuration</h3>
+
+vi src/main/resources/log4j.xml
+[code language='xml' light='true']
+#include("src/main/resources/log4j.xml")
+[/code]
+
+
+<h3>Data Managers and Entities</h3>
+
+Used by JPA to define and interact with the database.
+
+vi src/main/java/com/test/model/Company.java
+[code light='true']
+#include("src/main/java/com/test/model/Company.java")
+[/code]
+
+<h3>Spring DataManager Interface.</h3>
+
+vi src/main/java/com/test/model/CompanyDataManager.java
+[code light='true']
+#include("src/main/java/com/test/model/CompanyDataManager.java")
+[/code]
+
+<h3>Spring DataManager Implementation</h3>
+
+vi src/main/java/com/test/model/CompanyDataManagerImpl.java
+[code light='true']
+#include("src/main/java/com/test/model/CompanyDataManagerImpl.java")
+[/code]
+
+<h3>JSF Page and the JSF Managed Bean</h3>
+
+The managed bean hold user entered data. This particular bean is in the View Scope. This ia scope between request and session. It stays active as long as the uesr is on the page. We could not use the Request Scope for this because the page makes AJAX call in the background.
+
+vi src/main/java/com/test/CompanyMB.java
+[code light='true']
+#include("src/main/java/com/test/CompanyMB.java")
+[/code]
+
+This is the only UI page the users will see. Single page HTML5 applications use javascript to show dialogs and submit requests in the background.
+
+vi src/main/webapp/company.xhtml
+[code code="xml" light='true']
+#include("src/main/webapp/company.xhtml")
+[/code]
+
+
+<h3>Sample Data (optional)</h3>
+You can find the file under src/main/resources in the github repository for this page.
+
+
