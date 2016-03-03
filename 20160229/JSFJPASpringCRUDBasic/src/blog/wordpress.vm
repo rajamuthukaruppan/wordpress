@@ -1,0 +1,58 @@
+Title: Spring 4 JAX-RS based Rest Web Service  
+
+This page shows how to integrate a JAX-RS based application with the spring framework so you can use your spring managed beans in your JAX-RS resources. We will use an existing application described in my previous blog post. The App will use pure JAX-RS annotations with very little proprietary spring configuration.
+
+<h3>Background</h3>
+JAX-RS resources often times need to work with Spring managed beans. However it is not very well documented on how to make the spring context available to the JAX-RS stack. Improper techniques will result in a NullPointerException while trying to use a spring managed bean.
+
+
+$blog_header
+
+This page covers the following software stack.
+<ul>
+<li>Java 8</li>  
+<li>Spring 4</li>  
+<li>JPA 2</li>  
+<li>JSF 2.1</li>
+<li>JAX-RS 2</li>
+<li>HSQLDB</li>
+<li>JAVA EE 6 level containers like JBoss EAP 6.4 or Tomcat 7</li>
+</ul>
+
+<h3>Existing Application</h3>
+We will use an existing application created in my previous blog article as a baseline. Please check it out for more details. The source for that application is available in the git repository for this page. So please download it now and follow along.
+
+The first thing is to create a class that implements the javax.ws.rs.core.Application. This class will be automatically picked up by the Servlet 3.0 container on initialization. It will start serving resources at the path specified in the @ApplicationPath annotation. This class is similar to the Servlets that listen to the RESTful requests. Only difference is that this is implementation agnostic.
+
+vi src/main/java/com/test/WarehouseApplication.java
+[code light='true']
+#include("src/main/java/com/test/WarehouseApplication.java")
+[/code]
+
+<h3>Integrating the JAX-RS application with the spring framework</h3>
+
+In order to get the spring managed beans into the Resources we will create a SpringContext singleton that has access to the spring application context. Each resource will use it to get references to the beans they are interested in. This is not 100% true dependency injection since the resources need to get references to the beans but after a comprehensive search this is the best method I found. 
+
+
+vi src/main/java/com/test/SpringContext.java
+[code light='true']
+#include("src/main/java/com/test/SpringContext.java")
+[/code]
+
+The following resource wich is a CDI managed bean will use the SpringContext singleton to get references to the spring managed beans in the @PostConstruct method.
+
+vi src/main/java/com/test/CompanyResource.java
+[code light='true']
+#include("src/main/java/com/test/CompanyResource.java")
+[/code]
+
+Since its a CDI managed bean take this time to create a blank beans.xml file in the WEB-INF directory. 
+
+Restart the application and you should be able to access the following URLs: 
+
+This shows all the companies in JSON format:
+http://localhost:8080/JSFJPASpringCRUDBasic/services/companies
+
+Use google Postman or other tools to make POST,PUT,DELETE requests to call the CompanyResource.
+
+A fully working example is available at the github location listed in the beginning of this page.

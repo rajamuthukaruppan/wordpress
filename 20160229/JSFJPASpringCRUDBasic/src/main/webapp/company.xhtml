@@ -1,0 +1,104 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:b="http://bootsfaces.net/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+<h:head>
+	<title>Acme Distribution</title>
+</h:head>
+<h:body>
+	<b:container>
+		<b:navBar brand="Acme Wholesale Distributor" brandHref="#"
+			inverse="true">
+			<b:navbarLinks>
+				<b:dropMenu value="Home" href="index.xhtml">
+					<b:navLink value="Companies" href="company.xhtml"></b:navLink>
+				</b:dropMenu>
+			</b:navbarLinks>
+		</b:navBar>
+
+		<b:panel title="Company Address List" look="primary">
+
+			<h:form id="form">
+				<p:dataTable id="companyDt" var="company" value="#{companyMB.all}">
+					<f:event type="preRenderView" listener="#{companyMB.loadAll}" />
+					<p:column headerText="Name">
+						<h:outputText value="#{company.name}" />
+					</p:column>
+
+					<p:column headerText="Address" priority="2">
+						<h:outputText value="#{company.shipToAddress}" />
+					</p:column>
+					<p:column headerText="City" priority="3" width="160">
+						<h:outputText value="#{company.shipToCity}" />
+					</p:column>
+					<p:column headerText="State" priority="4" width="160">
+						<h:outputText value="#{company.shipToProvence}" />
+					</p:column>
+					<p:column headerText="Zip" priority="5" width="80">
+						<h:outputText value="#{company.shipToZip}" />
+					</p:column>
+					<p:column width="55">
+						<f:facet name="header">
+						<p:commandButton action="#{companyMB.newCompany}" update=":form:companyDetail"
+							oncomplete="PF('companyDialog').show()" icon="ui-icon-plusthick"
+							title="Add"/>
+						</f:facet>					
+						<p:commandButton update=":form:companyDetail"
+							oncomplete="PF('companyDialog').show()" icon="ui-icon-search"
+							title="View">
+							<f:setPropertyActionListener value="#{company}"
+								target="#{companyMB.selectedCompany}" />
+						</p:commandButton>
+					</p:column>
+
+				</p:dataTable>
+				<!-- AJAX like Pop-up Dialog -->
+				<p:dialog header="Company Info" widgetVar="companyDialog"
+					modal="true" showEffect="fade" hideEffect="fade" resizable="false" closable="false" >
+					
+					<p:outputPanel id="companyDetail" style="text-align:center;">
+						<p:panelGrid columns="2"
+							rendered="#{not empty companyMB.selectedCompany}"
+							columnClasses="label,value">
+							<h:outputText value="Id:" />
+							<h:outputText value="#{companyMB.selectedCompany.id}" />
+							<h:outputText value="Name" />
+							<h:inputText value="#{companyMB.selectedCompany.name}" />
+							<h:outputText value="Address 1:" />
+							<h:inputText value="#{companyMB.selectedCompany.shipToAddress}" />
+							<h:outputText value="City:" />
+							<h:inputText value="#{companyMB.selectedCompany.shipToCity}" />
+							<h:outputText value="State:" />
+							<h:inputText value="#{companyMB.selectedCompany.shipToProvence}" />
+							<h:outputText value="Zip:" />
+							<h:inputText value="#{companyMB.selectedCompany.shipToZip}" />
+						</p:panelGrid>
+						<!-- Save Button -->
+						<p:commandButton update="companyDt" 
+							action="#{companyMB.updateSelectedCompany}" value="Save"
+							oncomplete="PF('companyDialog').hide()" icon="ui-icon-disk" />
+						<!-- Delete Button -->
+						<p:commandButton update="companyDt"
+							action="#{companyMB.deleteSelectedCompany}" value="Delete"
+							oncomplete="PF('companyDialog').hide()" icon="ui-icon-trash" />
+						<p:commandButton action="#{companyMB.cancel}" update="companyDt" value="Cancel"
+							oncomplete="PF('companyDialog').hide()"
+							icon="ui-icon-arrowreturn-1-w" />
+					</p:outputPanel>
+				</p:dialog>
+			</h:form>
+		</b:panel>
+		<b:panel>
+		 <span class="subitem">Responsive</span>
+                        <span class="defaultText dispTable">
+        DataTable has two responsive modes. In priority mode, visibility of columns are toggled based on the screen size and their priority (1-6). On the other hand
+        in reflow mode, columns are displayed as stacked on smaller screens.
+    
+                        </span>
+		</b:panel>
+	</b:container>
+</h:body>
+</html>
