@@ -16,7 +16,7 @@ This page covers the following software stack.
 <li>JSF 2.1</li>
 <li>JAX-RS 2</li>
 <li>HSQLDB</li>
-<li>JAVA EE 6 level containers like JBoss EAP 6.4 or Tomcat 7</li>
+<li>JAVA EE 6 level containers like JBoss EAP 6.4</li>
 </ul>
 
 <h3>Existing Application</h3>
