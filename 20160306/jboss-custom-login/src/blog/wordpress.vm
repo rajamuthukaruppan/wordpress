@@ -1,0 +1,99 @@
+This page describes how to configure a (JAX-RS application) using (custom login modules) and (authorization based annotation) on JBoss 7.
+
+<ol>
+<li>JAX-RS is a language API that provides support in creating web services according to the REST architectural pattern in Java.</li>
+<li>Custom login module will act like an adapter to allow you to integrate with your authentication and authorization API's. This will allow your applications to use existing roles defined in your organization.
+</li>
+<li>Authorization based annotations like (@RolesAllowed, @DenyAll, @PermitAll, and @RunAs) make it easy to specify permissions at resource level. These permissions allows developers to specify who is allowed to interact with the REST resource. This can be done at the individual method level so you can restrict HTTP methods like @GET, @PUT, @DELETE etc... to only users allowed to perform those operations.
+</li>
+</ol>
+
+$blog_header
+
+<h3>Software Stack</h3>
+<ul>
+	<li>Java 8</li>
+	<li>Jboss EAP 6.4 - should work other Jboss servers as well</li>
+	<li>JAVA EE 6 / JAX-RS 1.1 </li>
+</ul>
+
+<h3>Procedure</h3>
+
+Most of the configuration will be done inside the WAR file however there is ONE THING that needs to be configured on the server. A new security domain needs to be defined for the custom login module. There is no way around this. This must be done.
+
+[JBOSS BASE DIR]/standalone/configuration/standalone.xml
+
+find the security-domains section and add the following domain.
+[code light='true']
+<security-domain name="custom-auth" cache-type="default">
+	<authentication>
+    <login-module code="com.test.MySimpleUsernamePasswordLoginModule" flag="required"/>
+    </authentication>
+</security-domain>
+[/code]
+
+
+<h3>Login Module</h3>
+
+The following is the custom login module. This is just one example on how to extend UsernamePasswordLoginModule. Other base classes are available to extend (AnonLoginModule, DatabaseServerLoginModule, LdapExtLoginModule, LdapLoginModule, SimpleServerLoginModule, UsersLoginModule, UsersRolesLoginModule, XMLLoginModule). See the JBoss documentation.
+
+src/main/java/com/test/MySimpleUsernamePasswordLoginModule.java
+[code light='true']
+#include("src/main/java/com/test/MySimpleUsernamePasswordLoginModule.java")
+[/code]
+
+<h3>REST Resource</h3>
+
+Each method is annotated with the roles that are allowed to execute it.
+
+src/main/java/com/test/CompanyResource.java
+[code light='true']
+#include("src/main/java/com/test/CompanyResource.java")
+[/code]
+
+
+<h3>REST Application Config</h3>
+
+src/main/java/com/test/WarehouseApplication.java
+[code light='true']
+#include("src/main/java/com/test/WarehouseApplication.java")
+[/code]
+
+
+<h3>Configuration files</h3>
+src/main/resources/log4j.xml
+[code language="xml" light='true']
+#include("src/main/resources/log4j.xml")
+[/code]
+
+src/main/webapp/WEB-INF/jboss-web.xml
+[code language="xml" light='true']
+#include("src/main/webapp/WEB-INF/jboss-web.xml")
+[/code]
+
+src/main/webapp/WEB-INF/web.xml
+[code language="xml" light='true']
+#include("src/main/webapp/WEB-INF/web.xml")
+[/code]
+
+<h3>pom.xml</h3>
+
+pom.xml
+[code language="xml" light='true']
+#include("pom.xml")
+[/code]
+
+
+<h3>Test the application</h3>
+
+Install the application into JBoss and navigate to the application using a browser testing tool such as Postman:
+
+url: http://localhost:8080/jboss-custom-login/services/companies
+
+The application uses BASIC auth so you may specify the following ids to login:
+
+user/user - can only use read-only methods like [getAll, getCompany]
+admin/admin - can use any method
+
+
+Check the log4j.xml config file to see where the logs are being written.
