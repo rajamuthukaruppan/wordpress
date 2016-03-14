@@ -5,8 +5,7 @@
 
 	<persistence-unit name="UserManager">
 		<provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider>
-		<jta-data-source>jta-managed</jta-data-source>
-		<non-jta-data-source>un-managed</non-jta-data-source>
+		<jta-data-source>java:/DefaultDS</jta-data-source>
 
 		<properties>
 			<property name="openjpa.Log" value="DefaultLevel=INFO, Tool=INFO" />
