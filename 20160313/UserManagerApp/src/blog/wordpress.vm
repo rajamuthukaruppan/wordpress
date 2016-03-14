@@ -1,0 +1,116 @@
+Title: Development and Unit testing of Java EE / JPA applications 
+
+This page describes how to create a working environment that allows you to develop, run and test a <a href="https://en.wikipedia.org/wiki/Java_Persistence_API">Java JPA</a> application. Except for the logging API, this example contains no vendor specific code. No Spring framework, no Hibernate, it uses pure java annotations wherever possible. It will use the OpenEJB/OpenJPA to provide the runtime environment to JUnit for testing. 
+
+This page is influenced by the concept described in book <a href="https://en.wikipedia.org/wiki/Domain-driven_design">"Domain Driven Design" by Eric J. Evans</a>. The example will use Java Session beans transaction and service Layer, repository beans with JPA Entity managers for data access and CDI for dependency injection, finally HSQLDB will store the results to the file-system for later analysis. 
+
+Once complete and tested this components could be used as part of a larger enterprise application that  runs in a full JEE container with little to no modifications. 
+
+$blog_header
+
+<h3>Background</h3>
+Java EE containers are large and clumsy to work with. They often times require you to package your application into WAR or EAR files and deploy them into a managed folder where they pick up and deploy internally within the container. 
+
+There is a need for a lighter weight solution. The solution should be quick to setup and run and allow for some level of JUnit testing. 
+ 
+Session beans on the other hand often times contain business logic that needs to be tested. 
+
+Mocking frameworks like <a href="http://www.jmock.org/">JMock</a> or <a href="http://mockito.org/">Mockito</a> allow to mock the data access layer. It is the preferred approach. The data is setup could be time consuming and awkward to setup in java code. 
+
+This page discusses a way to test the service and repository layer without mocking any classes, or hand coding of any table data in java code. Instead you can use JPA and HSQLDB to create and initialize a in-memory database.  
+
+Mocking frameworks can still be used to mock other aspects of the application that is not available to the service layer.
+
+<h3>Software Stack</h3>
+<ol>
+<li>Java 8</li>
+<li>Java EE 6</li>
+<li>JPA 2</li>
+<li>OpenEBJ 4.7</li>
+
+</ol>
+
+<h3>Test Case</h3>
+
+The following is the main test case. It contains a reference to an EJB container that will be used to run the application. The produceContainer method accepts a name of a database. This will result in a file being created in the users $HOME/data/ directory. Each test case class can have a dedicated database instance. Once the test case is complete HSQL can write the results back to the file system or not. This functionality is customizable by passing properties in the connection URL for hsqldb.
+
+src/test/java/org/test/UserManagerServiceTest.java
+[code light='true']
+#include("src/test/java/org/test/UserManagerServiceTest.java")
+[/code]
+ 
+<h3>Container Producer</h3>
+This is where the database connections are configured. The static method accepts a database name and saves an instance of the database into the users $HOME/data directory. The database is initialized with a completely blank schema. Once the test is complete the user can open the resulting database ".script" file and insert the mock data. Next time the test case runs it will load the data specified in the ".script" file. The JPA implementation will also check for any changes in the entity beans and propagate the DDL changes to the script file. 
+
+Since the scripts are regular files Using this method the developer has flexibility. For example the developer can have a complete library of script files one for each test case. The script files could also be checked into SVN or GIT version control so they can be shared or after finding a bug they could be restored to their original condition etc...
+
+
+src/test/java/org/test/ContainerProducer.java
+[code light='true']
+#include("src/test/java/org/test/ContainerProducer.java")
+[/code]
+
+
+<h3>User Entity Class</h3>
+
+The following represents a user object we will store to the database.
+
+src/main/java/org/test/User.java
+[code light='true']
+#include("src/main/java/org/test/User.java")
+[/code]
+
+<h3>Service Layer</h3>
+Embarrassingly simple service layer.
+
+src/main/java/org/test/UserManagerService.java
+[code light='true']
+#include("src/main/java/org/test/UserManagerService.java")
+[/code]
+
+<h3>Data Manager Layer</h3>
+Embarrassingly simple data manager layer.
+
+src/main/java/org/test/UserDataManager.java
+[code light='true']
+#include("src/main/java/org/test/UserDataManager.java")
+[/code]
+
+<h3>Logger CDI injection</h3>
+Just a simple way to inject a logger into the entity classes.
+src/main/java/org/test/LoggerProducer.java
+[code light='true']
+#include("src/main/java/org/test/LoggerProducer.java")
+[/code]
+
+<h3>Project Configuration</h3>
+
+src/main/resources/log4j.xml
+[code language="xml" light='true']
+#include("src/main/resources/log4j.xml")
+[/code]
+
+The following file should in the META-INF/ directory. If its going to be part of a war it should be located in a jar file that is inside the WEB-INF/lib directory. Read your containers documentation on the proper location of this file if its not clear.
+
+<h3>JPA Config</h3>
+
+src/main/resources/META-INF/persistence.xml
+[code language="xml" light='true']
+#include("src/main/resources/META-INF/persistence.xml")
+[/code]
+
+<h3>CDI config</h3>
+Create a blank src/main/resources/META-INF/beans.xml file to enable Java contexts and dependency injection (CDI)
+
+<h3>Maven Configuration</h3>
+
+src/main/java/org/test/LoggerProducer.java
+[code light='true']
+#include("src/main/java/org/test/LoggerProducer.java")
+[/code]
+
+<h3>Run the test case</h3>
+The test case should run with no problems.
+
+Database will go to the users $HOME/data directory. Logs will go to $HOME/logs.
+
