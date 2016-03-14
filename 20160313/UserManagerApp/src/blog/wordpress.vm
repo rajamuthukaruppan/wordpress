@@ -104,9 +104,9 @@ Create a blank src/main/resources/META-INF/beans.xml file to enable Java context
 
 <h3>Maven Configuration</h3>
 
-src/main/java/org/test/LoggerProducer.java
-[code light='true']
-#include("src/main/java/org/test/LoggerProducer.java")
+pom.xml
+[code language='xml' light='true']
+#include("pom.xml")
 [/code]
 
 <h3>Run the test case</h3>
