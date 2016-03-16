@@ -1,0 +1,124 @@
+This page describes how to create a Generic JPA Data Manager for CRUD operations. The sample on this page is self contained. An in-memory database is included along with a JUnit test case. You can download and run this example from the github repository link below.
+
+$blog_header
+
+<h3>Background</h3>
+CRUD operations are implemented by boilerplate code. You can simplify your data managers by extending a Generic DataManager that implements the CRUD operations.
+
+The CRUD operations include:
+<ul>
+<li>Create</li>
+<li>Read</li>
+<li>Update</li>
+<li>Delete</li>
+</ul>
+
+<h3>Software Stack</h3>
+<ol>
+<li>Java 8</li>
+<li>Java EE 6</li>
+<li>JPA 2</li>
+<li>OpenEBJ 4.7</li>
+</ol>
+
+<h3>Test Case</h3>
+
+The following is the main test case. It contains a reference to an EJB container that will be used to run the application. The produceContainer method accepts a name of a database. This will result in a file being created in the users $HOME/data/ directory. Each test case class can have a dedicated database instance. Once the test case is complete HSQL can write the results back to the file system or not. This functionality is customizable by passing properties in the connection URL for hsqldb.
+
+src/test/java/org/test/UserManagerServiceTest.java
+[code light='true']
+#include("src/test/java/org/test/UserManagerServiceTest.java")
+[/code]
+ 
+<h3>Container Producer</h3>
+This is where the database connections are configured. The static method accepts a database name and saves an instance of the database into the users $HOME/data directory. The database is initialized with a completely blank schema. Once the test is complete the user can open the resulting database ".script" file and insert the mock data. Next time the test case runs it will load the data specified in the ".script" file. The JPA implementation will also check for any changes in the entity beans and propagate the DDL changes to the script file. 
+
+Since the scripts are regular files Using this method the developer has flexibility. For example the developer can have a complete library of script files one for each test case. The script files could also be checked into SVN or GIT version control so they can be shared or after finding a bug they could be restored to their original condition etc...
+
+
+src/test/java/org/test/ContainerProducer.java
+[code light='true']
+#include("src/test/java/org/test/ContainerProducer.java")
+[/code]
+
+
+<h3>Generic CRUD JPA Data Managers</h3>
+
+The following 2 files are the main focus of the article. Most of the boiler plate code for the crud operations have been implemented here. This leaves your datamanager free to implement any custom functionality.
+
+src/main/java/org/test/CrudDataManager.java
+[code light='true']
+#include("src/main/java/org/test/CrudDataManager.java")
+[/code]
+
+src/main/java/org/test/CrudDataManagerImpl.java
+[code light='true']
+#include("src/main/java/org/test/CrudDataManagerImpl.java")
+[/code]
+
+<h3>Data Manager Layer</h3>
+
+Embarrassingly simple data manager layer. 
+
+src/main/java/org/test/UserDataManager.java
+[code light='true']
+#include("src/main/java/org/test/UserDataManager.java")
+[/code]
+
+
+<h3>User Entity Class</h3>
+
+The following represents a user object we will store to the database.
+
+src/main/java/org/test/User.java
+[code light='true']
+#include("src/main/java/org/test/User.java")
+[/code]
+
+<h3>Service Layer</h3>
+Embarrassingly simple service layer. Each method executes within a transaction automatically. 
+
+src/main/java/org/test/UserManagerService.java
+[code light='true']
+#include("src/main/java/org/test/UserManagerService.java")
+[/code]
+
+<h3>Logger CDI injection</h3>
+Just a simple way to inject a logger into the entity classes.
+src/main/java/org/test/LoggerProducer.java
+[code light='true']
+#include("src/main/java/org/test/LoggerProducer.java")
+[/code]
+
+<h3>Project Configuration</h3>
+
+src/main/resources/log4j.xml
+[code language="xml" light='true']
+#include("src/main/resources/log4j.xml")
+[/code]
+
+The following file should in the META-INF/ directory. If its going to be part of a war it should be located in a jar file that is inside the WEB-INF/lib directory. Read your containers documentation on the proper location of this file if its not clear.
+
+<h3>JPA Config</h3>
+
+src/main/resources/META-INF/persistence.xml
+[code language="xml" light='true']
+#include("src/main/resources/META-INF/persistence.xml")
+[/code]
+
+<h3>CDI config</h3>
+Create a blank src/main/resources/META-INF/beans.xml file to enable Java contexts and dependency injection (CDI)
+
+<h3>Maven Configuration</h3>
+
+pom.xml
+[code language='xml' light='true']
+#include("pom.xml")
+[/code]
+
+<h3>Run the test case</h3>
+The test case should run with no problems.
+
+Database will go to the users $HOME/data directory. Logs will go to $HOME/logs.
+
+Title: Simple Example of a Generic JPA CRUD DataManager
