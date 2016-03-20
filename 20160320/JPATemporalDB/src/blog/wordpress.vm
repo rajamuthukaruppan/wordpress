@@ -1,5 +1,7 @@
 This page is about storing and fetching data into tables that keep history using JPA 2. The method of implementing a relational database table and JPA code to allow storage of temporal information. This page uses a builtin HSQLDB database that outputs to a text file in the users home directory. No database configuration is needed.
 
+$blog_header
+
 <h3>Software Stack</h3>
 <ol>
 <li>Java 8</li>
