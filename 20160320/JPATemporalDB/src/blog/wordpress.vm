@@ -1,0 +1,102 @@
+This page is about storing and fetching data into tables that keep history using JPA 2. The method of implementing a relational database table and JPA code to allow storage of temporal information. This page uses a builtin HSQLDB database that outputs to a text file in the users home directory. No database configuration is needed.
+
+<h3>Software Stack</h3>
+<ol>
+<li>Java 8</li>
+<li>Java EE 6</li>
+<li>JPA 2</li>
+<li>OpenEBJ 4.7</li>
+</ol>
+
+<h3>Pure JPA Approach</h3>
+
+In the example below we will maintain user account information. Since both id and valid_to_ts is in the primary key we can store multiple records for the same user id each with its own valid_to timestamp. The current valid record is indicated with a valid_to_ts as '9999-12-31'.
+
+To expire the existing record we update the value to current timestamp and insert a new record with timestamp that expires in the future ex. '9999-12-31'. The data managers will perform the update and insert operation within the context of a transaction.
+
+[code light='true']
+ --------------------------
+| User                     |
+|--------------------------|
+| id : varchar(320)        |
+| valid_to_ts : datetime   |
+|--------------------------|
+| password : char(40)      |
+| created_dt : datetime    |
+| modified_dt : datetime   |
+| valid_from_ts : datetime |
+ --------------------------
+[/code]
+
+Advantages:
+All current and historical information about a Entity is on a single table.
+
+Disadvantages:
+Because the "valid_to_ts" column will be update to reflect the time record was updated, you will not be able to use foreign key relations for these temporal tables.
+
+
+<h3>TODO</h3>
+
+Figure out how to represent MAX DATE that is compatible with all databases and timezones. Currently I am using 9999-12-31 00:00:00 EDT represented as a long. This will not work in other time zones and if you are not in Daylight savings time. Adjust the value of the long accordingly. A suggestion may be to configure your database to store timestamps in GMT and use the value that represents '9999-12-31' in GMT.
+
+[code light='true']
+	public static final Date END_TS = new Date(253402232400000L); // only works in EDT
+[/code]
+
+
+<h3>Test Case</h3>
+
+The following Junit test case exercises the code. See the testAddUser() and testUpdateUser() tests is where the interesting things happen. Results get saved into your $HOME/data and $HOME/logs directories.
+
+src/test/java/org/test/UserManagerServiceTest.java
+[code light='true']
+#include("src/test/java/org/test/UserManagerServiceTest.java")
+[/code]
+
+
+
+<h3>Temporal Interface</h3>
+
+The following interface should be placed on any entity that you want history on.
+
+src/main/java/org/test/Temporal.java
+[code light='true']
+#include("src/main/java/org/test/Temporal.java")
+[/code]
+
+<h3>TemporalCrudDataManagerImpl</h3>
+
+
+The following data manager base class has been modified to handle recording of history for each entity. Since the valid_to_ts appears in the primary key, In JPA 2 you can't modify any part of the key directly. You need to query the entity, remove(), flush(), detach() it. Once detached you may update the PK and then persist(). An example of this is seen in the below datamanager.
+
+src/main/java/org/test/TemporalCrudDataManagerImpl.java
+[code light='true']
+#include("src/main/java/org/test/TemporalCrudDataManagerImpl.java")
+[/code]
+
+<h3>User Entity</h3>
+
+The user entity just needs to have the validToTs field since its part of the primary key. The rest of the timestamp values like update, created, validFrom timestamps are in a embedded object to make the entity class look a bit more cleaner.
+
+src/main/java/org/test/User.java
+[code light='true']
+#include("src/main/java/org/test/User.java")
+[/code]
+
+
+Nothing really interesting happening in the rest of the code. You may checkout the Git repository for this page if interested.
+
+
+<h3>Maven Configuration</h3>
+
+pom.xml
+[code language='xml' light='true']
+#include("pom.xml")
+[/code]
+
+<h3>Run the test case</h3>
+The test case should run with no problems.
+
+Database will go to the users $HOME/data directory. Logs will go to $HOME/logs.
+
+Title: Temporal Tables using JPA 2
