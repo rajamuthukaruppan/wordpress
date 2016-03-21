@@ -15,8 +15,8 @@ import javax.persistence.TemporalType;
 
 @Entity
 @NamedQueries({
-	@NamedQuery(name="getCount", query = "SELECT COUNT(u) from User u where u.validToTs > CURRENT_TIMESTAMP"),
-	@NamedQuery(name="getAll", query = "SELECT u from User u where u.validToTs > CURRENT_TIMESTAMP")
+	@NamedQuery(name="getCount", query = "SELECT COUNT(u) from User u where u.validToTs = :end_ts"),
+	@NamedQuery(name="getAll", query = "SELECT u from User u where u.validToTs = :end_ts")
 })
 @IdClass(value=UserPK.class)
 public class User implements Serializable, org.test.Temporal {

@@ -1,4 +1,4 @@
-This page is about storing and fetching data into tables that keep history using JPA 2. The method of implementing a relational database table and JPA code to allow storage of temporal information. This page uses a builtin HSQLDB database that outputs to a text file in the users home directory. No database configuration is needed.
+This page is about storing and fetching data into tables that keep history using JPA 2. The method of implementing a relational database table and JPA code to allow storage of temporal information. This page uses a built-in HSQLDB database that outputs to a text file in the users home directory. No database configuration is needed.
 
 $blog_header
 
@@ -12,9 +12,9 @@ $blog_header
 
 <h3>Pure JPA Approach</h3>
 
-In the example below we will maintain user account information. Since both id and valid_to_ts is in the primary key we can store multiple records for the same user id each with its own valid_to timestamp. The current valid record is indicated with a valid_to_ts as '9999-12-31'.
+In the example below we will maintain user account information. Since both id and valid_to_ts is in the primary key we can store multiple records for the same user id each with its own valid_to time stamp. The current valid record is indicated with a valid_to_ts as '9999-12-31'.
 
-To expire the existing record we update the value to current timestamp and insert a new record with timestamp that expires in the future ex. '9999-12-31'. The data managers will perform the update and insert operation within the context of a transaction.
+To expire the existing record we update the value to current time stamp and insert a new record with time stamp that expires in the future ex. '9999-12-31'. The data managers will perform the update and insert operation within the context of a transaction.
 
 [code light='true']
  --------------------------
@@ -37,12 +37,24 @@ Disadvantages:
 Because the "valid_to_ts" column will be update to reflect the time record was updated, you will not be able to use foreign key relations for these temporal tables.
 
 
-<h3>TODO</h3>
+<h3>A word about time zones and MAX dates</h3>
 
-Figure out how to represent MAX DATE that is compatible with all databases and timezones. Currently I am using 9999-12-31 00:00:00 EDT represented as a long. This will not work in other time zones and if you are not in Daylight savings time. Adjust the value of the long accordingly. A suggestion may be to configure your database to store timestamps in GMT and use the value that represents '9999-12-31' in GMT.
+The valid_to_ts needs to have a time component since we need to record the time the record was expired and replaced with a new record. 
+
+The java.util.Date value represents the number of mili-seconds since January, 1 1970 midnight UTC. To indicate a end date of 9999-12-31 UTC the value is: 253402214400000. JDBC stores time stamps based on the time zone JVM is in. For example try to store the value of java.util.Date(0) into the database. On a JVM and database located in the "America/New_York" time zone the column value is stored with 1969-12-31 19:00:00.000000. This is (UTC-5). This is a problem because a JVM located in a different time zone like UTC will read the value literally as 1969-12-31 19:00:00.000000 which is wrong.
+
+Solutions:
+<ol>
+<li>Accept the fact that dates stored in the database are from a defined time zone like America/New_York and only use JVMs configured to that time zone. For example in your startup code put the following line: TimeZone.setDefault(TimeZone.getTimeZone("America/New_York")); In New York, Don't use EDT or EST since those change from summer to winter. </li>
+<li>Store the time stamps as long. Use this approach if your JVMs run from different locations than your database. Its easy to convert and compare equality</li>
+</ol>
+
+For the purpose of this page we will assume the JVM and database are in the same time zone (America/New_York) and the "END" time stamp for current records is '9999-12-31 00:00:00' local time which is (10000-1-1 05:00:00 UTC). 
+ 
+It's useful to define the END_TS as a final constant somewhere in your code-base. This will save you the effort of creating an object that represents this value using java Calendar etc... 
 
 [code light='true']
-	public static final Date END_TS = new Date(253402232400000L); // only works in EDT
+	public static final Date END_TS = new Date(253402214400000L);
 [/code]
 
 
@@ -69,7 +81,7 @@ src/main/java/org/test/Temporal.java
 <h3>TemporalCrudDataManagerImpl</h3>
 
 
-The following data manager base class has been modified to handle recording of history for each entity. Since the valid_to_ts appears in the primary key, In JPA 2 you can't modify any part of the key directly. You need to query the entity, remove(), flush(), detach() it. Once detached you may update the PK and then persist(). An example of this is seen in the below datamanager.
+The following data manager base class has been modified to handle recording of history for each entity. Since the valid_to_ts appears in the primary key, In JPA 2 you can't modify any part of the key directly. You need to query the entity, remove(), flush(), detach() it. Once detached you may update the PK and then persist(). An example of this is seen in the below data manager.
 
 src/main/java/org/test/TemporalCrudDataManagerImpl.java
 [code light='true']
@@ -78,7 +90,7 @@ src/main/java/org/test/TemporalCrudDataManagerImpl.java
 
 <h3>User Entity</h3>
 
-The user entity just needs to have the validToTs field since its part of the primary key. The rest of the timestamp values like update, created, validFrom timestamps are in a embedded object to make the entity class look a bit more cleaner.
+The user entity just needs to have the validToTs field since its part of the primary key. The rest of the time stamp values like update, created, validFrom time stamps are in a embedded object to make the entity class look a bit more cleaner.
 
 src/main/java/org/test/User.java
 [code light='true']

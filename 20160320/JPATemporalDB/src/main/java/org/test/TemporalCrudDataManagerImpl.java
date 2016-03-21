@@ -8,7 +8,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 public class TemporalCrudDataManagerImpl<T extends Temporal, PK extends Serializable> implements CrudDataManager<T, PK> {
-	public static final Date END_TS = new Date(253402232400000L);
 	
 	protected Class<T> entityClass;
 

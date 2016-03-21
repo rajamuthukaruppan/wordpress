@@ -63,7 +63,7 @@ public class UserManagerServiceTest {
 	@Test
 	public void testReadUserById() throws Exception {
 		User randomUser = userManagerService.getRandomUser();
-		UserPK userPK = new UserPK(randomUser.getId(), new Date(253402232400000L));
+		UserPK userPK = new UserPK(randomUser.getId(), TemporalCrudDataManagerImpl.END_TS);
 		User user = userManagerService.getUser(userPK);
 		Assert.assertNotNull(user);
 		System.out.println(user);
