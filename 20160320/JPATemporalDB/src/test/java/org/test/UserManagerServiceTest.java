@@ -1,7 +1,5 @@
 package org.test;
 
-import java.util.Date;
-
 import javax.ejb.embeddable.EJBContainer;
 
 import org.junit.After;
@@ -63,7 +61,7 @@ public class UserManagerServiceTest {
 	@Test
 	public void testReadUserById() throws Exception {
 		User randomUser = userManagerService.getRandomUser();
-		UserPK userPK = new UserPK(randomUser.getId(), TemporalCrudDataManagerImpl.END_TS);
+		UserPK userPK = new UserPK(randomUser.getId(), HistoricalCrudDataManagerImpl.END_TS);
 		User user = userManagerService.getUser(userPK);
 		Assert.assertNotNull(user);
 		System.out.println(user);

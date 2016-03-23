@@ -73,19 +73,19 @@ src/test/java/org/test/UserManagerServiceTest.java
 
 The following interface should be placed on any entity that you want history on.
 
-src/main/java/org/test/Temporal.java
+src/main/java/org/test/Historical.java
 [code light='true']
-#include("src/main/java/org/test/Temporal.java")
+#include("src/main/java/org/test/Historical.java")
 [/code]
 
-<h3>TemporalCrudDataManagerImpl</h3>
+<h3>HistoricalCrudDataManagerImpl</h3>
 
 
 The following data manager base class has been modified to handle recording of history for each entity. Since the valid_to_ts appears in the primary key, In JPA 2 you can't modify any part of the key directly. You need to query the entity, remove(), flush(), detach() it. Once detached you may update the PK and then persist(). An example of this is seen in the below data manager.
 
-src/main/java/org/test/TemporalCrudDataManagerImpl.java
+src/main/java/org/test/HistoricalCrudDataManagerImpl.java
 [code light='true']
-#include("src/main/java/org/test/TemporalCrudDataManagerImpl.java")
+#include("src/main/java/org/test/HistoricalCrudDataManagerImpl.java")
 [/code]
 
 <h3>User Entity</h3>

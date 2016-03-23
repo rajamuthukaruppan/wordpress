@@ -5,7 +5,7 @@ import java.util.Random;
 
 import javax.persistence.TypedQuery;
 
-public class UserDataManager extends TemporalCrudDataManagerImpl<User, Serializable> {
+public class UserDataManager extends HistoricalCrudDataManagerImpl<User, Serializable> {
 
 	public Long getUserCount() {
 		TypedQuery<Long> q = entityManager.createNamedQuery("getCount", Long.class);

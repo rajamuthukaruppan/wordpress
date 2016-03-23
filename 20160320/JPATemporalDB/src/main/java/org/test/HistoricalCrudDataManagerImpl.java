@@ -7,7 +7,7 @@ import java.util.Date;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
-public class TemporalCrudDataManagerImpl<T extends Temporal, PK extends Serializable> implements CrudDataManager<T, PK> {
+public class HistoricalCrudDataManagerImpl<T extends Historical, PK extends Serializable> implements CrudDataManager<T, PK> {
 	
 	protected Class<T> entityClass;
 
@@ -15,7 +15,7 @@ public class TemporalCrudDataManagerImpl<T extends Temporal, PK extends Serializ
 	protected EntityManager entityManager;
 
 	@SuppressWarnings("unchecked")
-	public TemporalCrudDataManagerImpl() {
+	public HistoricalCrudDataManagerImpl() {
 		ParameterizedType genericSuperclass = (ParameterizedType) getClass().getGenericSuperclass();
 		this.entityClass = (Class<T>) genericSuperclass.getActualTypeArguments()[0];
 	}

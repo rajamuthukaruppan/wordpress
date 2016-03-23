@@ -19,7 +19,7 @@ import javax.persistence.TemporalType;
 	@NamedQuery(name="getAll", query = "SELECT u from User u where u.validToTs = :end_ts")
 })
 @IdClass(value=UserPK.class)
-public class User implements Serializable, org.test.Temporal {
+public class User implements Serializable, org.test.Historical {
 	private static final long serialVersionUID = 1L;
 	@Id
 	private String id;
