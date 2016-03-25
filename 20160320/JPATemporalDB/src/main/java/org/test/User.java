@@ -19,7 +19,7 @@ import javax.persistence.TemporalType;
 	@NamedQuery(name="getAll", query = "SELECT u from User u where u.validToTs = :end_ts")
 })
 @IdClass(value=UserPK.class)
-public class User implements Serializable, org.test.Historical {
+public class User implements Serializable, Historical {
 	private static final long serialVersionUID = 1L;
 	@Id
 	private String id;
@@ -72,5 +72,26 @@ public class User implements Serializable, org.test.Historical {
 	}
 	public void setTimestamps(Timestamps timestamps) {
 		this.timestamps = timestamps;
+	}
+	@Override
+	public boolean sameAs(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (!(obj instanceof User))
+			return false;
+		User other = (User) obj;
+		if (getId() == null) {
+			if (other.getId() != null)
+				return false;
+		} else if (!getId().equals(other.getId()))
+			return false;
+		if (getPassword() == null) {
+			if (other.getPassword() != null)
+				return false;
+		} else if (!getPassword().equals(other.getPassword()))
+			return false;
+		return true;
 	}
 }

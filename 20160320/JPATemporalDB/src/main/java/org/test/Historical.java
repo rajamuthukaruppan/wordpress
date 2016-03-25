@@ -10,4 +10,5 @@ public interface Historical {
 	public void setTimestamps(Timestamps timestamps);
 	public Date getValidToTs();
 	public void setValidToTs(Date validToTs);
+	public boolean sameAs(Object obj);
 }

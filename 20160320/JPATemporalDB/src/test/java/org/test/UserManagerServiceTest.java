@@ -52,6 +52,7 @@ public class UserManagerServiceTest {
 	public void testUpdateUser() throws Exception {
 		User randomUser = userManagerService.getRandomUser();
 		String newPw = ""+System.currentTimeMillis();
+		//String newPw = randomUser.getPassword(); // test with no change in password by uncommenting this line.
 		randomUser.setPassword(newPw);
 		userManagerService.updateUser(randomUser);
 		User updatedUser = userManagerService.getUser(new UserPK(randomUser.getId()));

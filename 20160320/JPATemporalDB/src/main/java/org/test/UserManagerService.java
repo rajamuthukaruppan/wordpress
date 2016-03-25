@@ -4,11 +4,11 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Stateless
 public class UserManagerService {
-	@Inject
-	private Logger logger;
+	private static final Logger logger = LoggerFactory.getLogger(UserManagerService.class);
 
 	@Inject
 	private UserDataManager userDataManager;

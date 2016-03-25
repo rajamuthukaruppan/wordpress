@@ -7,7 +7,11 @@ import java.util.Date;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
-public class HistoricalCrudDataManagerImpl<T extends Historical, PK extends Serializable> implements CrudDataManager<T, PK> {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class HistoricalCrudDataManagerImpl<T extends Historical, PK extends Serializable> implements HistoricalCrudDataManager<T, PK> {
+	private static final Logger logger = LoggerFactory.getLogger(HistoricalCrudDataManagerImpl.class);
 	
 	protected Class<T> entityClass;
 
@@ -34,12 +38,14 @@ public class HistoricalCrudDataManagerImpl<T extends Historical, PK extends Seri
 	}
 
 	@Override
-	public T update(T t) {
-		return this.entityManager.merge(t);
-	}
-	@Override
 	public T updateTemporal(T t, PK id) {
 		T tFromDb = this.entityManager.find(entityClass, id);
+		if(t.sameAs(tFromDb)) {
+			logger.info("Object same as: " + tFromDb);
+			return tFromDb;
+		} else {
+			logger.info("Saving updated temporal object: " + t);
+		}
 		Date now = new Date();
 		entityManager.remove(tFromDb);
 		entityManager.flush();
