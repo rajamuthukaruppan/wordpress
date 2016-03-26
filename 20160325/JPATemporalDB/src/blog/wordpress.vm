@@ -1,0 +1,81 @@
+This page describes the process of initializing HSQLDB database located within a OpenEBJ container with reference data from a CSV file for testing purposes. 
+
+$blog_header
+
+<h3>Software Stack</h3>
+<ol>
+<li>Java 8</li>
+<li>Java EE 6</li>
+<li>JPA 2</li>
+<li>OpenEBJ 4.7</li>
+</ol>
+
+<h3>Pure JPA Approach</h3>
+
+In the example below we will maintain user account information in a table capable of maintaining history. 
+
+[code light='true']
+ --------------------------
+| User                     |
+|--------------------------|
+| id : varchar(320)        |
+| valid_to_ts : datetime   |
+|--------------------------|
+| password : char(40)      |
+| created_dt : datetime    |
+| modified_dt : datetime   |
+| valid_from_ts : datetime |
+ --------------------------
+[/code]
+
+<h3>Initial data</h3>
+
+The initial data is stored in a csv file in a Tab delimited format.
+
+We read the csv file in UserDataManager.java and call the updateTemporal() method of the inherited method of the HistoricalCrudDataManager parent class. 
+
+src/main/java/org/test/UserDataManager.java
+[code light='true']
+#include("src/main/java/org/test/UserDataManager.java")
+[/code]
+
+The updateTemporal() method inserts a new record if it does not exist on the user table. If it exists it archives the old record before inserting.
+
+src/main/java/org/test/HistoricalCrudDataManagerImpl.java
+[code light='true']
+#include("src/main/java/org/test/HistoricalCrudDataManagerImpl.java")
+[/code]
+
+Finally put the following file into your $HOME/data directory. IMPORTANT: convert the spaces to TAB character between the fields. The second column is a sha1 hash of the username in the email address.
+
+$HOME/data/User.csv
+[code light='true']
+smith@test.org	2b5c240e6abd88e71ffc225b0459016e4cba9bda
+allen@test.org	a4aed34f4966dc8688b8e67046bf8b276626e284
+ward@test.org	f7d6f8166205aa91930091f422c0634df8a7ceb4
+jones@test.org	4c46bc790ffe655a1e65acfacf95da50cd4d3902
+[/code]
+
+<h3>Test Case</h3>
+
+The following Junit test case exercises the code. See the testInitData() test is where the interesting things happen. Results get saved into your $HOME/data and $HOME/logs directories.
+
+src/test/java/org/test/UserManagerServiceTest.java
+[code light='true']
+#include("src/test/java/org/test/UserManagerServiceTest.java")
+[/code]
+
+
+<h3>Maven Configuration</h3>
+
+pom.xml
+[code language='xml' light='true']
+#include("pom.xml")
+[/code]
+
+<h3>Run the test case</h3>
+The test case should run with no problems.
+
+Database will go to the users $HOME/data directory. Logs will go to $HOME/logs.
+
+Title: JPA initializing reference data
