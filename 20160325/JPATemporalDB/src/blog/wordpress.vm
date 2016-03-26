@@ -46,7 +46,7 @@ src/main/java/org/test/HistoricalCrudDataManagerImpl.java
 #include("src/main/java/org/test/HistoricalCrudDataManagerImpl.java")
 [/code]
 
-Finally put the following file into your $HOME/data directory. IMPORTANT: convert the spaces to TAB character between the fields. The second column is a sha1 hash of the username in the email address.
+Finally put the following file into your $HOME/data directory. IMPORTANT: convert the spaces to TAB character between the fields. The second column is a sha1 hash of the username in the email address. example "smith"
 
 $HOME/data/User.csv
 [code light='true']

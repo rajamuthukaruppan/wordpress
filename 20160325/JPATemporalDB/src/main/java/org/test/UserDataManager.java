@@ -18,7 +18,7 @@ public class UserDataManager extends HistoricalCrudDataManagerImpl<User, Seriali
 	private static final Logger logger = LoggerFactory.getLogger(UserDataManager.class);
 		
 	/**
-	 * Load data from a TAB delimited file named $HOME/data/$dbName/User.csv.
+	 * Load data from a TAB delimited file named $HOME/data/User.csv.
 	 * If record does not exist then create it. If it exists then update.
 	 * 
 	 * Note that tab delimited file not  have more than 1 record per new line.
