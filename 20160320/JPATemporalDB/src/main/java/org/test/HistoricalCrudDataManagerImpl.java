@@ -39,20 +39,22 @@ public class HistoricalCrudDataManagerImpl<T extends Historical, PK extends Seri
 
 	@Override
 	public T updateTemporal(T t, PK id) {
-		T tFromDb = this.entityManager.find(entityClass, id);
-		if(t.sameAs(tFromDb)) {
-			logger.info("Object same as: " + tFromDb);
-			return tFromDb;
-		} else {
-			logger.info("Saving updated temporal object: " + t);
-		}
 		Date now = new Date();
-		entityManager.remove(tFromDb);
-		entityManager.flush();
-		entityManager.detach(tFromDb);
-		tFromDb.setValidToTs(now);
-		entityManager.persist(tFromDb);
-		
+		T tFromDb = this.entityManager.find(entityClass, id);
+		if(tFromDb!=null) {
+			if(t.sameAs(tFromDb)) {
+				logger.info("Object same as: " + tFromDb);
+				return tFromDb;
+			} else {
+				logger.info("Saving updated temporal object: " + tFromDb);
+			}
+			t.getTimestamps().setCreateTs(tFromDb.getTimestamps().getCreateTs());
+			entityManager.remove(tFromDb);
+			entityManager.flush();
+			entityManager.detach(tFromDb);
+			tFromDb.setValidToTs(now);
+			entityManager.persist(tFromDb);
+		}
 		t.getTimestamps().setUpdateTs(now);
 		t.getTimestamps().setValidFromTs(now);
 		t.setValidToTs(END_TS);
