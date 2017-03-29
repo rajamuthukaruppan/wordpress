@@ -1,0 +1,44 @@
+This page describes how to setup Maria DB JDBC Resources in Tomcat 9 and how to create a servlet based webapp without a web.xml.
+
+$blog_header
+
+<h3>Database Drivers</h3>
+
+Place the database driver jar file into the server/lib folder.
+
+<h3>Define the resource in Tomcat</h3>
+
+Place the following into the $CATALINA_BASE/conf/context.xml
+[sourcecode language="xml" gutter="false"]
+  <Resource name="jdbc/batch" auth="Container" type="javax.sql.DataSource"
+               maxActive="100" maxIdle="30" maxWait="10000"
+               username="username" password="password" driverClassName="org.mariadb.jdbc.Driver"
+               url="jdbc:mysql://localhost:3306/test"/>
+[/sourcecode]
+
+Please note that if you are running in Eclipse and have Tomcat setup as a WTP project then this file is located in the "Server" project in your eclipse workspace.
+
+<h3>Test using Snoop JSP</h3>
+
+To test the datasource simply <a href="http://numberformat.wordpress.com/2010/01/02/snoopservlet-example/">create a snoop jsp to perform a lookup</a>.
+
+<h3>Test using your own Servlet</h3>
+
+src/main/java/com/test/TestServlet.java
+[sourcecode language="java" gutter="false"]
+#include("src/main/java/com/test/TestServlet.java")
+[/sourcecode]
+
+If you are using the popular spring framework you can do the following
+
+[sourcecode language="xml" gutter="false"]
+
+<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+    <property name="jndiName" value="jdbc/test"/>
+    <property name="resourceRef" value="true"/>
+ </bean>
+[/sourcecode]
+
+Restart and visit http://localhost:8080/test-jndi/testServlet to view the results of the connection.
+
+$blog_footer
