@@ -1,0 +1,35 @@
+<form class="ui form">
+  <div class="field">
+    <label>What's on your mind?</label>
+    <textarea name='body' placeholder="Penny for your thoughts" type="text" [(ngModel)]='mytext'></textarea>
+  </div>
+
+  <button class="ui button primary" type="button" (click)='OnNewTweet()'>Tweet</button>
+</form>
+<div class="ui comments" *ngFor='let tweet of tweets'>
+  <a class="avatar">
+    <img src="assets/avatars/{{tweet.avatar}}">
+  </a>
+  <div class="content">
+    <a class="author">{{tweet.author}}</a>
+    <div class="metadata">
+      <span class="date"> {{tweet.date | date: 'hh:mm:ss MM/dd/yy'}}</span>
+    </div>
+    <div class="text">
+      {{tweet.body}}
+    </div>
+    <div class="actions">
+      <a class="reply">Reply</a>
+      <a class="like" (click) = 'OnFavorite(tweet)' >
+        <i class="like icon" [ngClass]='{ liked: tweet.hasFavorited(userService.getCurrentUser()) }'></i> {{tweet.favorites.length}} Favorites
+        </a>
+        <a class="retweet" (click) = 'OnRetweet(tweet)' >
+          <i class="retweet icon" [ngClass]='{ retweeted: tweet.hasRetweeted(userService.getCurrentUser()) }'></i> {{tweet.retweets.length}} Retweets
+        </a>
+    </div>
+  </div>
+</div>
+
+<div *ngIf='!tweets.length'>
+  <h2>No tweets today.</h2>
+</div>
