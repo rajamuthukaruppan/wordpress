@@ -4,10 +4,12 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 
 /**
  * A simple REST service which is able to say hello to someone using a Service Please take a look at the web.xml where JAX-RS
@@ -39,10 +41,11 @@ public class TweetResource {
     @POST
     @Path("/tweets")
     @Produces({ "application/json" })
-    public List<Tweet> postTweets() {
-    	System.out.println("POST tweets called.");
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Tweet postTweets(Tweet tweet) {
+    	System.out.println("POST tweets called for Tweet: " + tweet);
     	List<Tweet> feed = tweetService.getFeed();
-    	return feed;
+    	return feed.get(0);
 		//return feed.toArray(new Tweet[feed.size()]);
     }
 

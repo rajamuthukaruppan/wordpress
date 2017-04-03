@@ -1,25 +1,25 @@
 import { Injectable } from '@angular/core';
 import { UserService } from './user.service';
 import { Tweet } from './tweet';
-import { Http, Response  }    from '@angular/http';
+import { Http, Response } from '@angular/http';
 import { Observable } from 'rxjs';
-
+import { Headers, RequestOptions } from '@angular/http';
 
 @Injectable()
 export class FeedService {
 
-tweets = []
+  tweets = []
 
 
-private getTweetFromJson(obj: Tweet) : Tweet {
-  return new Tweet( obj.id, obj.body,obj.author,obj.date,obj.retweets,obj.favorites);
-}
+  private getTweetFromJson(obj: Tweet): Tweet {
+    return new Tweet(obj.id, obj.body, obj.author, obj.date, obj.retweets, obj.favorites);
+  }
 
 
 
-constructor(private userService: UserService, private http : Http) { }
+  constructor(private userService: UserService, private http: Http) { }
 
-  getCurrentFeed() : Observable<Tweet[]> {
+  getCurrentFeed(): Observable<Tweet[]> {
     return this.http.get('http://localhost:8080/glensmith-twitter-service/rest/tweets').map((resp: Response) => {
       var fetchedTweets = [];
       for (let tweet of resp.json()) {
@@ -30,11 +30,11 @@ constructor(private userService: UserService, private http : Http) { }
 
   }
 
-  private isUserInCollection(collection : string[], userId : string) : boolean {
-      return collection.indexOf(userId) != -1;
+  private isUserInCollection(collection: string[], userId: string): boolean {
+    return collection.indexOf(userId) != -1;
   }
 
-  postNewTweet(tweetText : string) {
+  postNewTweet(tweetText: string) {
     console.log(tweetText);
 
     let body = JSON.stringify({
@@ -44,27 +44,29 @@ constructor(private userService: UserService, private http : Http) { }
     console.log(body);
     // not working as expected
 
-    return this.http.post('http://localhost:8080/glensmith-twitter-service/rest/tweets', body).map(
+    let headers = new Headers({ 'Content-Type': 'application/json' });
+    let options = new RequestOptions({ headers: headers });
+
+    return this.http.post('http://localhost:8080/glensmith-twitter-service/rest/tweets', body, options).map(
       (resp: Response) => {
-        console.log(resp.json());
-        return "";
-        // return this.getTweetFromJson(resp.json());
+        console.log("post response", resp.json());
+        return this.getTweetFromJson(resp.json());
       });
   }
 
-  reTweet(tweet : Tweet) {
+  reTweet(tweet: Tweet) {
     if (!this.isUserInCollection(tweet.retweets, this.userService.getCurrentUser())) {
       tweet.retweets.push(this.userService.getCurrentUser());
     }
   }
 
-  favoriteTweet(tweet : Tweet) {
+  favoriteTweet(tweet: Tweet) {
     if (!this.isUserInCollection(tweet.favorites, this.userService.getCurrentUser())) {
       tweet.favorites.push(this.userService.getCurrentUser());
     }
   }
 
-  getFriends() : Observable<string[]> {
+  getFriends(): Observable<string[]> {
     return this.http.get('/assets/friends.json').map((resp: Response) => resp.json() as string[]);
   }
 }

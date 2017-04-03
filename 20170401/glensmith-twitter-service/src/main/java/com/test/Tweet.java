@@ -5,6 +5,11 @@ import java.util.Date;
 import java.util.List;
 
 public class Tweet {
+	@Override
+	public String toString() {
+		return "Tweet [id=" + id + ", body=" + body + ", author=" + author + ", date=" + date + ", retweets=" + retweets
+				+ ", favorites=" + favorites + "]";
+	}
 	private Integer id;
 	private String body = "test tweet";
 	private String author;

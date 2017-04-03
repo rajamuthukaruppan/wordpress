@@ -14,10 +14,10 @@ export class FeedComponent implements OnInit {
 
   tweets = [];
 
-  constructor(private userService : UserService, private feedService : FeedService) { }
+  constructor(private userService: UserService, private feedService: FeedService) { }
 
   ngOnInit() {
-    this.feedService.getCurrentFeed().subscribe( (newTweets) => {
+    this.feedService.getCurrentFeed().subscribe((newTweets) => {
       this.tweets = newTweets;
     });
     // this.tweets = this.feedService.getCurrentFeed();
@@ -28,16 +28,18 @@ export class FeedComponent implements OnInit {
     return collection.indexOf(userId) != -1;
   }
 
-OnFavorite(tweet) {
-  this.feedService.favoriteTweet(tweet);
-}
+  OnFavorite(tweet) {
+    this.feedService.favoriteTweet(tweet);
+  }
 
-OnRetweet(tweet) {
-  this.feedService.reTweet(tweet);
-}
+  OnRetweet(tweet) {
+    this.feedService.reTweet(tweet);
+  }
 
-OnNewTweet() {
-  this.feedService.postNewTweet(this.mytext);
-  this.mytext = '';
-}
+  OnNewTweet() {
+    this.feedService.postNewTweet(this.mytext).subscribe((newTweet: Tweet) => {
+      this.tweets.unshift(newTweet);
+    });
+    this.mytext = '';
+  }
 }
