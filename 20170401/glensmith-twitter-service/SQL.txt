@@ -1,0 +1,15 @@
+
+-- Initial data containing tweets
+insert into tweet values (2, "Measuring programming progress by lines of code is like measuring aircraft building progress by weight", "Joe", current_timestamp)
+insert into tweet values (3, "Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it.", "Mary", current_timestamp)
+insert into tweet values (4, "People think that computer science is the art of geniuses but the actual reality is the opposite, just many people doing things that build on each other, like a wall of mini stones.", "Glen", current_timestamp)
+insert into tweet values (5, "You can’t have great software without a great team, and most software teams behave like dysfunctional families.", "Joe", current_timestamp)
+
+
+
+TODO: integrate this into the model.
+insert into tweet values (1, "Always code as if the guy who ends up maintaining your code will be a violent psychopath who knows where you live.", "Glen", current_timestamp , Arrays.asList(new String[] {"Joe"}), new ArrayList<String>()),
+//    		    new Tweet(2, "Measuring programming progress by lines of code is like measuring aircraft building progress by weight", "Joe", new Date(), new ArrayList<String>(), Arrays.asList(new String[] {"Mary"})),
+//    		    new Tweet(3, "Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it.", "Mary", new Date(), Arrays.asList(new String[] {"Glen"}), Arrays.asList(new String[] {"Mary"})),
+//    		    new Tweet(4, "People think that computer science is the art of geniuses but the actual reality is the opposite, just many people doing things that build on each other, like a wall of mini stones.", "Glen", new Date(), Arrays.asList(new String[] {"Joe", "Mary"}), new ArrayList<String>()),
+//    		    new Tweet(5, "You can’t have great software without a great team, and most software teams behave like dysfunctional families.", "Joe", new Date(), new ArrayList<String>(), Arrays.asList(new String[] {"Mary", "Glen"}))
