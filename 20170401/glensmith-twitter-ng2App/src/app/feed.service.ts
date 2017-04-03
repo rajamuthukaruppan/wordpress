@@ -35,9 +35,21 @@ constructor(private userService: UserService, private http : Http) { }
   }
 
   postNewTweet(tweetText : string) {
-    // this.tweets.unshift(
-    //       new Tweet(tweetText, this.userService.getCurrentUser(), new Date(), [], []) 
-    //    );
+    console.log(tweetText);
+
+    let body = JSON.stringify({
+      body: tweetText, author: this.userService.getCurrentUser(),
+      date: new Date(), retweets: [], favorites: []
+    });
+    console.log(body);
+    // not working as expected
+
+    return this.http.post('http://localhost:8080/glensmith-twitter-service/rest/tweets', body).map(
+      (resp: Response) => {
+        console.log(resp.json());
+        return "";
+        // return this.getTweetFromJson(resp.json());
+      });
   }
 
   reTweet(tweet : Tweet) {
