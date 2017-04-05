@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+
 public class Tweet {
 	@Override
 	public String toString() {
@@ -12,6 +13,7 @@ public class Tweet {
 	}
 	private Integer id;
 	private String body = "test tweet";
+	private String avatar;
 	private String author;
 	private Date date;
 	private List<String> retweets = new ArrayList<>();
@@ -69,6 +71,13 @@ public class Tweet {
 		this.favorites = favorites;
 	}
 	
+	public String getAvatar() {
+		return avatar;
+	}
+
+	public void setAvatar(String avatar) {
+		this.avatar = avatar;
+	}
 	
 	
 }

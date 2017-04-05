@@ -11,7 +11,7 @@ import { Tweet } from '../tweet';
 export class FeedComponent implements OnInit {
 
   mytext = '';
-
+  errorText = '';
   tweets = [];
 
   constructor(private userService: UserService, private feedService: FeedService) { }
@@ -19,6 +19,8 @@ export class FeedComponent implements OnInit {
   ngOnInit() {
     this.feedService.getCurrentFeed().subscribe((newTweets) => {
       this.tweets = newTweets;
+    }, (error) => {
+      this.errorText = error;
     });
   }
 
@@ -32,11 +34,19 @@ export class FeedComponent implements OnInit {
 
   OnRetweet(tweet) {
     this.feedService.reTweet(tweet);
+    this.feedService.updateTweet(tweet).subscribe((newTweet: Tweet) => {
+      this.tweets.unshift(newTweet);
+    }, (error) => {
+      this.errorText = error;
+    });
+    this.mytext = '';
   }
 
   OnNewTweet() {
     this.feedService.postNewTweet(this.mytext).subscribe((newTweet: Tweet) => {
       this.tweets.unshift(newTweet);
+    }, (error) => {
+      this.errorText = error;
     });
     this.mytext = '';
   }

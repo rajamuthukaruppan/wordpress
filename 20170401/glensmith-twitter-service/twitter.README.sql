@@ -46,6 +46,13 @@ insert into tweet values (3, "Debugging is twice as hard as writing the code in 
 insert into tweet values (4, "People think that computer science is the art of geniuses but the actual reality is the opposite, just many people doing things that build on each other, like a wall of mini stones.", "Glen", current_timestamp)
 insert into tweet values (5, "You can’t have great software without a great team, and most software teams behave like dysfunctional families.", "Joe", current_timestamp)
 
+INSERT INTO `tweet_users` (`user_id`, `name`) VALUES (0, 'Mary');
+INSERT INTO `tweet_users` (`user_id`, `name`) VALUES (1, 'Joe');
+INSERT INTO `tweet_users` (`user_id`, `name`) VALUES (2, 'Karen');
+INSERT INTO `tweet_users` (`user_id`, `name`) VALUES (3, 'Phil');
+INSERT INTO `tweet_users` (`user_id`, `name`) VALUES (4, 'Toni');
+INSERT INTO `tweet_users` (`user_id`, `name`) VALUES (5, 'Glen');
+
 
 
 select * from tweet

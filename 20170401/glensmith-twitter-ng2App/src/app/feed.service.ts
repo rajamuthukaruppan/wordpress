@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { UserService } from './user.service';
 import { Tweet } from './tweet';
 import { Http, Response } from '@angular/http';
-import { Observable } from 'rxjs';
+import { Observable } from 'rxjs/Rx';
 import { Headers, RequestOptions } from '@angular/http';
 
 @Injectable()
@@ -19,10 +19,26 @@ export class FeedService {
         fetchedTweets.push(this.getTweetFromJson(tweet));
       }
       return fetchedTweets as Array<Tweet>;
-    });
-
+    }).catch(this.errorHandler);
   }
 
+  errorHandler(err) {
+    console.log(err);
+    return Observable.throw(err); 
+  }
+
+  updateTweet(tweet: Tweet) : Observable<Tweet> {
+    let body = JSON.stringify(tweet);
+    let url = 'http://localhost:8080/glensmith-twitter-service/rest/tweet';
+    console.log("inside update");
+    let headers = new Headers({ 'Content-Type': 'application/json' });
+    let options = new RequestOptions({ headers: headers });
+    
+    return this.http.put(url, body, options).map(
+      (resp : Response) => {
+        return this.getTweetFromJson(resp.json());
+      });
+  }
   private isUserInCollection(collection: string[], userId: string): boolean {
     return collection.indexOf(userId) != -1;
   }
@@ -48,12 +64,16 @@ export class FeedService {
     if (!this.isUserInCollection(tweet.retweets, this.userService.getCurrentUser())) {
       tweet.retweets.push(this.userService.getCurrentUser());
     }
+    console.log("this ran");
+    this.updateTweet(tweet);
   }
 
   favoriteTweet(tweet: Tweet) {
     if (!this.isUserInCollection(tweet.favorites, this.userService.getCurrentUser())) {
       tweet.favorites.push(this.userService.getCurrentUser());
     }
+    console.log("this ran");
+    this.updateTweet(tweet);
   }
 
   getFriends(): Observable<string[]> {

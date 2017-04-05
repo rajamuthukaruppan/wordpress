@@ -6,6 +6,14 @@
 
   <button class="ui button primary" type="button" (click)='OnNewTweet()'>Tweet</button>
 </form>
+
+<div *ngIf="errorText" class="ui negative message">
+  <i class="close icon"></i>
+  <div class="header">
+    {{ errorText }}
+  </div>
+</div>
+
 <div class="ui comments" *ngFor='let tweet of tweets'>
   <a class="avatar">
     <img src="assets/avatars/{{tweet.avatar}}">

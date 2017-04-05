@@ -11,6 +11,9 @@ public class TweetService {
 	@Autowired
 	private TweetDataManager tweetDataManager;
 
+	public Tweet updateTweet(Tweet t) {
+		return tweetDataManager.updateTweet(t);
+	}
 	public List<Tweet> getFeed() {
     	return tweetDataManager.getFeed();
 	}
