@@ -11,12 +11,10 @@ public class TweetService {
 	@Autowired
 	private TweetDataManager tweetDataManager;
 
-	String createHelloMessage(String name) {
-		tweetDataManager.getTestData();
-        return "Hello " + name + "!";
-    }
-	
 	public List<Tweet> getFeed() {
     	return tweetDataManager.getFeed();
+	}
+	public Tweet postTweet(Tweet t) {
+    	return tweetDataManager.postTweet(t);
 	}
 }

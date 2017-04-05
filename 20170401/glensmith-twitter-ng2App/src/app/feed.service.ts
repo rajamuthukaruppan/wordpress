@@ -10,13 +10,6 @@ export class FeedService {
 
   tweets = []
 
-
-  private getTweetFromJson(obj: Tweet): Tweet {
-    return new Tweet(obj.id, obj.body, obj.author, obj.date, obj.retweets, obj.favorites);
-  }
-
-
-
   constructor(private userService: UserService, private http: Http) { }
 
   getCurrentFeed(): Observable<Tweet[]> {
@@ -34,26 +27,23 @@ export class FeedService {
     return collection.indexOf(userId) != -1;
   }
 
-  postNewTweet(tweetText: string) {
-    console.log(tweetText);
-
+  postNewTweet(tweetText: string) : Observable<Tweet> {
     let body = JSON.stringify({
       body: tweetText, author: this.userService.getCurrentUser(),
       date: new Date(), retweets: [], favorites: []
     });
-    console.log(body);
-    // not working as expected
 
     let headers = new Headers({ 'Content-Type': 'application/json' });
     let options = new RequestOptions({ headers: headers });
 
     return this.http.post('http://localhost:8080/glensmith-twitter-service/rest/tweets', body, options).map(
       (resp: Response) => {
-        console.log("post response", resp.json());
         return this.getTweetFromJson(resp.json());
       });
   }
-
+  private getTweetFromJson(obj: Tweet): Tweet {
+    return new Tweet(obj.id, obj.body, obj.author, obj.date, obj.retweets, obj.favorites);
+  }
   reTweet(tweet: Tweet) {
     if (!this.isUserInCollection(tweet.retweets, this.userService.getCurrentUser())) {
       tweet.retweets.push(this.userService.getCurrentUser());

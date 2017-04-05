@@ -43,10 +43,7 @@ public class TweetResource {
     @Produces({ "application/json" })
     @Consumes(MediaType.APPLICATION_JSON)
     public Tweet postTweets(Tweet tweet) {
-    	System.out.println("POST tweets called for Tweet: " + tweet);
-    	List<Tweet> feed = tweetService.getFeed();
-    	return feed.get(0);
-		//return feed.toArray(new Tweet[feed.size()]);
+    	return tweetService.postTweet(tweet);
     }
 
 }

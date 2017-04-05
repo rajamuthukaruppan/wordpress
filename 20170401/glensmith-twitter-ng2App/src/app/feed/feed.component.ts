@@ -20,8 +20,6 @@ export class FeedComponent implements OnInit {
     this.feedService.getCurrentFeed().subscribe((newTweets) => {
       this.tweets = newTweets;
     });
-    // this.tweets = this.feedService.getCurrentFeed();
-
   }
 
   isUserInCollection(collection: string[], userId: string): boolean {
