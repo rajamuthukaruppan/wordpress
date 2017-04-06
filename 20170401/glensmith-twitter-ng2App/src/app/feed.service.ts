@@ -27,16 +27,20 @@ export class FeedService {
     return Observable.throw(err); 
   }
 
-  updateTweet(tweet: Tweet) : Observable<Tweet> {
+  updateTweet(tweet: Tweet) {
     let body = JSON.stringify(tweet);
     let url = 'http://localhost:8080/glensmith-twitter-service/rest/tweet';
-    console.log("inside update");
     let headers = new Headers({ 'Content-Type': 'application/json' });
     let options = new RequestOptions({ headers: headers });
     
     return this.http.put(url, body, options).map(
       (resp : Response) => {
-        return this.getTweetFromJson(resp.json());
+        if (resp.status == 204) {
+          console.log("Success. Yay!");
+        } else {
+        throw `Error saving tweet ${tweet.id}. Received status code: ${resp.status}`;
+      }
+      return resp;
       });
   }
   private isUserInCollection(collection: string[], userId: string): boolean {
@@ -65,7 +69,7 @@ export class FeedService {
       tweet.retweets.push(this.userService.getCurrentUser());
     }
     console.log("this ran");
-    this.updateTweet(tweet);
+    
   }
 
   favoriteTweet(tweet: Tweet) {
@@ -73,10 +77,10 @@ export class FeedService {
       tweet.favorites.push(this.userService.getCurrentUser());
     }
     console.log("this ran");
-    this.updateTweet(tweet);
+    
   }
 
   getFriends(): Observable<string[]> {
-    return this.http.get('/assets/friends.json').map((resp: Response) => resp.json() as string[]);
+    return this.http.get(`http://localhost:8080/glensmith-twitter-service/rest/friends/${this.userService.getCurrentUser()}`).map((resp: Response) => resp.json() as string[]);
   }
 }

@@ -11,6 +11,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,9 +37,10 @@ public class TweetResource {
 
     @PUT
     @Path("/tweet")
-    public Tweet putTweet(Tweet t) {
+    public Response putTweet(Tweet t) {
     	logger.info("PUT tweets called.");
-    	return tweetService.updateTweet(t);
+    	tweetService.updateTweet(t);
+    	return Response.status(Response.Status.NO_CONTENT).build();
     }
     
     @GET
@@ -46,6 +48,11 @@ public class TweetResource {
     @Produces({ "application/json" })
     public List<Tweet> getTweets() {
     	logger.info("GET tweets called.");
+    	try {
+			Thread.sleep(3000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
     	List<Tweet> feed = tweetService.getFeed();
     	return feed;
     }

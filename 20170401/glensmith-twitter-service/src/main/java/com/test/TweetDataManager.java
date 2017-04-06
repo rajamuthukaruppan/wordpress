@@ -1,6 +1,8 @@
 package com.test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -42,14 +44,14 @@ public class TweetDataManager {
 		jdbcTemplate.update(insertSQL, tweetId, userId);
 	}
 	public void putFavorites(int tweetId, int userId) {
-		String insertSQL = "insert into tweet_facorites (tweet_id, user_id) "
+		String insertSQL = "insert into tweet_favorites (tweet_id, user_id) "
 				+ "select * from (select ? a, ? b) as tmp "
-				+ "WHERE not exists ( select 1 from tweet_facorites where tweet_id = tmp.a and user_id = tmp.b)";
+				+ "WHERE not exists ( select 1 from tweet_favorites where tweet_id = tmp.a and user_id = tmp.b)";
 		jdbcTemplate.update(insertSQL, tweetId, userId);
 	}
 	
-	public Tweet updateTweet(Tweet t) {
-		if (t == null) return null;
+	public void updateTweet(Tweet t) {
+		if (t == null) return;
 		
 		if(t.getRetweets()!=null) for(String user : t.getRetweets()) {
 			if(user==null || user.trim().length()==0) continue;
@@ -75,7 +77,6 @@ public class TweetDataManager {
 
 		}			
 	
-		return t;
 	}
 	
 	public Tweet postTweet(Tweet t) {
@@ -88,7 +89,7 @@ public class TweetDataManager {
         return t;
 	}
 	public List<Tweet> getFeed() {
-		String sql = "SELECT id,body,author,date from tweet";
+		String sql = "SELECT id,body,author,date from tweet order by date desc";
 		List<Map<String, Object>> mapList = jdbcTemplate.queryForList(sql);
 		List<Tweet> results = new ArrayList<>();
 		if (mapList != null)
@@ -98,5 +99,15 @@ public class TweetDataManager {
 				results.add(t);
 			}
 		return results;
+	}
+
+	public String[] getFriends(String user) {
+		List<String> userList = new ArrayList<>();
+		
+		List<Map<String,Object>> mapList = jdbcTemplate.queryForList("select name from tweet_users order by name");
+		if(mapList!=null) for(Map<String,Object> map : mapList) {
+			userList.add((String)map.get("name"));
+		}
+		return userList.toArray(new String[0]);
 	}
 }

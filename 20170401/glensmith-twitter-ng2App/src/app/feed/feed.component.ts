@@ -13,6 +13,7 @@ export class FeedComponent implements OnInit {
   mytext = '';
   errorText = '';
   tweets = [];
+  loaded = false;
 
   constructor(private userService: UserService, private feedService: FeedService) { }
 
@@ -21,6 +22,8 @@ export class FeedComponent implements OnInit {
       this.tweets = newTweets;
     }, (error) => {
       this.errorText = error;
+    }, () => {
+      this.loaded = true;
     });
   }
 
@@ -34,12 +37,11 @@ export class FeedComponent implements OnInit {
 
   OnRetweet(tweet) {
     this.feedService.reTweet(tweet);
-    this.feedService.updateTweet(tweet).subscribe((newTweet: Tweet) => {
-      this.tweets.unshift(newTweet);
+    this.feedService.updateTweet(tweet).subscribe(resp => {
+      console.log("Response in component: ", resp);
     }, (error) => {
       this.errorText = error;
     });
-    this.mytext = '';
   }
 
   OnNewTweet() {

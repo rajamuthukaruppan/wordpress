@@ -11,13 +11,16 @@ public class TweetService {
 	@Autowired
 	private TweetDataManager tweetDataManager;
 
-	public Tweet updateTweet(Tweet t) {
-		return tweetDataManager.updateTweet(t);
+	public void updateTweet(Tweet t) {
+		tweetDataManager.updateTweet(t);
 	}
 	public List<Tweet> getFeed() {
     	return tweetDataManager.getFeed();
 	}
 	public Tweet postTweet(Tweet t) {
     	return tweetDataManager.postTweet(t);
+	}
+	public String[] getFriends(String user) {
+		return tweetDataManager.getFriends(user);
 	}
 }
