@@ -12,6 +12,7 @@ import { MessagesComponent } from './messages/messages.component';
 import { FriendsComponent } from './friends/friends.component';
 import {routing, appRoutingProviders } from './app.routing';
 import { FriendComponent } from './friend/friend.component';
+import { LoginComponent } from './login/login.component';
 
 @NgModule({
   declarations: [
@@ -20,7 +21,8 @@ import { FriendComponent } from './friend/friend.component';
     FeedComponent,
     MessagesComponent,
     FriendsComponent,
-    FriendComponent
+    FriendComponent,
+    LoginComponent
   ],
   imports: [
     BrowserModule,
