@@ -9,13 +9,13 @@ import { Customer } from '../customer';
 })
 export class CustomersComponent implements OnInit {
 
-  customers : Array<Customer>;
+  customers = [];
 
   constructor(private customerService: CustomerService) { }
 
   ngOnInit() {
-    this.customers = this.customerService.getCustomers();
-    console.log(this.customers);
+    this.customerService.getCustomers().subscribe((customers) => {
+      this.customers = customers;
+    });
   }
-
 }
