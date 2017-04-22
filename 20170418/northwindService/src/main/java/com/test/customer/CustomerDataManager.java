@@ -70,26 +70,14 @@ public class CustomerDataManager {
 	}
 	
 	public Customer put(Customer c) {
-        Map<String, Object> p = new HashMap<String, Object>(3);
-        p.put("id", c.getId());
-        p.put("company", c.getCompany());
-        p.put("first_name", c.getFirstName());
-        p.put("last_name", c.getLastName());
-        p.put("email_address", c.getEmailAddress());
-        p.put("job_title", c.getJobTitle());
-        p.put("business_phone", c.getBusinessPhone());
-        p.put("home_phone", c.getHomePhone());
-        p.put("fax_number", c.getFaxNumber());
-        p.put("address", c.getAddress());
-        p.put("city", c.getCity());
-        p.put("state_province", c.getStateProvince());
-        p.put("zip_postal_code", c.getZipPostalCode());
-        p.put("country_region", c.getCountryRegion());
-        p.put("web_page", c.getWebPage());
-        p.put("notes", c.getNotes());
-        // p.put("attachments", c.getAttachments()); // TODO: fix it
-        int rows = insertCustomer.execute(p);
-        if(rows!=1) throw new RuntimeException("error while inserting.");
+		String sql = "UPDATE customers set company=?,first_name=?,last_name=?,email_address=?,"
+				+ "job_title=?,business_phone=?,home_phone=?,mobile_phone=?,fax_number=?,address=?,city=?,"
+				+ "state_province=?,zip_postal_code=?,country_region=?,web_page=? WHERE id = ?";
+		int rows = jdbcTemplate.update(sql, new Object[] {c.getCompany(),c.getFirstName(),c.getLastName(),
+				c.getEmailAddress(),c.getJobTitle(),c.getBusinessPhone(),c.getMobilePhone(),c.getHomePhone(),c.getFaxNumber(),
+				c.getAddress(),c.getCity(),c.getStateProvince(),c.getZipPostalCode(),c.getCountryRegion(),
+				c.getWebPage(),c.getId()});
+        if(rows!=1) throw new RuntimeException("error while updating.");
         return c;
 	}
 }

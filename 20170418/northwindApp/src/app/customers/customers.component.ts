@@ -10,12 +10,18 @@ import { Customer } from '../customer';
 export class CustomersComponent implements OnInit {
 
   customers = [];
+  loaded = false;
+  errorText = '';
 
   constructor(private customerService: CustomerService) { }
 
   ngOnInit() {
     this.customerService.getCustomers().subscribe((customers) => {
       this.customers = customers;
+    }, (error) => {
+      this.errorText = error;
+    }, () => {
+      this.loaded = true;
     });
   }
 }

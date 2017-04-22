@@ -58,7 +58,7 @@ app.component.html
 # Setup the router 
 One time setup to tell our module about this new routes in app.module.ts
 
-```
+```typescript
 import { routing,
      appRoutingProviders } from './app.routing';
 
@@ -68,14 +68,13 @@ imports: [ ... routing ],
 ```
 
 Then update our app component html in app.component.html
-```
+```xml
 <router-outlet></router-outlet>
 ```
 
 # Maintain the routing when new pages are added
 Every time a new page is introduced the app.routing.ts must be updated.
-
-```
+```typescript
 import { ModuleWithProviders } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { CustomersComponent } from './customers/customers.component';
@@ -152,7 +151,7 @@ Unlike adding components you still need to modify the file manually every time a
 ng g class Customer
 
 Define the Customer
-```
+```typescript
 export class Customer {
     constructor(
         public id: number, 
@@ -164,7 +163,7 @@ export class Customer {
 ```
 
 # modify the service
-```
+```typescript
 import { Injectable } from '@angular/core';
 import { Customer } from './customer';
 
@@ -202,7 +201,7 @@ Deep linking allows users to see individual records from a list and provides opt
 ng g c customer
 ```
 
-```
+```typescript
 import { Component, OnInit } from '@angular/core';
 import { Customer } from '../customer';
 import { ActivatedRoute } from '@angular/router';
@@ -231,11 +230,9 @@ export class CustomerComponent implements OnInit {
 ```
 
 Modify the app routing
-```
+```javascript
 import { CustomerComponent } from './customer/customer.component';
-
 ...
-
   { path: 'customers/:customerId', component: CustomerComponent },
 ```
 
@@ -265,14 +262,35 @@ Define the bean in the spring config class.
 	}
 ```
 
-## Enable CORS for the individual package that contains the resource.
-https://github.com/numberformat/wordpress/blob/master/20170401/glensmith-twitter-service/src/main/java/com/test/CORSFilter.java
+# Enable the proxy otherwise enable CORS
+Proxy all calls to the API to the app server.
+create proxy.config.json at the root of the project
+```json
+{
+    "/northwind/*" : {
+        "target": "http://localhost:8080/northwindService/",
+        "secure" : false,
+        "logLevel": "debug"
+    }
+}
+```
+
+Specify the proxy config at startup
+```
+ng s --proxy-config proxy.config.json
+```
+Or specify it in package.json
+```
+    "start": "ng serve --proxy-config proxy.config.json",
+```
+You must use npm start if going the config route.
+
 
 ## Fetch the data from the service and convert to Customer objects
 Modify the service to return an Observable
 ```typescript
   getCustomers() : Observable<Array<Customer>> {
-    return this.http.get('http://localhost:8080/northwindService/northwind/customers').map((resp: Response) => {
+    return this.http.get('northwind/customers').map((resp: Response) => {
       let fetchedCustomer : Array<Customer> = [];
       for (let json of resp.json()) {        
         fetchedCustomer.push(this.getCustomerFromJson(json));
@@ -311,9 +329,45 @@ Display the customers
   </tbody>
 </table>
 
-<div *ngIf='!customers.length'>
-  <h2>There are not any customers here</h2>
+```
+
+# Error handling
+
+* No Data
+* Pending
+* Errors
+
+```typescript
+  loaded = false;
+  errorText = '';
+```
+
+```html
+<div *ngIf="errorText" class="ui negative message">
+  <i class="close icon"></i>
+  <div class="header">
+    {{ errorText }}
+  </div>
 </div>
+<div *ngIf="loaded">
+  <!--table content goes here -->
+  <div *ngIf='!customers.length'>
+    <h2>There are not any customers here</h2>
+  </div>
+</div>
+<div *ngIf='!loaded'>
+  <h2>Loading...</h2>
+</div>
+```
+Here is the template code to getch data from the observable.
+```typescript
+    this.customerService.getCustomers().subscribe((customers) => {
+      this.customers = customers;
+    }, (error) => {
+      this.errorText = error;
+    }, () => {
+      this.loaded = true;
+    });
 ```
 
 

@@ -1,0 +1,7 @@
+{
+    "/northwind/*" : {
+        "target": "http://localhost:8080/northwindService/",
+        "secure" : false,
+        "logLevel": "debug"
+    }
+}

@@ -30,8 +30,6 @@ public class CustomerService {
 
 	@Transactional
 	public Customer put(Customer c) {
-		// for demo purpose only there are better ways to update...
-		customerDataManager.delete(c.getId());
 		return customerDataManager.put(c);
 	}
 
