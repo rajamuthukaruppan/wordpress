@@ -19,7 +19,7 @@ export class CustomerComponent implements OnInit {
   loaded = false;
   firstName = 'test';
   message = "";
-  
+  saved = false;
 
   constructor(private route : ActivatedRoute, private customerService : CustomerService,
   private location: Location) { }
@@ -43,8 +43,10 @@ export class CustomerComponent implements OnInit {
       this.message = "Nothing to save";
       return;
     }
-    this.customerService.saveCustomer(form.value).subscribe((customer) => {
-      this.message="Changes saved";      
+    let c = JSON.parse(form.value);
+    this.customerService.saveCustomer(c).subscribe((customer) => {
+      this.message="Changes saved";
+      this.saved=true;
     }, (error) => {
       this.errorText = error;
     }, () => {
@@ -52,7 +54,5 @@ export class CustomerComponent implements OnInit {
     });
   }
 
-    onCancel() {
-        this.location.back();
-    }  
+  
 }

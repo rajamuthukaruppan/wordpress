@@ -151,7 +151,10 @@
     </div>
   -->
     <button class="ui button primary" [disabled]="form.invalid || !form.dirty" type="submit">Save</button>
-    <button class="ui button primary" [disabled]="form.invalid" type="button" (click)="onCancel()">Cancel</button>
+    <a routerLink="../">
+      <button *ngIf="!saved" class="ui button primary" [disabled]="form.invalid" type="button">Cancel</button>
+      <button *ngIf="saved" class="ui button primary" [disabled]="form.invalid" type="button">Back</button>
+    </a>
   </form>
 <div *ngIf="message" id="message"  class="ui bottom attached warning message">
   <i class="icon info circle"></i>

@@ -24,8 +24,7 @@ export class CustomerService {
       return this.getCustomerFromJson(resp.json());
     });
   }
-  saveCustomer(formValue): Observable<Customer> {
-    let c: Customer = this.getCustomerFromJson(formValue);
+  saveCustomer(c : Customer): Observable<Customer> {
     console.log(c);
     return this.http.put(`northwind/customers/${c.id}`, c).map((resp: Response) => {
       return this.getCustomerFromJson(resp.json());
