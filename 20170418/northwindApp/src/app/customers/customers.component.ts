@@ -16,6 +16,9 @@ export class CustomersComponent implements OnInit {
   customerToEdit:Customer;
   message='';
   saved=false;
+  companyOrder = -1;
+  firstNameOrder = -1;
+  lastNameOrder = -1;
 
   constructor(private customerService: CustomerService) { }
 
@@ -51,5 +54,20 @@ export class CustomersComponent implements OnInit {
   }
   customerExit(customer) {
     this.customerToEdit=null;
+  }
+
+  sortCompany() {
+    if(this.companyOrder==-1 || this.companyOrder==0) { // sort Asc
+      this.companyOrder = 1;
+    } else if(this.companyOrder == 1) { // sort desc
+      this.companyOrder = -1;
+    }
+    this.customers.sort((a : Customer,b : Customer) : number => {
+      if(a.company==null) return -1;
+      if(b.company==null) return 1;
+      if(a.company.toUpperCase() < b.company.toUpperCase()) return -this.companyOrder;
+      if(a.company.toUpperCase() > b.company.toUpperCase()) return this.companyOrder;
+      return 0;
+    });
   }
 }
