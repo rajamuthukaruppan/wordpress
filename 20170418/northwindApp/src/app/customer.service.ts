@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Customer } from './customer';
+import { Customer } from './shared/customer';
 import { Observable } from 'rxjs/Rx';
 import { Http, Response } from '@angular/http';
 import { Headers, RequestOptions } from '@angular/http';

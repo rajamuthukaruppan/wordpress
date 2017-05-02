@@ -18,7 +18,8 @@ export class Customer {
     public notes: string;
     public attachments: string
 
-    constructor(jsonStr: string) {
+    constructor(jsonStr?: string) {
+        if(jsonStr==null) return;
         let jsonObj: any = JSON.parse(jsonStr);
         for (let prop in jsonObj) {
             this[prop] = jsonObj[prop];

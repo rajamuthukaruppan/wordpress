@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Customer } from '../customer';
+import { Customer } from '../shared/customer';
 import { ActivatedRoute } from '@angular/router';
 import { CustomerService } from '../customer.service';
 import { Location } from '@angular/common';

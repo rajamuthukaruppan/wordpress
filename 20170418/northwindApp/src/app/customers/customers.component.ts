@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CustomerService } from '../customer.service';
-import { Customer } from '../customer';
+import { Customer } from '../shared/customer';
 
 @Component({
   selector: 'app-customers',
@@ -19,7 +19,11 @@ export class CustomersComponent implements OnInit {
   companyOrder = -1;
   firstNameOrder = -1;
   lastNameOrder = -1;
-
+  filter: Customer = new Customer();  
+  searchCompanyMode=false;
+  searchFirstNameMode=false;
+  searchLastNameMode=false;
+  
   constructor(private customerService: CustomerService) { }
 
   ngOnInit() {
@@ -69,5 +73,8 @@ export class CustomersComponent implements OnInit {
       if(a.company.toUpperCase() > b.company.toUpperCase()) return this.companyOrder;
       return 0;
     });
+  }
+  searchCompany() {
+    this.searchCompanyMode = !this.searchCompanyMode;
   }
 }

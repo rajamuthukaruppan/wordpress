@@ -1,16 +1,19 @@
-<div *ngIf="loaded">
+<div *ngIf="loaded">  
   <table class="ui celled table" *ngIf='customers.length'>
     <thead>
       <tr>
-        <th>Company
+        <th>
+          <input *ngIf="searchCompanyMode" type="text" [(ngModel)]="filter.company" name="company" placeholder="Company">
+          <span *ngIf="!searchCompanyMode">Company</span>
           <i (click)="sortCompany()" class="icon sort"></i>
+          <i (click)="searchCompany()" class="icon search"></i>          
         </th>
         <th>First Name</th>
         <th>Last Name</th>
       <th></th>
     </tr></thead>
     <tbody>
-      <tr *ngFor='let customer of customers'>
+      <tr *ngFor='let customer of customers | customerFilter:filter'>
         <td>{{customer.company}}</td>
         <td>{{customer.firstName}}</td>
         <td >

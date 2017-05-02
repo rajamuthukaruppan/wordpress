@@ -25,6 +25,7 @@ import { PurchaseorderService } from './purchaseorder.service';
 import { ShipperService } from './shipper.service';
 import { SupplierService } from './supplier.service';
 import { CustomerComponent } from './customer/customer.component';
+import { CustomerFilterPipe } from './shared/customer-filter.pipe';
 
 @NgModule({
   declarations: [
@@ -40,6 +41,7 @@ import { CustomerComponent } from './customer/customer.component';
     SuppliersComponent,
     PurchaseordersComponent,
     CustomerComponent,
+    CustomerFilterPipe
   ],
   imports: [
     BrowserModule,
