@@ -21,9 +21,12 @@ export class CustomersComponent implements OnInit {
   firstNameSortStatus = {order : -1};
   lastNameSortStatus = {order : -1};
   filter: Customer = new Customer();  
-  searchCompanyStatus=false;
-  searchFirstNameStatus=false;
-  searchLastNameStatus=false;
+  searchStatus = {
+    searchCompanyStatus : false, 
+    searchFirstNameStatus : false, 
+    searchLastNameStatus : false
+  }
+
   // imported functions
   sortString=sortFunc.sortString;
   sortNumber=sortFunc.sortNumber;
@@ -65,7 +68,7 @@ export class CustomersComponent implements OnInit {
   } 
 
   searchEnable(searchStatusName) {
-    this[searchStatusName] = !this[searchStatusName]
+    this.searchStatus[searchStatusName] = !this.searchStatus[searchStatusName]
   }
 
 }

@@ -25,12 +25,12 @@ export class CustomerFilterPipe implements PipeTransform {
   applyFilter(customer: Customer, filter: Customer): boolean {
     for (let field in filter) {
       if (filter[field]) {
-        if (typeof filter[field] === 'string') {
+        if (typeof filter[field] === 'string' && typeof customer[field] === 'string') {
           if (customer[field].toLowerCase().indexOf(filter[field].toLowerCase()) === -1) {
             return false;
           }
-        } else if (typeof filter[field] === 'number') {
-          if (customer[field] !== filter[field]) {
+        } else if (typeof filter[field] === 'number' || typeof customer[field] === 'number') {
+          if (String(customer[field]).indexOf(String(filter[field])) === -1) {
             return false;
           }
         }

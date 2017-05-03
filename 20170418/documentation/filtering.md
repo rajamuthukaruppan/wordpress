@@ -8,49 +8,48 @@
 ```html
 <input *ngIf="searchCompanyStatus" type="text" [(ngModel)]="filter.company" name="company" placeholder="Company">
 ```
-3. Create the customer-filter.pipe.ts see file in this project.
 
-```typescript
-import { Pipe, PipeTransform } from '@angular/core';
-
-import { Customer } from './customer';
-
-@Pipe({
-    name: 'customerFilter',
-    pure: false
-})
-export class CustomerFilterPipe implements PipeTransform {
-  transform(items: Customer[], filter: Customer): Customer[] {
-    if (!items || !filter) {
-      return items;
-    }
-    // filter items array, items which match and return true will be kept, false will be filtered out
-    return items.filter((item: Customer) => this.applyFilter(item, filter));
-  }
-  
-  /**
-   * Perform the filtering.
-   * 
-   * @param {Customer} customer The customer to compare to the filter.
-   * @param {Customer} filter The filter to apply.
-   * @return {boolean} True if customer satisfies filters, false if not.
-   */
-  applyFilter(customer: Customer, filter: Customer): boolean {
-    for (let field in filter) {
-      if (filter[field]) {
-        if (typeof filter[field] === 'string') {
-          if (customer[field].toLowerCase().indexOf(filter[field].toLowerCase()) === -1) {
-            return false;
-          }
-        } else if (typeof filter[field] === 'number') {
-          if (customer[field] !== filter[field]) {
-            return false;
-          }
-        }
-      }
-    }
-    return true;
-  }
-}
+```html
+<i (click)="searchEnable('searchCompanyStatus')" class="icon search"></i>          
 ```
-4. Modify the app.module.ts and insert filter in the Imports and declarations.
+
+Add attribute within the component
+```typescript
+  searchStatus = {
+    searchCompanyStatus : false, 
+    searchFirstNameStatus : false, 
+    searchLastNameStatus : false
+  }
+```
+
+3. Add method
+```typescript
+  searchEnable(searchStatusName) {
+    this.searchStatus[searchStatusName] = !this.searchStatus[searchStatusName]
+  }
+```
+
+
+4. Create the customer-filter.pipe.ts see file in this project for an example.
+
+
+5. Modify the app.module.ts and insert filter in the Imports and declarations.
+
+app.module.ts
+```typescript
+import { CustomerFilterPipe } from './shared/customer-filter.pipe';
+...
+declarations: [
+    ...
+    CustomerFilterPipe,
+    ...
+]
+```
+
+6. Finally insert the pipe into the ngFor
+
+```html
+      <tr *ngFor='let customer of customers | customerFilter:filter'>
+```
+
+7. For Each additional field just perform the actions in Step 2
