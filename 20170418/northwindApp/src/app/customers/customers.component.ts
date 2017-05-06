@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CustomerService } from '../customer.service';
 import { Customer } from '../shared/customer';
 import * as sortFunc from '../shared/sortFunc';
+import {HostListener} from '@angular/core';
 
 @Component({
   selector: 'app-customers',
@@ -71,4 +72,11 @@ export class CustomersComponent implements OnInit {
     this.searchStatus[searchStatusName] = !this.searchStatus[searchStatusName]
   }
 
+  
+  escapePressed(key, field, statusVar) {
+    if("Escape" === key.key) {
+      this.filter[field] = "";
+      this.searchEnable(statusVar);
+    }
+  }
 }
