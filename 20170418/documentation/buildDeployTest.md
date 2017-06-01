@@ -1,5 +1,12 @@
 # Build Deploy Test
 
+## Git setup
+.gitignore
+```
+/target/
+node_modules/
+```
+
 ## Development server
 
 npm start
