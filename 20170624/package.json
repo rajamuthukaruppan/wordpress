@@ -1,0 +1,21 @@
+{
+  "name": "20170624",
+  "version": "1.0.0",
+  "description": "Hello World Typescript",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc -p src/",
+    "build:watch": "tsc -p src/ -w",
+    "serve": "lite-server -c=bs-config.json",
+    "prestart": "npm run build",
+    "start": "concurrently \"npm run build:watch\" \"npm run serve\""
+  },
+  "author": "Neeraj Verma",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^3.5.0",
+    "lite-server": "^2.3.0",
+    "typescript": "^2.3.4"
+  }
+}
