@@ -2,6 +2,7 @@
   <table class="ui celled table" *ngIf='customers.length'>
     <thead>
       <tr>
+        <th></th>
         <th>
           <input *ngIf="searchStatus.searchCompanyStatus" type="text" (keyup)="escapePressed($event, 'company', 'searchCompanyStatus')" [(ngModel)]="filter.company" name="company" placeholder="Company">
           <span *ngIf="!searchStatus.searchCompanyStatus">Company</span>
@@ -23,10 +24,11 @@
           <i *ngIf="!searchStatus.searchLastNameStatus" (click)="sortString(customers, 'lastName', lastNameSortStatus)" class="icon sort"></i>          
           <i *ngIf="!searchStatus.searchLastNameStatus" (click)="searchEnable('searchLastNameStatus')" class="icon search"></i>          
         </th>
-      <th></th>
     </tr></thead>
     <tbody>
       <tr *ngFor='let customer of customers | customerFilter:filter'>
+        <td>
+          <a routerLink="/customers/{{customer.id}}">Details</a></td>          
         <td>{{customer.company}}</td>
         <td>{{customer.firstName}}</td>
         <td >
@@ -39,8 +41,6 @@
             </form>
           </div> 
           </td>
-        <td>
-          <a routerLink="/customers/{{customer.id}}">Details</a></td>          
       </tr>
     </tbody>
   </table>
