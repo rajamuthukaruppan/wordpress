@@ -23,7 +23,7 @@ Proxy all calls to the API to the app server.
 create proxy.config.json at the root of the project
 ```json
 {
-    "/northwind/*" : {
+    "/v1/*" : {
         "target": "http://localhost:8080/northwindService/",
         "secure" : false,
         "logLevel": "debug"
