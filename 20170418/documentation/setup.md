@@ -164,20 +164,29 @@ export class Customer {
 ```typescript
 import { Injectable } from '@angular/core';
 import { Customer } from './customer';
+import { Observable } from 'rxjs/Rx';
+import { Http, Response } from '@angular/http';
+import { Headers, RequestOptions } from '@angular/http';
 
 @Injectable()
 export class CustomerService {
 
-  constructor() { }
+  constructor(private http: Http) { }
 
-  getCustomers() : Array<Customer> {
-    return [
-      new Customer(1, "smith", "john", "IBM"), 
-      new Customer(2, "Still", "Ben", "AAA"), 
-      new Customer(3, "Roland", "Doug", "888"), 
-      new Customer(4, "doe", "john", "TXN")
-    ];
+  getCustomers(): Observable<Customer[]> {
+    return this.http
+      .get('v1/customers')
+      .map((resp: Response) => {
+        const customers = resp.json();
+        return customers.map((customer) => new Customer(customer));
+      })
+      .catch(this.handleError);
   }
+  
+  private handleError (error: Response | any) {
+    console.error('ApiService::handleError', error);
+    return Observable.throw(error);
+  }    
 }
 ```
 
