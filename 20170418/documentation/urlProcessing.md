@@ -24,7 +24,7 @@ export class MyComponent implements OnInit {
 
   ngOnInit() {
     // subscribe to router event
-    this.activatedRoute.params.subscribe((params: Params) => {
+    this.activatedRoute.queryParams.subscribe((params: Params) => {
         let userId = params['userId'];
         console.log(userId);
       });
