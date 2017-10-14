@@ -15,11 +15,11 @@ Import jQuery
 import * as $ from 'jquery';
 ```
 Within your HTML
-```
+```html
 <div id="msgid"></div>
 ```
 Within your component
-```java
+```javascript
   public ngAfterViewChecked() {
     $("#msgid").html("This is Hello World by JQuery");
   }
