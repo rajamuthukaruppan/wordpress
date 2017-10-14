@@ -5,11 +5,6 @@ Install jQuery using NPM
 npm install --save jquery
 ```
 
-Install the jQuery declaration file
-```shell
-npm install -D @types/jquery
-```
-
 Import jQuery
 ```typescript
 import * as $ from 'jquery';
