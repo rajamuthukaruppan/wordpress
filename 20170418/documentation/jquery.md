@@ -5,6 +5,11 @@ Install jQuery using NPM
 npm install --save jquery
 ```
 
+Include the jquery script in index.html
+```html
+  <script src="../node_modules/jquery/dist/jquery.js"></script>
+```
+
 Import jQuery
 ```typescript
 import * as $ from 'jquery';
