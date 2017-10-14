@@ -1,17 +1,17 @@
 ## JQuery setup within an Angular project
 
 Install jQuery using NPM
-```
+```shell
 npm install --save jquery
 ```
 
 Install the jQuery declaration file
-```
+```shell
 npm install -D @types/jquery
 ```
 
 Import jQuery
-```
+```typescript
 import * as $ from 'jquery';
 ```
 Within your HTML
@@ -19,7 +19,7 @@ Within your HTML
 <div id="msgid"></div>
 ```
 Within your component
-```javascript
+```typescript
   public ngAfterViewChecked() {
     $("#msgid").html("This is Hello World by JQuery");
   }
