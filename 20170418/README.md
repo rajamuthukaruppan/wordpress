@@ -4,6 +4,8 @@ Thia page describes how to code a simple Angular 2 application to perform CRUD o
 
 ## [Angular Setup](documentation/setup.md)
 
+## [JQuery Setup](documentation/jquery.md)
+
 ## [Server Side Setup](documentation/serverSideSetup.md)
 
 ## [Error handling](documentation/errorHandling.md)
