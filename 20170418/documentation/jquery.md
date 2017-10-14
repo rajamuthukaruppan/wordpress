@@ -1,6 +1,6 @@
 ## JQuery setup within an Angular project
 
-Install jQuery using NPM
+Install jQuery using NPM if not done already
 ```shell
 npm install --save jquery
 ```
