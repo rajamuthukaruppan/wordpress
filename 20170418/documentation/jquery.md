@@ -3,11 +3,14 @@
 Install jQuery using NPM if not done already
 ```shell
 npm install --save jquery
+npm install --save jquery-ui-dist
 ```
 
-Include the jquery script in index.html
+Include the jquery css and scripts in index.html
 ```html
+  <link rel="stylesheet" href="../node_modules/jquery-ui-dist/jquery-ui.min.css">  
   <script src="../node_modules/jquery/dist/jquery.js"></script>
+  <script src="../node_modules/jquery-ui-dist/jquery-ui.min.js"></script>  
 ```
 
 Import jQuery
@@ -22,6 +25,7 @@ Within your component
 ```typescript
   public ngAfterViewChecked() {
     $("#msgid").html("This is Hello World by JQuery");
+    if(typeof $(document).tooltip === "function") $(document).tooltip();    
   }
 ```
 
