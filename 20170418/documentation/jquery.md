@@ -14,9 +14,12 @@ Import jQuery
 ```
 import * as $ from 'jquery';
 ```
-
-Within your component
+Within your HTML
 ```
+<div id="msgid"></div>
+```
+Within your component
+```java
   public ngAfterViewChecked() {
     $("#msgid").html("This is Hello World by JQuery");
   }
