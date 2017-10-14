@@ -14,3 +14,13 @@ Import jQuery
 ```
 import * as $ from 'jquery';
 ```
+
+Within your component
+```
+  public ngAfterViewChecked() {
+    $("#msgid").html("This is Hello World by JQuery");
+  }
+```
+
+## Reference
+<a href="https://angular.io/guide/lifecycle-hooks">https://angular.io/guide/lifecycle-hooks</a>
