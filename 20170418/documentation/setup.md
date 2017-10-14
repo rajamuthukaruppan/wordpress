@@ -1,9 +1,9 @@
 # Angular Setup
 
 ```shell
+npm install --save jquery
 npm install --save semantic-ui
 ```
-
 https://semantic-ui.com
 Put the following into the 
 index.html
