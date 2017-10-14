@@ -19,7 +19,7 @@ import * as $ from 'jquery';
 ```
 Within your HTML
 ```html
-<div id="msgid"></div>
+<div title="This is a tooltip." id="msgid"></div>
 ```
 Within your component
 ```typescript
