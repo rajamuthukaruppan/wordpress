@@ -15,7 +15,7 @@ Include the jquery css and scripts in index.html
 
 Import jQuery
 ```typescript
-import * as $ from 'jquery';
+declare var $:any;
 ```
 Within your HTML
 ```html
