@@ -1,12 +1,16 @@
 # Angular Setup
 
+```shell
+npm install --save jquery
+npm install --save semantic-ui
+```
 https://semantic-ui.com
 Put the following into the 
 index.html
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/semantic-ui/2.2.9/semantic.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js"></script>
-<script src="https://cdn.jsdelivr.net/semantic-ui/2.2.9/semantic.min.js"></script>
+<link rel="stylesheet" href="../node_modules/semantic-ui/dist/semantic.min.css">
+<script src="../node_modules/jquery/dist/jquery.js"></script>
+<script src="../node_modules/semantic-ui/dist/semantic.min.js"></script>
 ```
 
 https://cli.angular.io/
