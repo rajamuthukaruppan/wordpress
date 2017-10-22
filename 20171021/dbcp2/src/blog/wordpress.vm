@@ -1,0 +1,27 @@
+This page describes the process of setting up a connection pool using DBCP2 and spring framework.
+
+This is good for small standalone java applications that don't have access to JNDI resources typically provided by a Java application server.
+
+Include the following pom.xml file and regenerate the project.
+[sourcecode language="html" gutter="false"]
+#include("pom.xml")
+[/sourcecode]
+
+<h3>Spring Annotation based configuration</h3>
+Inside the spring configuration file you should define the following.
+
+SpringConfig.java
+[code language="java" gutter="false"]
+#include("src/main/java/com/test/SpringConfig.java")
+[/code]
+
+<h3>Standalone App Example</h3>
+
+TestPool.java
+[code language="java" gutter="false"]
+#include("src/main/java/com/test/TestPool.java")
+[/code]
+
+The following makes a connection to a database and displays information about the connection.
+
+$blog_footer
