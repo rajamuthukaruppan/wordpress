@@ -1,25 +1,39 @@
-This page describes the process of setting up a connection pool using DBCP2 and spring framework.
+This page describes how to setup a spring boot application which connects to the database using dbcp2 connection pool.
 
-This is good for small standalone java applications that don't have access to JNDI resources typically provided by a Java application server.
+This example demonstrates how to setup a simple java applications that doesnt need access a Java application server to manage a pool of jdbc connections.
 
-Include the following pom.xml file and regenerate the project.
+
+First we include the following pom.xml file and regenerate the project.
 [sourcecode language="html" gutter="false"]
 #include("pom.xml")
 [/sourcecode]
 
-<h3>Spring Annotation based configuration</h3>
-Inside the spring configuration file you should define the following.
-
-SpringConfig.java
-[code language="java" gutter="false"]
-#include("src/main/java/com/test/SpringConfig.java")
-[/code]
+<h3>Spring Configuration</h3>
+All of the beans in the app are auto wired with no spring configuration necessary.
 
 <h3>Standalone App Example</h3>
 
-TestPool.java
+We code the DBRepository which will be used to display connection information.
+
+DBRepository.java
 [code language="java" gutter="false"]
-#include("src/main/java/com/test/TestPool.java")
+#include("src/main/java/com/test/DBRepository.java")
+[/code]
+
+<h3>Database configuration</h3>
+
+Spring boot reads the application.properties located in the classpath to get settings.
+
+application.properties
+[code language="java" gutter="false"]
+#include("src/main/resources/application.properties")
+[/code]
+
+Finally we build the Application which will be used to call the datamanager.
+
+SpringBootConsoleApplication.java
+[code language="java" gutter="false"]
+#include("src/main/java/com/test/SpringBootConsoleApplication.java")
 [/code]
 
 The following makes a connection to a database and displays information about the connection.
