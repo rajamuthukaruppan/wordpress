@@ -12,13 +12,16 @@ https://cli.angular.io/
 npm install --save jquery
 npm install --save semantic-ui
 ```
+
+Move those two libraries out of the node_modules folder into src/assets
+
 https://semantic-ui.com
 Put the following into the 
 index.html
 ```html
-<link rel="stylesheet" href="../node_modules/semantic-ui/dist/semantic.min.css">
-<script src="../node_modules/jquery/dist/jquery.js"></script>
-<script src="../node_modules/semantic-ui/dist/semantic.min.js"></script>
+<link rel="stylesheet" href="assets/semantic-ui/dist/semantic.min.css">
+<script src="assets/jquery/dist/jquery.js"></script>
+<script src="assets/semantic-ui/dist/semantic.min.js"></script>
 ```
 
 navigate to: http://localhost:4200/
