@@ -1,5 +1,13 @@
 # Angular Setup
 
+## Install Angular CLI if required follow instructions on link below.
+
+https://cli.angular.io/
+
+## Create a new app
+* ng new -- create a new app or enhance an existing non-angular app.
+* ng g component - create a new component
+
 ```shell
 npm install --save jquery
 npm install --save semantic-ui
@@ -13,14 +21,8 @@ index.html
 <script src="../node_modules/semantic-ui/dist/semantic.min.js"></script>
 ```
 
-https://cli.angular.io/
-* ng new -- create a new app
-* ng g component - create a new component
-
-Run the app:
-* ng s
-
 navigate to: http://localhost:4200/
+
 
 We will create an app with the following menu
 * customers
