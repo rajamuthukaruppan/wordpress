@@ -16,16 +16,18 @@ import { ProductsComponent } from './products/products.component';
 import { ShippersComponent } from './shippers/shippers.component';
 import { SuppliersComponent } from './suppliers/suppliers.component';
 import { PurchaseordersComponent } from './purchaseorders/purchaseorders.component';
-import { CustomerService } from './customer.service'
-import { EmployeeService } from './employee.service';
-import { InvoiceService } from './invoice.service';
+import { CustomerService } from './customer/customer.service'
+import { EmployeeService } from './employees/employee.service';
+import { InvoiceService } from './invoices/invoice.service';
 import { OrderService } from './order.service';
 import { ProductService } from './product.service';
 import { PurchaseorderService } from './purchaseorder.service';
 import { ShipperService } from './shipper.service';
 import { SupplierService } from './supplier.service';
+import { AuthService } from './auth/auth.service';
 import { CustomerComponent } from './customer/customer.component';
-import { CustomerFilterPipe } from './shared/customer-filter.pipe';
+import { CustomerFilterPipe } from './customer/customer-filter.pipe';
+import { DatePickerModule } from 'ng2-datepicker';
 
 @NgModule({
   declarations: [
@@ -47,7 +49,8 @@ import { CustomerFilterPipe } from './shared/customer-filter.pipe';
     BrowserModule,
     FormsModule,
     HttpModule,
-    routing
+    routing,
+    DatePickerModule 
   ],
   providers: [
     appRoutingProviders, 
@@ -58,7 +61,8 @@ import { CustomerFilterPipe } from './shared/customer-filter.pipe';
     ProductService,
     PurchaseorderService,
     ShipperService,
-    SupplierService
+    SupplierService,
+    AuthService
   ],
   bootstrap: [AppComponent]
 })

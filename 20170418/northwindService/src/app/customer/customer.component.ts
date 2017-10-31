@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { Customer } from '../shared/customer';
 import { ActivatedRoute } from '@angular/router';
-import { CustomerService } from '../customer.service';
+import { CustomerService } from './customer.service';
 import { Location } from '@angular/common';
+
 import 'rxjs/Rx';
+import * as $ from 'jquery';
 
 @Component({
   selector: 'app-customer',
@@ -12,8 +13,8 @@ import 'rxjs/Rx';
 })
 export class CustomerComponent implements OnInit {
 
-  customer : Customer;
-  customerOrig : Customer;
+  customer;
+  customerOrig;
   customerId = '';  
   errorText = '';
   loaded = false;
@@ -54,5 +55,5 @@ export class CustomerComponent implements OnInit {
     });
   }
 
-  
+
 }

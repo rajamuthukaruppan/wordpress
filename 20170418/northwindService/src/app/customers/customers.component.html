@@ -1,3 +1,5 @@
+<div title="This is a tooltip." id="msgid"></div>
+
 <div *ngIf="loaded">  
   <table class="ui celled table" *ngIf='customers.length'>
     <thead>
@@ -29,9 +31,9 @@
       <tr *ngFor='let customer of customers | customerFilter:filter'>
         <td>
           <a routerLink="/customers/{{customer.id}}">Details</a></td>          
-        <td>{{customer.company}}</td>
-        <td>{{customer.firstName}}</td>
-        <td >
+        <td title="Company">{{customer.company}}</td>
+        <td title="First Name">{{customer.firstName}}</td>
+        <td title="Last Name">
           <div *ngIf="customerToEdit != customer" (click)="customerLastNameEdit(customer)">{{customer.lastName}}</div>
                    <div *ngIf="customerToEdit == customer">
             <form #form='ngForm' >

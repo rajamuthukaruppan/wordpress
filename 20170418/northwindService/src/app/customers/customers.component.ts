@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { CustomerService } from '../customer.service';
-import { Customer } from '../shared/customer';
+import { CustomerService } from '../customer/customer.service';
 import * as sortFunc from '../shared/sortFunc';
 import {HostListener} from '@angular/core';
+import * as $ from 'jquery';
+
 
 @Component({
   selector: 'app-customers',
@@ -15,13 +16,13 @@ export class CustomersComponent implements OnInit {
   loaded = false;
   errorText = '';
   customerLastNameEditFlag=false;
-  customerToEdit:Customer;
+  customerToEdit;
   message='';
   saved=false;
   companySortStatus = {order : -1};
   firstNameSortStatus = {order : -1};
   lastNameSortStatus = {order : -1};
-  filter: Customer = new Customer();  
+  filter = {};  
   searchStatus = {
     searchCompanyStatus : false, 
     searchFirstNameStatus : false, 
@@ -78,5 +79,10 @@ export class CustomersComponent implements OnInit {
       this.filter[field] = "";
       this.searchEnable(statusVar);
     }
+  }
+
+  public ngAfterViewChecked() {
+    $("#msgid").html("This is Hello World by JQuery");
+    if(typeof $(document).tooltip === "function") $(document).tooltip();    
   }
 }
