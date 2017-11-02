@@ -1,4 +1,4 @@
-package com.test;
+package com.test.responsehandling;
 
 import java.util.Map;
 

@@ -1,7 +1,6 @@
 package com.test.customer;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collections;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -19,11 +18,12 @@ import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.test.AppResponse;
 import com.test.AuthService;
 import com.test.ContextHolder;
-import com.test.FailureResponse;
-import com.test.PermissionFailureResponse;
+import com.test.responsehandling.AppResponse;
+import com.test.responsehandling.FailureResponse;
+import com.test.responsehandling.LabelMessage;
+import com.test.responsehandling.PermissionFailureResponse;
 
 @Path("/customers")
 @Produces({ "application/json" })
@@ -43,15 +43,14 @@ public class CustomerResource {
     
     @GET
     public Response getAll(@HeaderParam("remote_user") String remoteUser) {
+    	// general failure
     	if(remoteUser == null || "".equals(remoteUser.trim())) {
-    		Map<String,String> messages = new HashMap<>();
-    		messages.put("main", "Login Session is required.");
-    		return Response.ok(new FailureResponse(messages)).build();
+    		return Response.ok(new FailureResponse(Collections.singletonList(new LabelMessage("", "Login session is required.")))).build();
     	}
-    	if(!authService.hasPermission("viewUser", "customers-view")) {
-    		Map<String,String> messages = new HashMap<>();
-    		messages.put("main", "User does not have permission to perform this operation.");
-    		return Response.ok(new FailureResponse(messages)).build();    		
+    	    	
+    	// permission failure
+    	if(!authService.hasPermission("viewUser", "customers-view2")) {
+    		return Response.ok(new PermissionFailureResponse(remoteUser, "view customer list")).build();    		
     	}
     		
         return Response.ok(new AppResponse(customerService.get())).build();

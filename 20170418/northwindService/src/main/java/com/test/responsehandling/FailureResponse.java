@@ -1,7 +1,7 @@
-package com.test;
+package com.test.responsehandling;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FailureResponse extends AppResponse {
 
@@ -10,7 +10,7 @@ public class FailureResponse extends AppResponse {
 	public FailureResponse() {
 		super();
 		this.status = "fail";
-		this.data = new HashMap<String,String>();
+		this.data = new ArrayList<LabelMessage>();
 	}
 	
 	/**
@@ -19,14 +19,14 @@ public class FailureResponse extends AppResponse {
 	 * @param status
 	 * @param data - hashmap of error messages
 	 */
-	public FailureResponse(Map<String, String> data) {
+	public FailureResponse(List<LabelMessage> data) {
 		this.status = "fail";
 		this.data = data;
 		// VALIDATION, AUTHORIZATION
 	}
 	
 	public void addFailure(String key, String message) {
-		((Map<String,String>)data).put(key, message);
+		((List<LabelMessage>)data).add(new LabelMessage(key, message));
 	}
 	
 }

@@ -15,7 +15,7 @@
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <version.jboss.spec.javaee.7.0>1.0.3.Final-redhat-2</version.jboss.spec.javaee.7.0>
+        <version.jboss.spec.javaee.7.0>1.1.0.Beta1</version.jboss.spec.javaee.7.0>
 
         <!-- other plug-in versions -->
         <version.war.plugin>2.1.1</version.war.plugin>
