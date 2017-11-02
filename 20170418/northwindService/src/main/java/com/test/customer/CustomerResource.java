@@ -49,7 +49,7 @@ public class CustomerResource {
     	}
     	    	
     	// permission failure
-    	if(!authService.hasPermission("viewUser", "customers-view2")) {
+    	if(!authService.hasPermission("viewUser", "customers-view")) {
     		return Response.ok(new PermissionFailureResponse(remoteUser, "view customer list")).build();    		
     	}
     		

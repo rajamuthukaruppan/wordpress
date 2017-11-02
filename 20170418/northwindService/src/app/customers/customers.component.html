@@ -1,5 +1,13 @@
 <div title="This is a tooltip." id="msgid"></div>
-
+<div *ngIf="errorList?.length" class="ui negative message">
+  <i class="close icon" (click)="errorList.length=0"></i>
+  <div class="header">
+    Error
+  </div>
+  <ul>
+    <li *ngFor="let error of errorList"><span *ngIf="error.label">{{error.label}} :</span> {{error.message}}</li>
+  </ul>
+</div>
 <div *ngIf="loaded">  
   <table class="ui celled table" *ngIf='customers.length'>
     <thead>

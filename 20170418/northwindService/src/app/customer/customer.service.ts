@@ -9,17 +9,21 @@ export class CustomerService {
 
   constructor(private http: Http) { }
 
-  getCustomers(): Observable<any[]> {
+  getCustomers(): Promise<any[]> {
     let h = new Headers();
     h.append("remote_user", "readUser");
     let options = new RequestOptions({headers: h});
     return this.http
       .get('v1/customers', options)
-      .map((resp: Response) => {
-        const customers = resp.json();
-        return customers.data.map((customer) => customer);
-      })
-      .catch(this.handleError);
+      .toPromise()
+      .then((resp: Response) => {
+        const appResponse = resp.json();
+        if(appResponse.status === 'success')
+          return appResponse.data;
+        else
+          throw appResponse;        
+      })      
+      .catch(error => Promise.reject(error));
   }
   getCustomerById(id: number): Observable<any> {
     return this.http

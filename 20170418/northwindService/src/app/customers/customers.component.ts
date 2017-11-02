@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CustomerService } from '../customer/customer.service';
 import * as sortFunc from '../shared/sortFunc';
 import {HostListener} from '@angular/core';
+import * as handleErrorFunc from "../shared/handleErrorFunc";
 import * as $ from 'jquery';
 
 
@@ -15,6 +16,8 @@ export class CustomersComponent implements OnInit {
   customers = [];
   loaded = false;
   errorText = '';
+  errorList = [];
+  handleError = handleErrorFunc.handleError;
   customerLastNameEditFlag=false;
   customerToEdit;
   message='';
@@ -36,13 +39,11 @@ export class CustomersComponent implements OnInit {
   constructor(private customerService: CustomerService) { }
 
   ngOnInit() {
-    this.customerService.getCustomers().subscribe((customers) => {
+    this.customerService.getCustomers().then((customers) => {
       this.customers = customers;
-    }, (error) => {
-      this.errorText = error;
-    }, () => {
-      this.loaded = true;
-    });
+      this.loaded=true;
+    })
+    .catch(error => this.handleError(error));
   }
 
   customerLastNameEdit(customer) {
