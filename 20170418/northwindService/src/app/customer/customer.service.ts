@@ -2,13 +2,15 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Rx';
 import { Http, Response } from '@angular/http';
 import { Headers, RequestOptions } from '@angular/http';
+import 'rxjs/add/operator/toPromise';
+
 
 @Injectable()
 export class CustomerService {
   constructor(private http: Http) { }
   getCustomers(): Promise<any[]> {
     let h = new Headers();
-    h.append("remote_user", "readUser");
+    h.append("remote_user", "viewUser");
     let options = new RequestOptions({headers: h});
     return this.http
       .get('v1/customers', options)
