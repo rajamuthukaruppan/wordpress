@@ -17,3 +17,5 @@ Thia page describes how to code a simple Angular 2 application to perform CRUD o
 ## [URL Processing](documentation/urlProcessing.md)
 
 ## [Build Deployment and Testing](documentation/buildDeployTest.md)
+
+## [Updating Libraries](documentation/updating.md)
