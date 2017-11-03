@@ -3,12 +3,9 @@ import { Observable } from 'rxjs/Rx';
 import { Http, Response } from '@angular/http';
 import { Headers, RequestOptions } from '@angular/http';
 
-
 @Injectable()
 export class CustomerService {
-
   constructor(private http: Http) { }
-
   getCustomers(): Promise<any[]> {
     let h = new Headers();
     h.append("remote_user", "readUser");
@@ -25,27 +22,31 @@ export class CustomerService {
       })      
       .catch(error => Promise.reject(error));
   }
-  getCustomerById(id: number): Observable<any> {
+  getCustomerById(id: number): Promise<any> {
     return this.http
     .get(`v1/customers/${id}`)
-    .map((resp: Response) => {
-      return resp.json().data;      
+    .toPromise()
+    .then((resp: Response) => {
+      const appResponse = resp.json();      
+      if(appResponse.status === 'success')
+        return appResponse.data;     
+      else
+        throw appResponse;
     })
-    .catch(this.handleError);
+    .catch(error => Promise.reject(error));
   }
-  saveCustomer(c): Observable<any> {
+  saveCustomer(c): Promise<any> {
     console.log(c);
     return this.http
     .put(`v1/customers/${c.id}`, c)
-    .map((resp: Response) => {
-      return resp.json();
+    .toPromise()
+    .then((resp: Response) => {
+      const appResponse = resp.json();      
+      if(appResponse.status === 'success')
+        return appResponse.data;
+      else
+        throw appResponse;
     })
-    .catch(this.handleError);
-    //return customer;
+    .catch(error => Promise.reject(error));
   }
-
-  private handleError (error: Response | any) {
-    console.error('ApiService::handleError', error);
-    return Observable.throw(error);
-  }  
 }

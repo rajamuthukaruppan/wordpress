@@ -5,14 +5,12 @@ import {HostListener} from '@angular/core';
 import * as handleErrorFunc from "../shared/handleErrorFunc";
 import * as $ from 'jquery';
 
-
 @Component({
   selector: 'app-customers',
   templateUrl: './customers.component.html',
   styleUrls: ['./customers.component.css']
 })
 export class CustomersComponent implements OnInit {
-
   customers = [];
   loaded = false;
   errorText = '';
@@ -39,7 +37,7 @@ export class CustomersComponent implements OnInit {
   constructor(private customerService: CustomerService) { }
 
   ngOnInit() {
-    this.customerService.getCustomers().then((customers) => {
+    this.customerService.getCustomers().then(customers => {
       this.customers = customers;
       this.loaded=true;
     })
@@ -55,16 +53,13 @@ export class CustomersComponent implements OnInit {
     c[fieldName] = form.controls[fieldName].value;
     console.log("saved customer: " , c);
 
-    this.customerService.saveCustomer(c).subscribe((customer) => {
+    this.customerService.saveCustomer(c).then(customer => {
       this.message="Changes saved";
       this.saved=true;
       this.customerExit(c);
-    }, (error) => {
-      this.errorText = error;
-    }, () => {
       this.loaded = true;
-    });
-    
+    })
+    .catch(error => this.handleError(error));
   }
   customerExit(customer) {
     this.customerToEdit=null;
@@ -73,7 +68,6 @@ export class CustomersComponent implements OnInit {
   searchEnable(searchStatusName) {
     this.searchStatus[searchStatusName] = !this.searchStatus[searchStatusName]
   }
-
   
   escapePressed(key, field, statusVar) {
     if("Escape" === key.key) {
@@ -82,8 +76,8 @@ export class CustomersComponent implements OnInit {
     }
   }
 
-  public ngAfterViewChecked() {
-    $("#msgid").html("This is Hello World by JQuery");
-    if(typeof $(document).tooltip === "function") $(document).tooltip();    
-  }
+  // public ngAfterViewChecked() {
+  //   $("#msgid").html("This is Hello World by JQuery");
+  //   if(typeof $(document).tooltip === "function") $(document).tooltip();    
+  // }
 }

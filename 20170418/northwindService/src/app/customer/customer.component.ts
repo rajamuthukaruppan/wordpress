@@ -5,6 +5,7 @@ import { Location } from '@angular/common';
 
 import 'rxjs/Rx';
 import * as $ from 'jquery';
+import * as handleErrorFunc from "../shared/handleErrorFunc";
 
 @Component({
   selector: 'app-customer',
@@ -17,6 +18,8 @@ export class CustomerComponent implements OnInit {
   customerOrig;
   customerId = '';  
   errorText = '';
+  errorList = [];
+  handleError = handleErrorFunc.handleError;  
   loaded = false;
   firstName = 'test';
   message = "";
@@ -26,17 +29,18 @@ export class CustomerComponent implements OnInit {
   private location: Location) { }
 
   ngOnInit() {
-  this.route.params.map(params => params['customerId']).subscribe((customerId) => {
-    this.customerService.getCustomerById(customerId).subscribe((customer) => {
-      this.customer = customer;
-      this.customerOrig = JSON.parse(JSON.stringify(customer));
-      console.log(this.customer);
-    }, (error) => {
-      this.errorText = error;
-    }, () => {
-      this.loaded = true;
+    this.route.params.map(params => params['customerId'])
+    .subscribe((customerId) => {
+      this.customerService.getCustomerById(customerId)
+        .then(customer => {
+          this.customer = customer;
+          this.customerOrig = JSON.parse(JSON.stringify(customer));
+          console.log(this.customer);
+          this.loaded = true;              
+        })
+        .catch(error => this.handleError(error));
+        ;
     });
-  });
   }
 
   public onSubmit(form) {
@@ -45,15 +49,10 @@ export class CustomerComponent implements OnInit {
       return;
     }
     let c = JSON.parse(form.value);
-    this.customerService.saveCustomer(c).subscribe((customer) => {
+    this.customerService.saveCustomer(c).then(customer => {
       this.message="Changes saved";
       this.saved=true;
-    }, (error) => {
-      this.errorText = error;
-    }, () => {
       this.loaded = true;
     });
   }
-
-
 }

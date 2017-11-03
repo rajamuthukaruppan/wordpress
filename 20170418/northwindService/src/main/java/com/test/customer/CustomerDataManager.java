@@ -8,11 +8,8 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -20,11 +17,11 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class CustomerDataManager {
-	private Logger logger = LoggerFactory.getLogger(CustomerDataManager.class);
+	//private Logger logger = LoggerFactory.getLogger(CustomerDataManager.class);
 
 	private JdbcTemplate jdbcTemplate;
 	private SimpleJdbcInsert insertCustomerGen;
-	private SimpleJdbcInsert insertCustomer;
+	//private SimpleJdbcInsert insertCustomer;
 
 	public CustomerDataManager() {
 		super();
@@ -39,9 +36,9 @@ public class CustomerDataManager {
                 new SimpleJdbcInsert(ds)
                         .withTableName("customers")                        
                         .usingGeneratedKeyColumns("id");
-        insertCustomer =
-                new SimpleJdbcInsert(ds)
-                        .withTableName("customers");
+//        insertCustomer =
+//                new SimpleJdbcInsert(ds)
+//                        .withTableName("customers");
 	}
 
 	public List<Customer> get() {

@@ -5,7 +5,15 @@
   <div class="divider"> / </div>
   <div class="active section">Customer Details</div>
 </div>
-
+<div *ngIf="errorList?.length" class="ui negative message">
+  <i class="close icon" (click)="errorList.length=0"></i>
+  <div class="header">
+    Error
+  </div>
+  <ul>
+    <li *ngFor="let error of errorList"><span *ngIf="error.label">{{error.label}} :</span> {{error.message}}</li>
+  </ul>
+</div>
 <div *ngIf="loaded">
   <form class="ui attached form error" #form='ngForm' (ngSubmit)='onSubmit(form)'>
     <h4 class="ui dividing header">Customer Information</h4>
