@@ -10,6 +10,8 @@ Thia page describes how to code a simple Angular 2 application to perform CRUD o
 
 ## [Error handling](documentation/errorHandling.md)
 
+## [Forms](documentation/forms.md)
+
 ## [Sorting](documentation/sorting.md)
 
 ## [Filtering](documentation/filtering.md)
