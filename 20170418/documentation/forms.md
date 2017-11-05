@@ -43,4 +43,27 @@ if(value.length>0) {
 }  
 ```
 
+### Validation
+
+### CSS Classes for validation
+The classes are saved in xxx.className
+* ng-untouched - initial state
+* ng-touched - when user tabs thru regardless if the user changed anything or not
+* ng-pristine - left in initial state
+* ng-dirty - changed
+* ng-valid
+* ng-invalid
+
+
+
+* ngModel properties for validation
+* Error messages and styling
+* HTML 5 validation attributes
+* Styling a select control
+* ngForm properties for validation
+
+
+
+
+
 
