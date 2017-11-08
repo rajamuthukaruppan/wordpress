@@ -28,6 +28,8 @@ import { AuthService } from './auth/auth.service';
 import { CustomerComponent } from './customer/customer.component';
 import { CustomerFilterPipe } from './customer/customer-filter.pipe';
 import { DatePickerModule } from 'ng2-datepicker';
+import { ErrorsDisplayComponent } from './errors/errors-display.component';
+import { InvoiceComponent } from './invoice/invoice.component';
 
 @NgModule({
   declarations: [
@@ -43,7 +45,9 @@ import { DatePickerModule } from 'ng2-datepicker';
     SuppliersComponent,
     PurchaseordersComponent,
     CustomerComponent,
-    CustomerFilterPipe
+    CustomerFilterPipe,
+    ErrorsDisplayComponent,
+    InvoiceComponent
   ],
   imports: [
     BrowserModule,

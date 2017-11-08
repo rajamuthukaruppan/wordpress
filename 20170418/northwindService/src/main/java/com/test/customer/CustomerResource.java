@@ -1,5 +1,8 @@
 package com.test.customer;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -16,7 +19,8 @@ import javax.ws.rs.core.Response;
 import com.test.AuthService;
 import com.test.ContextHolder;
 import com.test.responsehandling.AppResponse;
-import com.test.responsehandling.PermissionException;
+import com.test.responsehandling.AppValidationException;
+import com.test.responsehandling.LabelMessage;
 
 @Path("/customers")
 @Produces({ "application/json" })
@@ -37,9 +41,9 @@ public class CustomerResource {
     @GET
     public Response getAll(@HeaderParam("remote_user") String remoteUser) {
     	// permission failure
-    	if(!authService.hasPermission(remoteUser, "customers-view")) {
-    		throw new PermissionException(remoteUser, "view customer list");    		
-    	}
+//    	if(!authService.hasPermission(remoteUser, "customers-view")) {
+//    		throw new PermissionException(remoteUser, "view customer list");    		
+//    	}
     	
     	// validation failure
 //    	if(true) {
@@ -58,7 +62,7 @@ public class CustomerResource {
     @PUT
     @Path("{customerId}")
     @Consumes({ "application/json" })
-    public Customer putCustomers(@HeaderParam("remote_user") String remoteUser, @PathParam("customerId") Long customerId, Customer c) {
+    public Customer putCustomers(@PathParam("customerId") Long customerId, Customer c) {
     	c.id = customerId;
     	customerService.put(c);
         return c;
@@ -66,16 +70,16 @@ public class CustomerResource {
     
     @GET
     @Path("{customerId}")
-    public Response getCustomer(@HeaderParam("remote_user") String remoteUser, @PathParam("customerId") Long customerId) {
-    	if(!authService.hasPermission(remoteUser, "customers-viewDetails")) {
-    		throw new PermissionException(remoteUser, "View Customer Details");    		
-    	}
+    public Response getCustomer(@PathParam("customerId") Long customerId) {
+//    	if(!authService.hasPermission(remoteUser, "customers-viewDetails")) {
+//    		throw new PermissionException(remoteUser, "View Customer Details");    		
+//    	}
     	return Response.ok(new AppResponse(customerService.getCustomer(customerId))).build();
     }
 
     @DELETE
     @Path("{customerId}")
-    public void deleteCustomer(@HeaderParam("remote_user") String remoteUser, @PathParam("customerId") Long customerId) {
+    public void deleteCustomer(@PathParam("customerId") Long customerId) {
     	customerService.delete(customerId);
     }
 

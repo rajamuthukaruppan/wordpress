@@ -6,6 +6,7 @@ import { EmployeesComponent } from './employees/employees.component';
 import { OrdersComponent } from './orders/orders.component';
 import { MainComponent } from './main/main.component';
 import { InvoicesComponent } from './invoices/invoices.component';
+import { InvoiceComponent } from './invoice/invoice.component';
 import { ProductsComponent } from './products/products.component';
 import { ShippersComponent } from './shippers/shippers.component';
 import { SuppliersComponent } from './suppliers/suppliers.component';
@@ -23,6 +24,7 @@ const appRoutes: Routes = [
   { path: 'purchaseorders', component: PurchaseordersComponent },
   { path: 'main', component: MainComponent },
   { path: 'customers/:customerId', component: CustomerComponent },
+  { path: 'invoices/:invoiceId', component: InvoiceComponent }
 ];
 
 export const appRoutingProviders: any[] = [

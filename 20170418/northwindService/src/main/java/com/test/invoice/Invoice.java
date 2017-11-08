@@ -1,58 +1,22 @@
 package com.test.invoice;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 public class Invoice {
 
-	public Integer id;
-	public Integer orderId;
+	public Long id;
+	public Long orderId;
 	public Date invoiceDate;
 	public Date dueDate;
-	public Double tax;
-	public Double shipping;
-	public Double amountDue;
+	public BigDecimal tax;
+	public BigDecimal shipping;
+	public BigDecimal amountDue;
 	
-	public Integer getId() {
-		return id;
-	}
-	public void setId(Integer id) {
-		this.id = id;
-	}
-	public Integer getOrderId() {
-		return orderId;
-	}
-	public void setOrderId(Integer orderId) {
-		this.orderId = orderId;
-	}
-	public Date getInvoiceDate() {
-		return invoiceDate;
-	}
-	public void setInvoiceDate(Date invoiceDate) {
-		this.invoiceDate = invoiceDate;
-	}
-	public Date getDueDate() {
-		return dueDate;
-	}
-	public void setDueDate(Date dueDate) {
-		this.dueDate = dueDate;
-	}
-	public Double getTax() {
-		return tax;
-	}
-	public void setTax(Double tax) {
-		this.tax = tax;
-	}
-	public Double getShipping() {
-		return shipping;
-	}
-	public void setShipping(Double shipping) {
-		this.shipping = shipping;
-	}
-	public Double getAmountDue() {
-		return amountDue;
-	}
-	public void setAmountDue(Double amountDue) {
-		this.amountDue = amountDue;
+	@Override
+	public String toString() {
+		return "Invoice [id=" + id + ", orderId=" + orderId + ", invoiceDate=" + invoiceDate + ", dueDate=" + dueDate
+				+ ", tax=" + tax + ", shipping=" + shipping + ", amountDue=" + amountDue + "]";
 	}
 	
 }

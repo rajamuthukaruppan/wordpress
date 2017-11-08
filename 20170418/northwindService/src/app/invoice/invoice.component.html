@@ -1,0 +1,43 @@
+<div class="ui raised padded text container segment">
+    <h3>Invoice</h3>
+    <form class="ui form" #form="ngForm" novalidate (submit)="submitForm(form)">
+        <div class="field" [class.error]="id.invalid && id.dirty">
+            <label>Invoice Id</label>
+            <input #id="ngModel" type="text" pattern="\d+" required placeholder="Invoice Id" name="id" [ngModel]="invoice.id">
+            <div *ngIf="id.invalid && id.dirty" class="ui pointing red basic label">
+                Please enter a numeric value
+            </div>
+        </div>
+        <div class="field" [class.error]="orderId.invalid && orderId.dirty">
+            <label>Order Id</label>
+            <input #orderId="ngModel" type="text" pattern="\d+" placeholder="Order Id" name="orderId" [ngModel]="invoice.orderId">
+            <div *ngIf="orderId.invalid && orderId.dirty" class="ui pointing red basic label">
+                Please enter a numeric value
+            </div>
+        </div>
+        <div class="field">
+            <label>Invoice Date</label>
+            <input type="text" placeholder="Invoice Date" name="invoiceDate" [ngModel]="invoice.invoiceDate">
+        </div>
+        <div class="field">
+            <label>Due Date</label>
+            <input #dueDate="ngModel" type="text" placeholder="Due Date" required name="dueDate" [ngModel]="invoice.dueDate">
+            <div *ngIf="dueDate.invalid && dueDate.dirty" class="ui pointing red basic label">
+                Please enter a date
+            </div>
+        </div>
+        <div class="field">
+            <label>Tax</label>
+            <input type="text" placeholder="Tax" name="tax" [ngModel]="invoice.tax">
+        </div>
+        <div class="field">
+            <label>Shipping</label>
+            <input type="text" placeholder="Shipping" name="shipping" [ngModel]="invoice.shipping">
+        </div>
+        <div class="field">
+            <label>Amount Due</label>
+            <input type="text" placeholder="Amount Due" name="amountDue" [ngModel]="invoice.amountDue">
+        </div>
+        <button [disabled]="form.invalid" class="ui button" type="submit">Ok</button>
+    </form>
+</div>

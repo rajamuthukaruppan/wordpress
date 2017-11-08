@@ -1,14 +1,16 @@
 package com.test.invoice;
 
-import java.util.List;
-
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Response;
 
 import com.test.ContextHolder;
+import com.test.responsehandling.AppResponse;
 
 @Path("/invoices")
 @Produces({ "application/json" })
@@ -26,8 +28,20 @@ public class InvoiceResource {
     }
     
     @GET
-    public List<Invoice> getAll() {
-        return invoiceDataManager.getAll();
+    public Response getAll() {
+        return Response.ok(new AppResponse(invoiceDataManager.getAll())).build();
+    }
+    
+    @GET
+    @Path("{id}")    
+    public Response getInvoice(@PathParam("id") Integer id) {
+    	return Response.ok(new AppResponse(invoiceDataManager.getInvoice(id))).build();
+    }
+    
+    @PUT
+    @Path("{id}")    
+    public Response updateInvoice(@PathParam("id") Integer id, Invoice invoice) {
+    	return Response.ok(new AppResponse(invoiceDataManager.updateInvoice(invoice))).build();
     }
     
 }
