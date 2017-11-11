@@ -3,7 +3,7 @@ import { CustomerService } from '../customer/customer.service';
 import * as sortFunc from '../shared/sortFunc';
 import {HostListener} from '@angular/core';
 import * as handleErrorFunc from "../shared/handleErrorFunc";
-import * as $ from 'jquery';
+declare var $: any;
 
 @Component({
   selector: 'app-customers',

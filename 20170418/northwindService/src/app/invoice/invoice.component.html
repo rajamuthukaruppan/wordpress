@@ -1,4 +1,4 @@
-<div class="ui raised padded text container segment">
+<div id="main" class="ui raised padded text container segment">
     <h3>Invoice</h3>
     <form class="ui form" #form="ngForm" novalidate (submit)="submitForm(form)">
         <div class="field" [class.error]="id.invalid && id.dirty">

@@ -6,7 +6,7 @@ import { NgForm } from '@angular/forms';
 
 import * as sortFunc from '../shared/sortFunc'
 import * as handleErrorFunc from "../shared/handleErrorFunc"
-import * as $ from 'jquery'
+declare var $: any;
 
 @Component({
   selector: 'app-invoice',

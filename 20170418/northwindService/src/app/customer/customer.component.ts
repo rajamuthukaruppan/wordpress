@@ -5,7 +5,8 @@ import { Location } from '@angular/common'
 import { NgForm } from '@angular/forms'
 
 import 'rxjs/Rx'
-import * as $ from 'jquery'
+declare var $: any;
+
 import * as handleErrorFunc from "../shared/handleErrorFunc"
 
 @Component({

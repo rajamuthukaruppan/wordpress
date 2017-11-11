@@ -70,7 +70,7 @@ The classes are saved in f.className when you put the #f in the input field.
 ```
   * however the above may not get updates right after user selected the new value. In order for this to work you need to use a template reference variable (#xxx) and add a (change) event and pass in the TRV as a parameter ex: (change)="validate(xxx.value)". We could have used the event to search for the new value but TRV is easier as we dont need to query the DOM.
 ```html
-< #xxx name="selectElement" (blur)="validateSelect(xxx)" (change)="validateSelect(xxx)" [ngModel]="objectFromDB"
+< #xxx="ngModel" name="selectElement" (blur)="validateSelect(xxx)" (change)="validateSelect(xxx)" [ngModel]="objectFromDB"
 ```
 * ngForm properties for validation ( this is to control the overall form )
   * prestine, valid, must have "required" for valid to work when using pattern.

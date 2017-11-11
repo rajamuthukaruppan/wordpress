@@ -1,13 +1,29 @@
-<div class="ui secondary pointing menu">
-  <a class="item active" routerLink="/main" routerLinkActive="active">
-    Home
-  </a>
+<div class="ui inverted menu">
+    <a href="#" class="header item">
+      <img style="margin-right: 10px;" class="logo" src="assets/images/lighthouse.jpg">Northwind Database</a>
+    <a class="item" routerLink="/main" routerLinkActive="active">
+      Home
+    </a>
   <a class="item" routerLink="/customers" routerLinkActive="active">
     Customers
   </a>
-  <a class="item" routerLink="/employees" routerLinkActive="active">
-    Employees
-  </a>
+  <div class="ui simple dropdown item">
+    Employee
+    <i class="dropdown icon"></i>
+    <div class="menu">
+      <a class="item" routerLink="/employees" routerLinkActive="active">All</a>
+      <a class="item" routerLink="/employees">Details</a>
+      <div class="item">
+        <i class="dropdown icon"></i>
+        Sub Menu
+        <div class="menu">
+          <a class="item" href="#">Link Item</a>
+          <a class="item" href="#">Link Item</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <a class="item" routerLink="/orders" routerLinkActive="active">
     Orders
   </a>
@@ -26,7 +42,4 @@
   <a class="item" routerLink="/purchaseorders" routerLinkActive="active">
     Purchase Orders
   </a>
-</div>
-<div class="ui segment">
-  <p></p>
 </div>
