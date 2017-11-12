@@ -1,10 +1,5 @@
 package com.test.customer;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -16,43 +11,31 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.test.AuthService;
-import com.test.ContextHolder;
 import com.test.responsehandling.AppResponse;
-import com.test.responsehandling.AppValidationException;
-import com.test.responsehandling.LabelMessage;
 
 @Path("/customers")
 @Produces({ "application/json" })
 public class CustomerResource {
 	//private Logger logger = LoggerFactory.getLogger(CustomerResource.class);
 
-    @Inject
-    private ContextHolder contextHolder;
-    private CustomerService customerService;
+//    @Inject
+//    private ContextHolder contextHolder;
+    @Autowired
+	private CustomerService customerService;
+    @Autowired
     private AuthService authService;
 
-    @PostConstruct
-    void postConstruct() {
-    	customerService = (CustomerService) contextHolder.getContext().getBean("customerService");
-    	authService = (AuthService) contextHolder.getContext().getBean("authService");
-    }
+//    @PostConstruct
+//    void postConstruct() {
+//    	customerService = (CustomerService) contextHolder.getContext().getBean("customerService");
+//    	authService = (AuthService) contextHolder.getContext().getBean("authService");
+//    }
     
     @GET
-    public Response getAll(@HeaderParam("remote_user") String remoteUser) {
-    	// permission failure
-//    	if(!authService.hasPermission(remoteUser, "customers-view")) {
-//    		throw new PermissionException(remoteUser, "view customer list");    		
-//    	}
-    	
-    	// validation failure
-//    	if(true) {
-//    		List<LabelMessage> msgs = new ArrayList<>();
-//    		msgs.add(new LabelMessage("test", "test should not be null or zero"));
-//    		msgs.add(new LabelMessage("test2", "test2 should not be null or zero"));
-//    		throw new AppValidationException(msgs);
-//    	}
-    		
+    public Response getAll(@HeaderParam("remote_user") String remoteUser) {   		
         return Response.ok(new AppResponse(customerService.get())).build();
     }
     @POST

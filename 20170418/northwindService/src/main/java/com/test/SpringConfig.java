@@ -7,17 +7,12 @@ import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
  * This class replaces the spring xml configuration.
- * 
  */
-@Configuration
-@ComponentScan("com.test")
 @EnableTransactionManagement 
 public class SpringConfig {
 	private Logger logger = LoggerFactory.getLogger(SpringConfig.class);
