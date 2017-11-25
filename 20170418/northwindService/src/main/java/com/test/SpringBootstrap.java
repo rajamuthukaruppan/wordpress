@@ -8,8 +8,8 @@ import org.springframework.context.annotation.Configuration;
 @EnableAutoConfiguration
 @ComponentScan("com.test")
 @Configuration
-public class Bootstrap {
+public class SpringBootstrap {
     public static void main(String[] args) throws Exception {
-        SpringApplication.run(Bootstrap.class, args);
+        SpringApplication.run(SpringBootstrap.class, args);
     }
 }

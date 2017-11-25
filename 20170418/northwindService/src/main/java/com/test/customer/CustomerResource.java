@@ -38,18 +38,18 @@ public class CustomerResource {
     public Response getAll(@HeaderParam("remote_user") String remoteUser) {   		
         return Response.ok(new AppResponse(customerService.get())).build();
     }
-    @POST
-    public Customer postCustomers() {
-        return customerService.post();
-    }
-    @PUT
-    @Path("{customerId}")
-    @Consumes({ "application/json" })
-    public Customer putCustomers(@PathParam("customerId") Long customerId, Customer c) {
-    	c.id = customerId;
-    	customerService.put(c);
-        return c;
-    }
+//    @POST
+//    public Customer postCustomers() {
+//        return customerService.post();
+//    }
+//    @PUT
+//    @Path("{customerId}")
+//    @Consumes({ "application/json" })
+//    public Customer putCustomers(@PathParam("customerId") Long customerId, Customer c) {
+//    	c.id = customerId;
+//    	customerService.put(c);
+//        return c;
+//    }
     
     @GET
     @Path("{customerId}")
